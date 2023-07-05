@@ -2,25 +2,22 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import CSVLogger
+import os
 
 from datasets.CIFAR import CIFARDataModule
+from datasets.MNIST import MNISTDataModule
 from pytorch_models.alexnet import AlexNet
+from pytorch_models.fully_connected import FullyConnected
 from lightning_model import LightningModel
 
-if __name__ == '__main__':
+def run(model_class, dataset_class, batch_size, num_epochs, learning_rate, num_workers, num_classes, seed):
+    torch.manual_seed(seed) 
+    data_module = dataset_class(batch_size, num_workers, data_path='./data')
+    
+    #pytorch_model = AlexNet(num_classes=num_classes)
+    pytorch_model = model_class(num_classes=num_classes, input_dim=data_module.input_dim, hidden_dim=[50,50])
 
-    BATCH_SIZE = 256
-    NUM_EPOCHS = 40
-    LEARNING_RATE = 0.0001
-    NUM_WORKERS = 1
-    NUM_CLASSES = 10
-    SEED = 1
-
-    torch.manual_seed(SEED) 
-    data_module = CIFARDataModule(BATCH_SIZE, NUM_WORKERS, data_path='./data')
-    pytorch_model = AlexNet(num_classes=NUM_CLASSES)
-
-    lightning_model = LightningModel(pytorch_model, learning_rate=LEARNING_RATE, num_classes=NUM_CLASSES)
+    lightning_model = LightningModel(pytorch_model, learning_rate=learning_rate, num_classes=num_classes)
 
     callbacks = [
         ModelCheckpoint(
@@ -34,7 +31,7 @@ if __name__ == '__main__':
 
 
     trainer = pl.Trainer(
-        max_epochs=NUM_EPOCHS,
+        max_epochs=num_epochs,
         callbacks=callbacks,
         accelerator="auto",  # Uses GPUs or TPUs if available
         devices="auto",  # Uses all available GPUs/TPUs if applicable
@@ -48,3 +45,23 @@ if __name__ == '__main__':
 
     runtime = (time.time() - start_time) / 60
     print(f"Training took {runtime:.2f} min in total.")
+
+    path = f'saved_models/{model_class.__name__}-{dataset_class.__name__}/'
+    if not os.path.exists(path):
+        os.makedirs(path)
+    torch.save(pytorch_model.state_dict(), path + f'seed-{seed}')
+
+
+if __name__ == '__main__':
+
+    for seed in range(20, 100):
+        run(
+            FullyConnected,
+            MNISTDataModule,
+            batch_size=256,
+            num_epochs=2,
+            learning_rate=0.001,
+            num_workers=4,
+            num_classes=10,
+            seed=seed
+        )

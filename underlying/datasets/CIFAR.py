@@ -14,6 +14,7 @@ class CIFARDataModule(pl.LightningDataModule):
         self.data_path = data_path
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.input_dim = 64**2 * 3
 
     def prepare_data(self):
         datasets.CIFAR10(root=self.data_path, download=True)

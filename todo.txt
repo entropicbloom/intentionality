@@ -1,6 +1,5 @@
-- add mnist dataset
-- add simpler convnet (parametrizable)
-- add FC net (parametrizable)
+
+- (add simpler convnet (parametrizable))
 - make sure all combinations of datasets and networks work
 - implement model saving
 - implement decoding using trivial case as test (same random seed)

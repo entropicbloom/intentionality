@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 # Regular PyTorch Module
 class AlexNet(nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, input_dim=None, hidden_dim=None):
         super().__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
