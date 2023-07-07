@@ -32,8 +32,9 @@ class LightningModel(pl.LightningModule):
     # this is used for training, validation, and testing below
     def _shared_step(self, batch):
         features, true_labels = batch
+        true_labels = true_labels.squeeze().long()
         logits = self(features)
-        print(logits.shape, true_labels.shape)
+
         loss = torch.nn.functional.cross_entropy(logits, true_labels)
         predicted_labels = torch.argmax(logits, dim=1)
 

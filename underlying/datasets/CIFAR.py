@@ -76,9 +76,9 @@ class CIFARDataModule(pl.LightningDataModule):
     def test_dataloader(self):
         test_loader = DataLoader(
             dataset=self.test,
-            batch_size=batch_size,
+            batch_size=self.batch_size,
             drop_last=False,
             shuffle=False,
-            num_workers=num_workers,
+            num_workers=self.num_workers,
         )
         return test_loader

@@ -3,3 +3,4 @@ underlying/logs/
 underlying/saved_models/
 *.pyc
 .DS_Store
+decoder/logs/
