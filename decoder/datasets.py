@@ -27,15 +27,15 @@ class OneLayerDataset(Dataset):
         model = torch.load(self.dataset_path + f'seed-{model_idx}')
         weights = model[self.layer].to('cpu')
 
-        # extend weight vectors with chosen class marked
-        weights = torch.cat((weights, torch.zeros((weights.shape[0], 1), device=weights.device)), dim=1)
-        weights[class_idx, -1] = 1
-
         #weights = torch.zeros(weights.shape, device=weights.device)
         #weights[0, class_idx] = 1
 
         # shuffle rows of weight matrix
-        weights = weights[torch.randperm(weights.shape[0])]
+        tmp = weights[class_idx].clone()
+        weights[class_idx] = weights[0]
+        weights[0] = tmp
+
+        weights[1:,:] = weights[1:,:][torch.randperm(weights.shape[0] - 1)]
 
         return weights, torch.Tensor([class_idx])
 

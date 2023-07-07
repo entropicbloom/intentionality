@@ -54,7 +54,7 @@ def run(model_class, dataset_class, batch_size, num_epochs, learning_rate, num_w
 
 if __name__ == '__main__':
 
-    for seed in range(500, 600):
+    for seed in range(551, 1000):
         run(
             FullyConnected,
             MNISTDataModule,
