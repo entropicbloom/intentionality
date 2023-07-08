@@ -14,7 +14,7 @@ model_type = 'FullyConnected'
 dataset_type = 'MNISTDataModule'
 
 loader = DataLoader(OneLayerDataset(model_type, dataset_type, 2), batch_size=5, shuffle=True)
-pytorch_model = SetTransformer(dim_input=50, num_outputs=1, dim_output=10, num_inds=16, dim_hidden=128, num_heads=4, ln=False)
+pytorch_model = SetTransformer(dim_input=10, num_outputs=1, dim_output=10, num_inds=16, dim_hidden=64, num_heads=4, ln=False)
 
 lightning_model = LightningModel(pytorch_model, learning_rate=0.001, num_classes=10)
 data_module = OneLayerDataModule(model_type, dataset_type, layer_idx=2, input_dim=50, batch_size=128, num_workers=0)

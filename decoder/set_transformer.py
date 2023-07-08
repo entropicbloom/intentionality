@@ -45,6 +45,8 @@ class SetTransformer(nn.Module):
         )
 
     def forward(self, X):
+        # multiply X matrix by transpose
+        X = X @ X.transpose(1,2)
 
         X = self.enc(X)
 
