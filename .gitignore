@@ -4,3 +4,5 @@ underlying/saved_models/
 *.pyc
 .DS_Store
 decoder/logs/
+decoder/lightning_logs/
+decoder/wandb/

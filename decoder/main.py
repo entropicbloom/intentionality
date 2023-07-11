@@ -3,40 +3,58 @@ import torch
 import os
 import time
 from datasets import OneLayerDataset, OneLayerDataModule
-from set_transformer import SetTransformer
+from decoder import Transformer, FCDecoder
 from torch.utils.data import DataLoader
 from lightning_model import LightningModel
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import CSVLogger
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning import Trainer
+import wandb
 
-model_type = 'FullyConnected'
-dataset_type = 'MNISTDataModule'
+config = {
+    "model_type": 'FullyConnectedDropout',
+    "dataset_type": 'MNISTDataModule',
+    "decoder_class": 'FCDecoder',
+}
 
-loader = DataLoader(OneLayerDataset(model_type, dataset_type, 2), batch_size=5, shuffle=True)
-pytorch_model = SetTransformer(dim_input=10, num_outputs=1, dim_output=10, num_inds=16, dim_hidden=64, num_heads=4, ln=False)
+decoder_dict = {
+    'FCDecoder': FCDecoder,
+    'Transformer': Transformer,
+}
 
-lightning_model = LightningModel(pytorch_model, learning_rate=0.001, num_classes=10)
-data_module = OneLayerDataModule(model_type, dataset_type, layer_idx=2, input_dim=50, batch_size=128, num_workers=0)
+def run(seed):
+    torch.manual_seed(seed) 
+    wandb.init(project="decoder", config=config, name=f"{config['model_type']}-{config['dataset_type']}-{config['decoder_class']}-{seed}")
 
-callbacks = [
-        ModelCheckpoint(
-            save_top_k=1, mode="max", monitor="valid_acc"
-        )  # save top 1 model
-    ]
-logger = CSVLogger(save_dir="logs/", name="my-model")
-trainer = pl.Trainer(
-    max_epochs=100,
-    callbacks=callbacks,
-    accelerator="auto",  # Uses GPUs or TPUs if available
-    devices="auto",  # Uses all available GPUs/TPUs if applicable
-    logger=logger,
-    deterministic=False,
-    log_every_n_steps=10,
-)
+    pytorch_model = decoder_dict[config['decoder_class']](dim_input=10, num_outputs=1, dim_output=10, num_inds=16, dim_hidden=64, num_heads=4, ln=False)
 
-start_time = time.time()
-trainer.fit(model=lightning_model, datamodule=data_module)
+    lightning_model = LightningModel(pytorch_model, learning_rate=0.001, num_classes=10)
+    data_module = OneLayerDataModule(config['model_type'], config['dataset_type'], layer_idx=2, input_dim=50, batch_size=128, num_workers=0)
 
-runtime = (time.time() - start_time) / 60
-print(f"Training took {runtime:.2f} min in total.")
+    callbacks = [
+            ModelCheckpoint(
+                save_top_k=1, mode="max", monitor="valid_acc"
+            )  # save top 1 model
+        ]
+
+    wandb_logger = WandbLogger()
+    trainer = pl.Trainer(
+        max_epochs=50,
+        callbacks=callbacks,
+        accelerator="auto",  # Uses GPUs or TPUs if available
+        devices="auto",  # Uses all available GPUs/TPUs if applicable
+        deterministic=False,
+        log_every_n_steps=10,
+        logger=wandb_logger
+    )
+
+    trainer.fit(model=lightning_model, datamodule=data_module)
+
+    wandb.finish()
+
+if __name__ == '__main__':
+
+    for seed in range(5):
+        run(seed)

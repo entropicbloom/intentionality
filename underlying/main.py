@@ -7,7 +7,7 @@ import os
 from datasets.CIFAR import CIFARDataModule
 from datasets.MNIST import MNISTDataModule
 from pytorch_models.alexnet import AlexNet
-from pytorch_models.fully_connected import FullyConnected
+from pytorch_models.fully_connected import FullyConnected, FullyConnectedDropout
 from lightning_model import LightningModel
 
 def run(model_class, dataset_class, batch_size, num_epochs, learning_rate, num_workers, num_classes, seed):
@@ -54,9 +54,9 @@ def run(model_class, dataset_class, batch_size, num_epochs, learning_rate, num_w
 
 if __name__ == '__main__':
 
-    for seed in range(551, 1000):
+    for seed in range(1000):
         run(
-            FullyConnected,
+            FullyConnectedDropout,
             MNISTDataModule,
             batch_size=256,
             num_epochs=2,
