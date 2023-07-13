@@ -35,9 +35,10 @@ class Transformer(nn.Module):
             num_inds=32, dim_hidden=128, num_heads=4, ln=False):
         super(Transformer, self).__init__()
         self.enc = nn.Sequential(
-                ISAB(dim_input, dim_hidden, num_heads, num_inds, ln=ln),
+                #ISAB(dim_input, dim_hidden, num_heads, num_inds, ln=ln),
                 #ISAB(dim_hidden, dim_hidden, num_heads, num_inds, ln=ln)
-                #SAB(dim_input, dim_hidden, num_heads, ln=ln)
+                SAB(dim_input, dim_hidden, num_heads, ln=ln),
+                SAB(dim_hidden, dim_hidden, num_heads, ln=ln)
 
         )
                 
@@ -49,7 +50,7 @@ class Transformer(nn.Module):
 
     def forward(self, X):
         # multiply X matrix by transpose
-        X = X @ X.transpose(1,2)
+        #X = X @ X.transpose(1,2)
         
 
         X = self.enc(X)
@@ -72,5 +73,5 @@ class FCDecoder(nn.Module):
         )
 
     def forward(self, X):
-        X = X @ X.transpose(1,2)
+        #X = X @ X.transpose(1,2)
         return self.layers(X[:,0,:])

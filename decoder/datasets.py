@@ -9,10 +9,11 @@ from torchvision import transforms
 from torchvision import datasets
 
 class OneLayerDataset(Dataset):
-    def __init__(self, model_type, dataset_type, layer_idx, transpose_weights=False):
+    def __init__(self, model_type, dataset_type, layer_idx, transpose_weights=False, preprocessing=None):
         self.dataset_path = f'../underlying/saved_models/{model_type}-{dataset_type}/'
         self.layer = f'layers.{layer_idx}.weight'
         self.transpose_weights = transpose_weights
+        self.preprocessing = preprocessing
 
         if not transpose_weights:
             self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[0]
@@ -30,8 +31,9 @@ class OneLayerDataset(Dataset):
 
         # load relevant data
         model = torch.load(self.dataset_path + f'seed-{model_idx}')
-        weights = model[self.layer].T.to('cpu')
-
+        weights = model[self.layer].to('cpu')
+        if self.transpose_weights:
+            weights = weights.T
         #weights = torch.zeros(weights.shape, device=weights.device)
         #weights[0, class_idx] = 1
 
@@ -42,10 +44,19 @@ class OneLayerDataset(Dataset):
 
         weights[1:,:] = weights[1:,:][torch.randperm(weights.shape[0] - 1)]
 
+        # apply preprocessing 
+        if self.preprocessing == 'multiply_transpose':
+            weights = weights @ weights.T
+        elif self.preprocessing == 'dim_reduction':
+            U, _, _ = torch.pca_lowrank(weights.T, q=self.num_classes, center=True)
+            weights = weights @ U
+
+
+
         return weights, torch.Tensor([class_idx])
 
 class OneLayerDataModule(pl.LightningDataModule):
-    def __init__(self, model_type, dataset_type, layer_idx, input_dim, batch_size, num_workers, transpose_weights=False):
+    def __init__(self, model_type, dataset_type, layer_idx, input_dim, batch_size, num_workers, transpose_weights=False, preprocessing=None):
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -54,14 +65,18 @@ class OneLayerDataModule(pl.LightningDataModule):
         self.dataset_type = dataset_type
         self.layer_idx = layer_idx
         self.transpose_weights = transpose_weights
+        self.preprocessing = preprocessing
 
     def prepare_data(self):
         return
 
     def setup(self, stage=None):
-        dataset = OneLayerDataset(self.model_type, self.dataset_type, self.layer_idx, transpose_weights=self.transpose_weights)
-       
-        self.train, self.valid, self.test = random_split(dataset, lengths=[0.8, 0.1, 0.1])
+        dataset = OneLayerDataset(self.model_type, self.dataset_type, self.layer_idx, transpose_weights=self.transpose_weights, preprocessing=self.preprocessing)
+
+        # Created using indices from 0 to train_size.
+        self.train = torch.utils.data.Subset(dataset, range(int(len(dataset) * 0.8)))
+        self.valid = torch.utils.data.Subset(dataset, range(int(len(dataset) * 0.8), int(len(dataset) * 0.9)))
+        self.test = torch.utils.data.Subset(dataset, range(int(len(dataset) * 0.9), len(dataset)))
 
     def train_dataloader(self):
         train_loader = DataLoader(
