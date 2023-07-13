@@ -9,10 +9,15 @@ from torchvision import transforms
 from torchvision import datasets
 
 class OneLayerDataset(Dataset):
-    def __init__(self, model_type, dataset_type, layer_idx):
+    def __init__(self, model_type, dataset_type, layer_idx, transpose_weights=False):
         self.dataset_path = f'../underlying/saved_models/{model_type}-{dataset_type}/'
         self.layer = f'layers.{layer_idx}.weight'
-        self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[0]
+        self.transpose_weights = transpose_weights
+
+        if not transpose_weights:
+            self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[0]
+        else:
+            self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[1]
 
     def __len__(self):
         num_models = len(os.listdir(self.dataset_path))
@@ -25,7 +30,7 @@ class OneLayerDataset(Dataset):
 
         # load relevant data
         model = torch.load(self.dataset_path + f'seed-{model_idx}')
-        weights = model[self.layer].to('cpu')
+        weights = model[self.layer].T.to('cpu')
 
         #weights = torch.zeros(weights.shape, device=weights.device)
         #weights[0, class_idx] = 1
@@ -40,7 +45,7 @@ class OneLayerDataset(Dataset):
         return weights, torch.Tensor([class_idx])
 
 class OneLayerDataModule(pl.LightningDataModule):
-    def __init__(self, model_type, dataset_type, layer_idx, input_dim, batch_size, num_workers):
+    def __init__(self, model_type, dataset_type, layer_idx, input_dim, batch_size, num_workers, transpose_weights=False):
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -48,12 +53,13 @@ class OneLayerDataModule(pl.LightningDataModule):
         self.model_type = model_type
         self.dataset_type = dataset_type
         self.layer_idx = layer_idx
+        self.transpose_weights = transpose_weights
 
     def prepare_data(self):
         return
 
     def setup(self, stage=None):
-        dataset = OneLayerDataset(self.model_type, self.dataset_type, self.layer_idx)
+        dataset = OneLayerDataset(self.model_type, self.dataset_type, self.layer_idx, transpose_weights=self.transpose_weights)
        
         self.train, self.valid, self.test = random_split(dataset, lengths=[0.8, 0.1, 0.1])
 

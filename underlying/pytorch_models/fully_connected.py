@@ -5,12 +5,13 @@ import torch.nn.functional as F
 
 # Regular PyTorch Module
 class FullyConnected(nn.Module):
-    def __init__(self, num_classes, input_dim, hidden_dim, dropout=0):
+    def __init__(self, num_classes, input_dim, hidden_dim, dropout=0, generative=False):
         super().__init__()
         self.input_dim = input_dim
         self.output_dim = num_classes
         self.hidden_dim = hidden_dim
         self.dropout = dropout
+        self.generative = generative
 
         current_dim = input_dim
         self.layers = nn.ModuleList()
@@ -30,3 +31,7 @@ class FullyConnected(nn.Module):
 class FullyConnectedDropout(FullyConnected):
     def __init__(self, num_classes, input_dim, hidden_dim):
         super().__init__(num_classes, input_dim, hidden_dim, dropout=0.2)
+
+class FullyConnectedGenerative(FullyConnected):
+    def __init__(self, num_classes, input_dim, hidden_dim):
+        super().__init__(input_dim, num_classes, hidden_dim, generative=True)

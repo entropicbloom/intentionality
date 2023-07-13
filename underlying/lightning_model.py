@@ -1,5 +1,6 @@
 # LightningModule that receives a PyTorch model as input
 import torch
+import torch.nn.functional as F
 import pytorch_lightning as pl
 import torchmetrics
 
@@ -19,9 +20,14 @@ class LightningModel(pl.LightningModule):
         self.save_hyperparameters(ignore=["model"])
 
         # Set up attributes for computing the accuracy
-        self.train_acc = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
-        self.valid_acc = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
-        self.test_acc = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
+        if not self.model.generative:
+            self.train_acc = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
+            self.valid_acc = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
+            self.test_acc = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
+        else:
+            self.train_acc = torchmetrics.MeanSquaredError()
+            self.valid_acc = torchmetrics.MeanSquaredError()
+            self.test_acc = torchmetrics.MeanSquaredError()
 
     # Defining the forward method is only necessary
     # if you want to use a Trainer's .predict() method (optional)
@@ -31,13 +37,24 @@ class LightningModel(pl.LightningModule):
     # A common forward step to compute the loss and labels
     # this is used for training, validation, and testing below
     def _shared_step(self, batch):
-        features, true_labels = batch
-        logits = self(features)
 
-        loss = torch.nn.functional.cross_entropy(logits, true_labels)
-        predicted_labels = torch.argmax(logits, dim=1)
+        if not self.model.generative:
+            features, true_labels = batch
+            logits = self(features)
 
-        return loss, true_labels, predicted_labels
+            loss = torch.nn.functional.cross_entropy(logits, true_labels)
+            predicted_labels = torch.argmax(logits, dim=1)
+
+            return loss, true_labels, predicted_labels
+        else:
+            features, true_labels = batch 
+            true_labels = F.one_hot(true_labels, num_classes=self.model.input_dim).type(torch.float32)
+            pred = self(true_labels)
+            loss_fn = torch.nn.MSELoss()
+
+            loss = loss_fn(pred, features.view(-1, self.model.output_dim))
+
+            return loss, features, pred
 
     def training_step(self, batch, batch_idx):
         loss, true_labels, predicted_labels = self._shared_step(batch)
@@ -49,7 +66,10 @@ class LightningModel(pl.LightningModule):
         self.model.eval()
         with torch.no_grad():
             _, true_labels, predicted_labels = self._shared_step(batch)
-        self.train_acc(predicted_labels, true_labels)
+        if not self.model.generative:
+            self.train_acc(predicted_labels, true_labels)
+        else:
+            self.train_acc(predicted_labels, true_labels.view(-1, self.model.output_dim))
         self.log("train_acc", self.train_acc, on_epoch=True, on_step=False)
         self.model.train()
 
@@ -58,7 +78,10 @@ class LightningModel(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         loss, true_labels, predicted_labels = self._shared_step(batch)
         self.log("valid_loss", loss)
-        self.valid_acc(predicted_labels, true_labels)
+        if not self.model.generative:
+            self.valid_acc(predicted_labels, true_labels)
+        else:
+            self.valid_acc(predicted_labels, true_labels.view(-1, self.model.output_dim))
         self.log(
             "valid_acc",
             self.valid_acc,
@@ -75,3 +98,4 @@ class LightningModel(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
+    

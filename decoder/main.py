@@ -14,9 +14,10 @@ from pytorch_lightning import Trainer
 import wandb
 
 config = {
-    "model_type": 'FullyConnectedDropout',
+    "model_type": 'FullyConnectedGenerative',
     "dataset_type": 'MNISTDataModule',
-    "decoder_class": 'FCDecoder',
+    "decoder_class": 'Transformer',
+    "preprocessing": None,
 }
 
 decoder_dict = {
@@ -26,12 +27,13 @@ decoder_dict = {
 
 def run(seed):
     torch.manual_seed(seed) 
-    wandb.init(project="decoder", config=config, name=f"{config['model_type']}-{config['dataset_type']}-{config['decoder_class']}-{seed}")
+    wandb.init(project="decoder", config=config, mode="disabled",
+               name=f"{config['model_type']}-{config['dataset_type']}-{config['decoder_class']}-{seed}")
 
     pytorch_model = decoder_dict[config['decoder_class']](dim_input=10, num_outputs=1, dim_output=10, num_inds=16, dim_hidden=64, num_heads=4, ln=False)
 
     lightning_model = LightningModel(pytorch_model, learning_rate=0.001, num_classes=10)
-    data_module = OneLayerDataModule(config['model_type'], config['dataset_type'], layer_idx=2, input_dim=50, batch_size=128, num_workers=0)
+    data_module = OneLayerDataModule(config['model_type'], config['dataset_type'], layer_idx=0, input_dim=50, batch_size=64, num_workers=0, transpose_weights=True)
 
     callbacks = [
             ModelCheckpoint(
