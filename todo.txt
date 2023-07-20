@@ -1,5 +1,23 @@
 
-- (add simpler convnet (parametrizable))
-- make sure all combinations of datasets and networks work
-- implement model saving
-- implement decoding using trivial case as test (same random seed)
+july 24th
+- clean up code
+- network size dataset
+
+activity
+- implement procedure to get functional from structural connectivity
+    - create rate based dynamical system from existing structure, with additional noise source from every neuron
+- re-train decoder with functional connectivity
+
+
+accuracy improvements
+- add previous layers to decoder input
+
+
+other cases 
+- untrained underlying network control -> high priority
+- trivial synthetic decoder input control
+- variable hidden layer size within data set -> high priority
+- variable number of hidden layers within data set -> high priority
+- pixel position
+- generative + dropout
+- color?

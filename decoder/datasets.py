@@ -9,16 +9,16 @@ from torchvision import transforms
 from torchvision import datasets
 
 class OneLayerDataset(Dataset):
-    def __init__(self, model_type, dataset_type, layer_idx, transpose_weights=False, preprocessing=None):
-        self.dataset_path = f'../underlying/saved_models/{model_type}-{dataset_type}/'
+    def __init__(self, dataset_path, layer_idx, transpose_weights=False, preprocessing=None):
+        self.dataset_path = dataset_path
         self.layer = f'layers.{layer_idx}.weight'
         self.transpose_weights = transpose_weights
         self.preprocessing = preprocessing
 
         if not transpose_weights:
-            self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[0]
+            self.num_classes = torch.load(self.dataset_path + f'/seed-{0}')[self.layer].shape[0]
         else:
-            self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[1]
+            self.num_classes = torch.load(self.dataset_path + f'/seed-{0}')[self.layer].shape[1]
 
     def __len__(self):
         num_models = len(os.listdir(self.dataset_path))
@@ -56,13 +56,12 @@ class OneLayerDataset(Dataset):
         return weights, torch.Tensor([class_idx])
 
 class OneLayerDataModule(pl.LightningDataModule):
-    def __init__(self, model_type, dataset_type, layer_idx, input_dim, batch_size, num_workers, transpose_weights=False, preprocessing=None):
+    def __init__(self, dataset_path, layer_idx, input_dim, batch_size, num_workers, transpose_weights=False, preprocessing=None):
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.input_dim = input_dim
-        self.model_type = model_type
-        self.dataset_type = dataset_type
+        self.dataset_path = dataset_path
         self.layer_idx = layer_idx
         self.transpose_weights = transpose_weights
         self.preprocessing = preprocessing
@@ -71,7 +70,7 @@ class OneLayerDataModule(pl.LightningDataModule):
         return
 
     def setup(self, stage=None):
-        dataset = OneLayerDataset(self.model_type, self.dataset_type, self.layer_idx, transpose_weights=self.transpose_weights, preprocessing=self.preprocessing)
+        dataset = OneLayerDataset(self.dataset_path, self.layer_idx, transpose_weights=self.transpose_weights, preprocessing=self.preprocessing)
 
         # Created using indices from 0 to train_size.
         self.train = torch.utils.data.Subset(dataset, range(int(len(dataset) * 0.8)))

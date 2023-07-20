@@ -35,3 +35,7 @@ class FullyConnectedDropout(FullyConnected):
 class FullyConnectedGenerative(FullyConnected):
     def __init__(self, num_classes, input_dim, hidden_dim):
         super().__init__(input_dim, num_classes, hidden_dim, generative=True)
+
+class FullyConnectedGenerativeDropout(FullyConnected):
+    def __init__(self, num_classes, input_dim, hidden_dim):
+        super().__init__(input_dim, num_classes, hidden_dim, dropout=0.2, generative=True)
