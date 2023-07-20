@@ -14,11 +14,11 @@ from pytorch_lightning import Trainer
 import wandb
 
 config = {
-    "model_type": 'FullyConnectedGenerativeDropout',
+    "model_type": 'FullyConnected',
     "dataset_type": 'MNISTDataModule',
-    "decoder_class": 'Transformer',
-    "preprocessing": 'dim_reduction',
-    "untrained": False,
+    "decoder_class": 'FCDecoder',
+    "preprocessing": 'multiply_transpose',
+    "untrained": True,
     "varying_dim": False,
 }
 
@@ -41,8 +41,8 @@ def run(seed):
                                                           num_heads=4, ln=False)
 
     lightning_model = LightningModel(pytorch_model, learning_rate=0.001, num_classes=10)
-    data_module = OneLayerDataModule(dataset_path, layer_idx=0, input_dim=50, batch_size=64,
-                                     num_workers=0, transpose_weights=True,
+    data_module = OneLayerDataModule(dataset_path, layer_idx=2, input_dim=50, batch_size=64,
+                                     num_workers=0, transpose_weights=False,
                                      preprocessing=config['preprocessing'])
 
     callbacks = [
@@ -68,5 +68,5 @@ def run(seed):
 
 if __name__ == '__main__':
 
-    for seed in range(2):
+    for seed in range(5):
         run(seed)
