@@ -65,13 +65,14 @@ class FCDecoder(nn.Module):
         self.num_outputs = num_outputs
         self.dim_output = dim_output
         self.layers = nn.Sequential(
-                nn.Linear(dim_input, dim_hidden),
+                nn.Linear(dim_input * dim_output, dim_hidden),
                 nn.ReLU(),
                 nn.Linear(dim_hidden, dim_hidden),
                 nn.ReLU(),
-                nn.Linear(dim_hidden, dim_hidden),
+                nn.Linear(dim_hidden, dim_output),
         )
 
     def forward(self, X):
         #X = X @ X.transpose(1,2)
-        return self.layers(X[:,0,:])
+
+        return self.layers(X.flatten(1))

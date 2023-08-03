@@ -14,11 +14,11 @@ from pytorch_lightning import Trainer
 import wandb
 
 config = {
-    "model_type": 'FullyConnected',
+    "model_type": 'FullyConnectedDropout',
     "dataset_type": 'MNISTDataModule',
     "decoder_class": 'Transformer',
     "preprocessing": 'multiply_transpose',
-    "untrained": True,
+    "untrained": False,
     "varying_dim": False,
 }
 
@@ -33,7 +33,7 @@ def run(seed):
     varying_dim_str = '-varying-dim' if config['varying_dim'] else ''
     underlying_config_str = f"{config['model_type']}-{config['dataset_type']}{untrained_str}{varying_dim_str}"
     dataset_path = f'../underlying/saved_models/{underlying_config_str}/' 
-    wandb.init(project="decoder-3", config=config, #mode="disabled",
+    wandb.init(project="decoder-4", config=config, #mode="disabled",
                name=f"{underlying_config_str}-{config['decoder_class']}-{seed}")
 
     pytorch_model = decoder_dict[config['decoder_class']](dim_input=10, num_outputs=1,
@@ -53,7 +53,7 @@ def run(seed):
 
     wandb_logger = WandbLogger()
     trainer = pl.Trainer(
-        max_epochs=100,
+        max_epochs=200,
         callbacks=callbacks,
         accelerator="auto",  # Uses GPUs or TPUs if available
         devices="auto",  # Uses all available GPUs/TPUs if applicable
