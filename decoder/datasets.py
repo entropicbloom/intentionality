@@ -46,11 +46,17 @@ class OneLayerDataset(Dataset):
 
         # apply preprocessing 
         if self.preprocessing == 'multiply_transpose':
+            # compute matrix of angles between weight vectors
             weights = weights @ weights.T
+            weights = weights / torch.norm(weights, dim=1).unsqueeze(1)
+            weights = weights / torch.norm(weights, dim=0).unsqueeze(0)
+
         elif self.preprocessing == 'dim_reduction':
             U, _, _ = torch.pca_lowrank(weights.T, q=self.num_classes, center=True)
             weights = weights @ U
-
+            
+            # permute weights columns
+            weights = weights[:,torch.randperm(weights.shape[1])]
 
 
         return weights, torch.Tensor([class_idx])
@@ -74,8 +80,8 @@ class OneLayerDataModule(pl.LightningDataModule):
 
         # Created using indices from 0 to train_size.
         self.train = torch.utils.data.Subset(dataset, range(int(len(dataset) * 0.8)))
-        self.valid = torch.utils.data.Subset(dataset, range(int(len(dataset) * 0.8), int(len(dataset) * 0.9)))
-        self.test = torch.utils.data.Subset(dataset, range(int(len(dataset) * 0.9), len(dataset)))
+        self.valid = torch.utils.data.Subset(dataset, range(int(len(dataset) * 0.8), int(len(dataset))))
+        self.test = None
 
     def train_dataloader(self):
         train_loader = DataLoader(

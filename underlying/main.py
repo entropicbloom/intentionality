@@ -58,15 +58,15 @@ def run(model_class, dataset_class, batch_size, num_epochs, learning_rate, num_w
 if __name__ == '__main__':
 
     train_config = {
-        'model_class': FullyConnected,
+        'model_class': FullyConnectedDropout,
         'dataset_class': MNISTDataModule,
         'batch_size': 256,
-        'num_epochs': 0,
+        'num_epochs': 2,
         'learning_rate': 0.001,
         'num_workers': 4,
         'num_classes': 10,
         'hidden_dim': [50,50],
-        'varying_dim_bounds': None#(25, 100)
+        'varying_dim_bounds': (25, 100)
     }
 
     for seed in range(1000):
