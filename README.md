@@ -1,6 +1,6 @@
 # Investigating Intrinsic Intentionality in Neural Networks
 
-This project investigates whether neural networks develop inherent, discoverable meaning in their weight structures - what philosophers might call "intrinsic intentionality". Specifically, we examine whether the role of output neurons (which digit they classify) can be determined solely from their weight patterns, without requiring knowledge of that specific network's training history.
+This project investigates whether neural networks develop inherent, discoverable meaning in their weight structures - what philosophers might call "intrinsic intentionality". Specifically, I examine whether the role of output neurons (which digit they classify) can be determined solely from their weight patterns, without requiring knowledge of that specific network's training history.
 
 ## Research Question
 
@@ -17,13 +17,7 @@ Can we determine what a neuron "means" (which digit it classifies) just by looki
    - Extract output layer weights from trained networks
    - Shuffle the neurons (rows) randomly
    - Use a Set Transformer to predict which neuron corresponds to which digit
-   - Crucially: The decoder generalizes across different random seeds
-   
-3. **Key Insight**
-   If our decoder can successfully identify digit-neurons across different networks, this suggests that:
-   - Networks develop consistent, recognizable patterns for each digit
-   - These patterns are inherent to the task, not just artifacts of specific training runs
-   - There might be a "natural" way that networks organize information about digits
+   - Crucially: The decoder generalizes across different random seeds of base networks
 
 ## Project Structure
 
@@ -32,7 +26,7 @@ Can we determine what a neuron "means" (which digit it classifies) just by looki
 
 ## Results
 
-Our experiments demonstrate that neural networks do develop discoverable patterns in their output layer weights that indicate their functional role. We tested this hypothesis across three training paradigms:
+The experiments demonstrate that neural networks do develop discoverable patterns in their output layer weights that indicate their functional role. I tested this hypothesis across three training paradigms:
 
 1. **Untrained Networks (Control)**
    - Random weights, no training
@@ -53,15 +47,12 @@ Our experiments demonstrate that neural networks do develop discoverable pattern
 
 - Output neurons develop consistent, decodable patterns in their connectivity
 - Dropout dramatically improves decodability (25% → 75%)
-- Results suggest networks organize information in interpretable ways
 
-### Interpretation
+## Interpretation
 
 The superior performance with dropout likely occurs because:
 - Dropout encourages neurons to rely on population activity rather than single-neuron pathways
 - Output neurons representing similar digits share more features in their input weights
-- This creates more consistent and detectable patterns in the weight structure
+- This creates more consistent and detectable patterns in the relational weight structure
 
-These results support the existence of intrinsic intentionality in neural networks, as we can decode neuron function across different random seeds without any knowledge of the specific network's training history.
-
-## Conclusion
+These results suggest that even simple MNIST-predicting ANNs structurally encode representations, making them decodable without knowing anything about how the network was linked to the 'outside world' (i.e. input pixels and output classes). Please consider reading [my article](https://pennfranc.github.io/consciousness/) for more details and to learn about possible implications in philosophy of mind.
