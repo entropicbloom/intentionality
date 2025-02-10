@@ -3,7 +3,7 @@ import torch
 import os
 import time
 from datasets import OneLayerDataset, OneLayerDataModule
-from decoder import Transformer, FCDecoder
+from decoder import TransformerDecoder, FCDecoder
 from torch.utils.data import DataLoader
 from lightning_model import LightningModel
 import pytorch_lightning as pl
@@ -16,7 +16,7 @@ import wandb
 config = {
     "model_type": 'FullyConnectedDropout',
     "dataset_type": 'MNISTDataModule',
-    "decoder_class": 'Transformer',
+    "decoder_class": 'TransformerDecoder',
     "preprocessing": 'multiply_transpose',
     "untrained": False,
     "varying_dim": False,
@@ -24,7 +24,7 @@ config = {
 
 decoder_dict = {
     'FCDecoder': FCDecoder,
-    'Transformer': Transformer,
+    'Transformer': TransformerDecoder,
 }
 
 def run(seed):
