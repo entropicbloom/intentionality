@@ -7,21 +7,23 @@ import torchmetrics
 class LightningModel(pl.LightningModule):
     def __init__(self, model, learning_rate, num_classes):
         super().__init__()
-
-        self.learning_rate = learning_rate
-        # The inherited PyTorch module
+        
+        # Store model and hyperparameters
         self.model = model
-        if hasattr(model, "dropout_proba"):
-            self.dropout_proba = model.dropout_proba
-
-        # Save settings and hyperparameters to the log directory
-        # but skip the model parameters
+        self.learning_rate = learning_rate
         self.save_hyperparameters(ignore=["model"])
-
-        # Set up attributes for computing the accuracy
-        self.train_acc = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
-        self.valid_acc = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
-        self.test_acc = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
+        
+        # Optional: get dropout probability if it exists
+        self.dropout_proba = getattr(model, "dropout_proba", None)
+        
+        # Initialize metrics
+        metrics = {"train": None, "valid": None, "test": None}
+        for split in metrics:
+            metrics[split] = torchmetrics.Accuracy(
+                task='multiclass', 
+                num_classes=num_classes
+            )
+        self.metrics = torch.nn.ModuleDict(metrics)
 
     # Defining the forward method is only necessary
     # if you want to use a Trainer's .predict() method (optional)
@@ -44,25 +46,23 @@ class LightningModel(pl.LightningModule):
         loss, true_labels, predicted_labels = self._shared_step(batch)
         self.log("train_loss", loss)
 
-        # Do another forward pass in .eval() mode to compute accuracy
-        # while accountingfor Dropout, BatchNorm etc. behavior
-        # during evaluation (inference)
+        # Compute accuracy in eval mode
         self.model.eval()
         with torch.no_grad():
             _, true_labels, predicted_labels = self._shared_step(batch)
-        self.train_acc(predicted_labels, true_labels)
-        self.log("train_acc", self.train_acc, on_epoch=True, on_step=False)
+        self.metrics["train"](predicted_labels, true_labels)
+        self.log("train_acc", self.metrics["train"], on_epoch=True, on_step=False)
         self.model.train()
-
-        return loss  # this is passed to the optimzer for training
+        
+        return loss
 
     def validation_step(self, batch, batch_idx):
         loss, true_labels, predicted_labels = self._shared_step(batch)
         self.log("valid_loss", loss)
-        self.valid_acc(predicted_labels, true_labels)
+        self.metrics["valid"](predicted_labels, true_labels)
         self.log(
             "valid_acc",
-            self.valid_acc,
+            self.metrics["valid"],
             on_epoch=True,
             on_step=False,
             prog_bar=True,
@@ -70,8 +70,8 @@ class LightningModel(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         loss, true_labels, predicted_labels = self._shared_step(batch)
-        self.test_acc(predicted_labels, true_labels)
-        self.log("test_acc", self.test_acc, on_epoch=True, on_step=False)
+        self.metrics["test"](predicted_labels, true_labels)
+        self.log("test_acc", self.metrics["test"], on_epoch=True, on_step=False)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
