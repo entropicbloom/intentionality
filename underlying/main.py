@@ -29,7 +29,7 @@ DATASET_MAP = {
     'cifar': CIFARDataModule
 }
 
-# Default Training Configuration
+# Current training configuration
 CONFIG = {
     'model_class_str': 'fully_connected_dropout',
     'dataset_class_str': 'mnist',
@@ -42,7 +42,7 @@ CONFIG = {
     'varying_dim_bounds': (25, 100)
 }
 
-# File System Constants
+# File system constants
 DATA_DIR = './data'
 LOGS_DIR = 'logs/'
 MODELS_DIR = 'saved_models/'
