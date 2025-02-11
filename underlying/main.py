@@ -54,9 +54,28 @@ def run(model_class, dataset_class, batch_size, num_epochs, learning_rate, num_w
         os.makedirs(path)
     torch.save(pytorch_model.state_dict(), path + f'seed-{seed}')
 
+def get_start_seed(path):
+    """
+    Determine the next available seed number by checking existing files in the path.
+    
+    Args:
+        path (str): Directory path to check for existing seed files
+        
+    Returns:
+        int: Next available seed number
+    """
+    existing_seeds = []
+    for filename in os.listdir(path):
+        if filename.startswith('seed-'):
+            try:
+                seed_num = int(filename.split('seed-')[1])
+                existing_seeds.append(seed_num)
+            except ValueError:
+                continue
+    
+    return max(existing_seeds) + 1 if existing_seeds else 0
 
 if __name__ == '__main__':
-
     train_config = {
         'model_class': FullyConnectedDropout,
         'dataset_class': MNISTDataModule,
@@ -69,8 +88,16 @@ if __name__ == '__main__':
         'varying_dim_bounds': (25, 100)
     }
 
-    for seed in range(1000):
+    # Get the path and create directory if it doesn't exist
+    path = get_dir_path(train_config['model_class'], train_config['dataset_class'], 
+                       train_config['num_epochs'], train_config['varying_dim_bounds'])
+    if not os.path.exists(path):
+        os.makedirs(path)
 
+    start_seed = get_start_seed(path)
+    print(f"Starting training from seed {start_seed}")
+
+    for seed in range(start_seed, 1000):
         # vary hidden dimension if necessary
         if train_config['varying_dim_bounds'] is not None:
             random_dimension = np.random.randint(*train_config['varying_dim_bounds'])
@@ -83,6 +110,9 @@ if __name__ == '__main__':
         )
 
     # save config
-    path = get_dir_path(train_config['model_class'], train_config['dataset_class'], train_config['num_epochs'], None)
+    path = get_dir_path(train_config['model_class'],
+                        train_config['dataset_class'], 
+                        train_config['num_epochs'],
+                        None)
     with open(path + 'train_config.txt', 'w') as f:
         print(train_config, file=f)
