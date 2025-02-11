@@ -96,6 +96,15 @@ def get_start_seed(path):
     
     return max(existing_seeds) + 1 if existing_seeds else 0
 
+def load_config(path):
+    """Load existing config from file."""
+    try:
+        with open(path + 'train_config.txt', 'r') as f:
+            # Using eval to convert string representation of dict back to dict
+            return eval(f.read())
+    except FileNotFoundError:
+        return None
+
 if __name__ == '__main__':
     train_config = CONFIG.copy()
 
@@ -105,9 +114,19 @@ if __name__ == '__main__':
     if not os.path.exists(path):
         os.makedirs(path)
 
-    # Save config before training
-    with open(path + 'train_config.txt', 'w') as f:
-        print(train_config, file=f)
+    # Check if config exists and matches
+    existing_config = load_config(path)
+    if existing_config is not None:
+        if existing_config != train_config:
+            raise ValueError(
+                f"Existing config in {path} does not match current config.\n"
+                f"Existing: {existing_config}\n"
+                f"Current: {train_config}"
+            )
+    else:
+        # Save config if it doesn't exist
+        with open(path + 'train_config.txt', 'w') as f:
+            print(train_config, file=f)
 
     start_seed = get_start_seed(path)
     print(f"Starting training from seed {start_seed}")
