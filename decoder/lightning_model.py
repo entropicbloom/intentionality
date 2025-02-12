@@ -16,8 +16,8 @@ class LightningModel(pl.LightningModule):
         # Optional: get dropout probability if it exists
         self.dropout_proba = getattr(model, "dropout_proba", None)
         
-        # Initialize metrics
-        metrics = {"train": None, "valid": None, "test": None}
+        # Initialize metrics - use different names to avoid conflicts
+        metrics = {"train_metrics": None, "valid_metrics": None, "test_metrics": None}
         for split in metrics:
             metrics[split] = torchmetrics.Accuracy(
                 task='multiclass', 
@@ -50,8 +50,8 @@ class LightningModel(pl.LightningModule):
         self.model.eval()
         with torch.no_grad():
             _, true_labels, predicted_labels = self._shared_step(batch)
-        self.metrics["train"](predicted_labels, true_labels)
-        self.log("train_acc", self.metrics["train"], on_epoch=True, on_step=False)
+        self.metrics["train_metrics"](predicted_labels, true_labels)
+        self.log("train_acc", self.metrics["train_metrics"], on_epoch=True, on_step=False)
         self.model.train()
         
         return loss
@@ -59,10 +59,10 @@ class LightningModel(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         loss, true_labels, predicted_labels = self._shared_step(batch)
         self.log("valid_loss", loss)
-        self.metrics["valid"](predicted_labels, true_labels)
+        self.metrics["valid_metrics"](predicted_labels, true_labels)
         self.log(
             "valid_acc",
-            self.metrics["valid"],
+            self.metrics["valid_metrics"],
             on_epoch=True,
             on_step=False,
             prog_bar=True,
@@ -70,8 +70,8 @@ class LightningModel(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         loss, true_labels, predicted_labels = self._shared_step(batch)
-        self.metrics["test"](predicted_labels, true_labels)
-        self.log("test_acc", self.metrics["test"], on_epoch=True, on_step=False)
+        self.metrics["test_metrics"](predicted_labels, true_labels)
+        self.log("test_acc", self.metrics["test_metrics"], on_epoch=True, on_step=False)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
