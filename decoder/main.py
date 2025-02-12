@@ -1,6 +1,12 @@
 import numpy as np
 import torch
 import os
+import sys
+
+# Add the project root directory to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(project_root)
+
 from datasets import OneLayerDataset, OneLayerDataModule
 from decoder import TransformerDecoder, FCDecoder
 from lightning_model import LightningModel
@@ -22,11 +28,13 @@ config = {
 # Model mapping
 decoder_dict = {
     'FCDecoder': FCDecoder,
-    'Transformer': TransformerDecoder,
+    'TransformerDecoder': TransformerDecoder,
 }
 
+MODELS_DIR ='saved_models/'
+
 # Import the path creation function from underlying
-from underlying.main import get_dir_path
+from underlying.utils import get_dir_path
 
 def run(seed):
     torch.manual_seed(seed)
@@ -37,7 +45,8 @@ def run(seed):
         model_class_str=config['model_class_str'],
         dataset_class_str=config['dataset_class_str'],
         num_epochs=0 if config['untrained'] else 1,
-        varying_dim=config['varying_dim']
+        varying_dim=config['varying_dim'], 
+        models_dir=MODELS_DIR
     )
 
     # Get the configuration string for wandb naming

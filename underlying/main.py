@@ -7,6 +7,7 @@ import os
 import sys
 import contextlib
 import io
+from utils import get_dir_path
 
 from datasets.CIFAR import CIFARDataModule
 from datasets.MNIST import MNISTDataModule
@@ -58,12 +59,6 @@ def suppress_output():
     with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
         yield
 
-def get_dir_path(model_class_str, dataset_class_str, num_epochs, varying_dim):
-    untrained_str = '-untrained' if num_epochs == 0 else ''
-    varying_dim_str = '-varying-dim' if varying_dim else ''
-    path = f'{MODELS_DIR}{model_class_str}-{dataset_class_str}{untrained_str}{varying_dim_str}/'
-    return path
-
 def run(model_class_str, dataset_class_str, batch_size, num_epochs, learning_rate, num_workers, num_classes,
         hidden_dim, seed, varying_dim_bounds=None):
     torch.manual_seed(seed)
@@ -102,7 +97,7 @@ def run(model_class_str, dataset_class_str, batch_size, num_epochs, learning_rat
         with suppress_output():
             trainer.fit(model=lightning_model, datamodule=data_module)
 
-    path = get_dir_path(model_class_str, dataset_class_str, num_epochs, varying_dim_bounds)
+    path = get_dir_path(model_class_str, dataset_class_str, num_epochs, varying_dim_bounds, MODELS_DIR)
     if not os.path.exists(path):
         os.makedirs(path)
     torch.save(pytorch_model.state_dict(), path + f'seed-{seed}')
@@ -142,7 +137,7 @@ if __name__ == '__main__':
 
     # Get the path and create directory if it doesn't exist
     path = get_dir_path(train_config['model_class_str'], train_config['dataset_class_str'], 
-                       train_config['num_epochs'], train_config['varying_dim_bounds'])
+                       train_config['num_epochs'], train_config['varying_dim_bounds'], MODELS_DIR)
     if not os.path.exists(path):
         os.makedirs(path)
 
