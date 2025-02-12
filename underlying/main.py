@@ -4,6 +4,9 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import CSVLogger
 import os
+import sys
+import contextlib
+import io
 
 from datasets.CIFAR import CIFARDataModule
 from datasets.MNIST import MNISTDataModule
@@ -39,13 +42,21 @@ CONFIG = {
     'num_workers': 4,
     'num_classes': 10,
     'hidden_dim': [50, 50],
-    'varying_dim_bounds': (25, 100)
+    'varying_dim_bounds': None
 }
 
 # File system constants
 DATA_DIR = './data'
 LOGS_DIR = 'logs/'
 MODELS_DIR = 'saved_models/'
+
+@contextlib.contextmanager
+def suppress_output():
+    """Temporarily suppress all stdout and stderr output."""
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+        yield
 
 def get_dir_path(model_class_str, dataset_class_str, num_epochs, varying_dim):
     untrained_str = '-untrained' if num_epochs == 0 else ''
@@ -83,10 +94,13 @@ def run(model_class_str, dataset_class_str, batch_size, num_epochs, learning_rat
         logger=logger,
         deterministic=False,
         log_every_n_steps=LOG_STEPS,
+        enable_progress_bar=False,  # Disable progress bar
+        enable_model_summary=False,  # Disable model summary
     )
 
     if num_epochs > 0:
-        trainer.fit(model=lightning_model, datamodule=data_module)
+        with suppress_output():
+            trainer.fit(model=lightning_model, datamodule=data_module)
 
     path = get_dir_path(model_class_str, dataset_class_str, num_epochs, varying_dim_bounds)
     if not os.path.exists(path):
@@ -156,6 +170,7 @@ if __name__ == '__main__':
             train_config['hidden_dim'] = [random_dimension] * len(train_config['hidden_dim'])
 
         # train underlying model
+        print(f"Training underlying model with seed {seed}")
         run(
             **train_config,
             seed=seed
