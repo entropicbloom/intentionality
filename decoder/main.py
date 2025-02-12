@@ -54,9 +54,10 @@ def run(seed):
     
     # Initialize wandb
     wandb.init(
-        project="decoder-4",
+        project="decoder",
         config=config,
-        name=f"{underlying_config_str}-{config['decoder_class']}-{seed}"
+        name=f"{underlying_config_str}-{config['decoder_class']}-{seed}",
+        group=f"{underlying_config_str}-{config['decoder_class']}"
     )
 
     # Initialize model
@@ -99,5 +100,5 @@ def run(seed):
     wandb.finish()
 
 if __name__ == '__main__':
-    for seed in range(2, 5):
+    for seed in range(5):
         run(seed)
