@@ -35,10 +35,10 @@ DATASET_MAP = {
 
 # Current training configuration
 CONFIG = {
-    'model_class_str': 'fully_connected_dropout',
+    'model_class_str': 'fully_connected',
     'dataset_class_str': 'mnist',
     'batch_size': 256,
-    'num_epochs': 2,
+    'num_epochs': 0,
     'learning_rate': 0.001,
     'num_workers': 4,
     'num_classes': 10,
@@ -101,6 +101,12 @@ def run(model_class_str, dataset_class_str, batch_size, num_epochs, learning_rat
     if not os.path.exists(path):
         os.makedirs(path)
     torch.save(pytorch_model.state_dict(), path + f'seed-{seed}')
+    
+    # Clean up memory
+    del pytorch_model
+    del lightning_model
+    del trainer
+    torch.cuda.empty_cache()  # Clear GPU memory if using CUDA
 
 def get_start_seed(path):
     """
