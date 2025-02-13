@@ -16,9 +16,9 @@ class OneLayerDataset(Dataset):
         self.preprocessing = preprocessing
 
         if not transpose_weights:
-            self.num_classes = torch.load(self.dataset_path + f'/seed-{0}')[self.layer].shape[0]
+            self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[0]
         else:
-            self.num_classes = torch.load(self.dataset_path + f'/seed-{0}')[self.layer].shape[1]
+            self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[1]
 
     def __len__(self):
         num_models = len(os.listdir(self.dataset_path))
