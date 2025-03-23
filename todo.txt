@@ -1,10 +1,13 @@
 controls
 - try to decode based on only 0 and 1 underlying output neurons as decoder inputs (should fail because of symmetry)
-- trivial synthetic decoder input control
+- trivial synthetic decoder input control (?)
 
 more decoding setups
 - train/valid splits with different network hidden layer sizes and num layers
-- variable number of hidden layers within data set -> high priority
+    - new base model dataset with 200 seeds of different hidden layer sizes
+    - new base model dataset with 200 seeds of different number of layers
+    - new base model dataset with 200 seeds of different hidden layer sizes
+- variable number of hidden layers within data set
 - pixel position
 - generative + dropout
 - color?
