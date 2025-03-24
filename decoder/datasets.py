@@ -9,40 +9,113 @@ from torchvision import transforms
 from torchvision import datasets
 
 class OneLayerDataset(Dataset):
-    def __init__(self, dataset_path, layer_idx, transpose_weights=False, preprocessing=None):
+    """
+    Dataset for extracting neural network weights from trained models for decoding.
+    
+    This dataset extracts weights from a specific layer of multiple trained models,
+    allowing for experiments on weight interpretability. It supports using only a 
+    subset of neurons through the use_neurons parameter.
+    
+    Attributes:
+        dataset_path: Path to directory containing saved models
+        layer: Name of the layer to extract weights from
+        transpose_weights: Whether to transpose the weight matrix
+        preprocessing: Optional preprocessing method to apply to weights
+        use_neurons: Optional list of specific neuron indices to use
+        num_classes: Total number of classes/neurons in the original weight matrix
+        effective_num_classes: Number of classes/neurons after filtering (if applicable)
+    """
+    def __init__(self, dataset_path, layer_idx, transpose_weights=False, preprocessing=None, use_neurons=None):
+        """
+        Initialize the dataset.
+        
+        Args:
+            dataset_path (str): Path to directory containing saved models
+            layer_idx (int): Index of the layer to extract weights from
+            transpose_weights (bool): Whether to transpose the weight matrix
+            preprocessing (str, optional): Preprocessing method to apply ('multiply_transpose' or 'dim_reduction')
+            use_neurons (list, optional): List of specific neuron indices to use. If provided, only these
+                                         neurons will be included in the dataset.
+        """
         self.dataset_path = dataset_path
         self.layer = f'layers.{layer_idx}.weight'
         self.transpose_weights = transpose_weights
         self.preprocessing = preprocessing
+        self.use_neurons = use_neurons
 
         if not transpose_weights:
             self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[0]
         else:
             self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[1]
+            
+        # If we're using specific neurons, update the effective number of classes
+        if self.use_neurons is not None:
+            self.effective_num_classes = len(self.use_neurons)
+        else:
+            self.effective_num_classes = self.num_classes
 
     def __len__(self):
+        """
+        Return the length of the dataset.
+        
+        Returns:
+            int: Number of samples in the dataset (number of models × effective number of classes)
+        """
         num_models = len(os.listdir(self.dataset_path))
-        return num_models * self.num_classes
+        return num_models * self.effective_num_classes  # Use effective number of classes
 
     def __getitem__(self, idx):
-        # get model and class indices
-        model_idx = idx // self.num_classes
-        class_idx = idx % self.num_classes
+        """
+        Get a single sample from the dataset.
+        
+        When use_neurons is specified, this method:
+        1. Maps the dataset index to the appropriate model and neuron index
+        2. Filters the weight matrix to only include specified neurons
+        3. Maps the class index to its position in the filtered weights
+        4. Shuffles the rows of the weight matrix to ensure the model must learn
+           to recognize each neuron's weight pattern
+        
+        Args:
+            idx (int): Index of the sample to retrieve
+            
+        Returns:
+            tuple: (weights, class_index)
+                - weights: Tensor of weight values 
+                - class_index: Tensor containing the class index (position in filtered weights)
+        """
+        # get model and class indices based on effective number of classes
+        model_idx = idx // self.effective_num_classes
+        neuron_idx = idx % self.effective_num_classes
+        
+        # If we're using specific neurons, map the neuron_idx to the actual neuron index
+        if self.use_neurons is not None:
+            class_idx = self.use_neurons[neuron_idx]
+        else:
+            class_idx = neuron_idx
 
         # load relevant data
         model = torch.load(self.dataset_path + f'seed-{model_idx}')
         weights = model[self.layer].to('cpu')
         if self.transpose_weights:
             weights = weights.T
-        #weights = torch.zeros(weights.shape, device=weights.device)
-        #weights[0, class_idx] = 1
+            
+        # Filter to only use specified neurons if requested
+        if self.use_neurons is not None:
+            weights = weights[self.use_neurons, :]
+            # Now class_idx needs to be mapped to its position in the filtered weights
+            class_idx_in_filtered = self.use_neurons.index(class_idx)
+        else:
+            class_idx_in_filtered = class_idx
 
         # shuffle rows of weight matrix
-        tmp = weights[class_idx].clone()
-        weights[class_idx] = weights[0]
+        tmp = weights[class_idx_in_filtered].clone()
+        weights[class_idx_in_filtered] = weights[0]
         weights[0] = tmp
 
-        weights[1:,:] = weights[1:,:][torch.randperm(weights.shape[0] - 1)]
+        if weights.shape[0] > 1:  # Only shuffle if there's more than one row
+            # Get indices excluding the first element (which now contains our target class)
+            shuffle_indices = torch.randperm(weights.shape[0] - 1)
+            weights[1:,:] = weights[1:,:][shuffle_indices]
 
         # apply preprocessing 
         if self.preprocessing == 'multiply_transpose':
@@ -59,10 +132,41 @@ class OneLayerDataset(Dataset):
             weights = weights[:,torch.randperm(weights.shape[1])]
 
 
-        return weights, torch.Tensor([class_idx])
+        return weights, torch.Tensor([class_idx_in_filtered])
 
 class OneLayerDataModule(pl.LightningDataModule):
-    def __init__(self, dataset_path, layer_idx, input_dim, batch_size, num_workers, transpose_weights=False, preprocessing=None):
+    """
+    PyTorch Lightning DataModule for the OneLayerDataset.
+    
+    This module handles dataset creation, splitting into train/validation sets,
+    and creating appropriate DataLoaders.
+    
+    Attributes:
+        dataset_path: Path to directory containing saved models
+        layer_idx: Index of the layer to extract weights from
+        input_dim: Input dimension for the model
+        batch_size: Batch size for training/validation
+        num_workers: Number of workers for data loading
+        transpose_weights: Whether to transpose the weight matrix
+        preprocessing: Optional preprocessing method
+        use_neurons: Optional list of specific neuron indices to use
+    """
+    def __init__(self, dataset_path, layer_idx, input_dim, batch_size, num_workers, 
+                 transpose_weights=False, preprocessing=None, use_neurons=None):
+        """
+        Initialize the data module.
+        
+        Args:
+            dataset_path (str): Path to directory containing saved models
+            layer_idx (int): Index of the layer to extract weights from
+            input_dim (int): Input dimension for the model
+            batch_size (int): Batch size for DataLoaders
+            num_workers (int): Number of workers for DataLoaders
+            transpose_weights (bool): Whether to transpose the weight matrix
+            preprocessing (str, optional): Preprocessing method to apply
+            use_neurons (list, optional): List of specific neuron indices to use.
+                                         If provided, only these neurons will be included.
+        """
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -71,12 +175,29 @@ class OneLayerDataModule(pl.LightningDataModule):
         self.layer_idx = layer_idx
         self.transpose_weights = transpose_weights
         self.preprocessing = preprocessing
+        self.use_neurons = use_neurons
 
     def prepare_data(self):
         return
 
     def setup(self, stage=None):
-        dataset = OneLayerDataset(self.dataset_path, self.layer_idx, transpose_weights=self.transpose_weights, preprocessing=self.preprocessing)
+        """
+        Set up the dataset and create train/validation splits.
+        
+        This method creates a OneLayerDataset instance with the specified parameters,
+        including any neuron filtering requested. Then splits it into train (80%) and
+        validation (20%) subsets.
+        
+        Args:
+            stage (str, optional): Stage of setup ('fit', 'validate', 'test')
+        """
+        dataset = OneLayerDataset(
+            self.dataset_path, 
+            self.layer_idx, 
+            transpose_weights=self.transpose_weights, 
+            preprocessing=self.preprocessing,
+            use_neurons=self.use_neurons
+        )
 
         # Created using indices from 0 to train_size.
         self.train = torch.utils.data.Subset(dataset, range(int(len(dataset) * 0.8)))
