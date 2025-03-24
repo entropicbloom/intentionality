@@ -23,6 +23,8 @@ config = {
     "preprocessing": 'multiply_transpose',
     "untrained": False,
     "varying_dim": False,
+    "num_neurons": 10,  # New parameter to specify max number of neurons
+    "min_neurons": 2,   # New parameter to specify min number of neurons
 }
 
 # Model mapping
@@ -36,7 +38,7 @@ MODELS_DIR ='saved_models/'
 # Import the path creation function from underlying
 from underlying.utils import get_dir_path
 
-def run(seed):
+def run(seed, num_neurons):
     torch.manual_seed(seed)
     
     # Use get_dir_path to create the dataset path
@@ -52,17 +54,20 @@ def run(seed):
     # Get the configuration string for wandb naming
     underlying_config_str = dataset_path.split('/')[-2]  # Extract the directory name
     
-    # Initialize wandb
+    # Initialize wandb with a new project name
     wandb.init(
-        project="decoder",
+        project="decoder-neuron-ablation",  # Changed from "decoder" to "decoder-neuron-ablation"
         config=config,
-        name=f"{underlying_config_str}-{config['decoder_class']}-{seed}",
-        group=f"{underlying_config_str}-{config['decoder_class']}"
+        name=f"{underlying_config_str}-{config['decoder_class']}-n{num_neurons}-s{seed}",
+        group=f"{underlying_config_str}-{config['decoder_class']}-n{num_neurons}"
     )
 
+    # Create a list of neuron indices to use
+    use_neurons = list(range(num_neurons))
+    
     # Initialize model
     pytorch_model = decoder_dict[config['decoder_class']](
-        dim_input=10,
+        dim_input=num_neurons,  # Update the input dimension to match number of neurons
         num_outputs=1,
         dim_output=10,
         num_inds=16,
@@ -80,7 +85,8 @@ def run(seed):
         batch_size=64,
         num_workers=0,
         transpose_weights=False,
-        preprocessing=config['preprocessing']
+        preprocessing=config['preprocessing'],
+        use_neurons=use_neurons  # Pass the list of neurons to use
     )
 
     # Training configuration
@@ -100,5 +106,8 @@ def run(seed):
     wandb.finish()
 
 if __name__ == '__main__':
-    for seed in range(5):
-        run(seed)
+    # Loop through different numbers of neurons
+    for num_neurons in range(config['min_neurons'], config['num_neurons'] + 1):
+        print(f"Running experiments with {num_neurons} neurons")
+        for seed in range(1):
+            run(seed, num_neurons)
