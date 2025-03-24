@@ -119,10 +119,10 @@ class OneLayerDataset(Dataset):
 
         # apply preprocessing 
         if self.preprocessing == 'multiply_transpose':
-            # compute matrix of angles between weight vectors
-            weights = weights @ weights.T
-            weights = weights / torch.norm(weights, dim=1).unsqueeze(1)
-            weights = weights / torch.norm(weights, dim=0).unsqueeze(0)
+            # Normalize weights first
+            weights_norm = weights / torch.norm(weights, dim=1, keepdim=True)
+            # Then compute cosine similarities
+            weights = weights_norm @ weights_norm.T
 
         elif self.preprocessing == 'dim_reduction':
             U, _, _ = torch.pca_lowrank(weights.T, q=self.num_classes, center=True)
@@ -130,7 +130,6 @@ class OneLayerDataset(Dataset):
             
             # permute weights columns
             weights = weights[:,torch.randperm(weights.shape[1])]
-
 
         return weights, torch.Tensor([class_idx_in_filtered])
 
