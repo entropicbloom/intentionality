@@ -17,14 +17,14 @@ import wandb
 
 # Updated Configuration dictionary to align with underlying/main.py naming conventions
 config = {
-    "model_class_str": 'fully_connected_dropout',  # was previously "model_type"
-    "dataset_class_str": 'mnist',                     # was previously "dataset_type"
+    "model_class_str": 'fully_connected_dropout',
+    "dataset_class_str": 'mnist',
     "decoder_class": 'TransformerDecoder',
     "preprocessing": 'multiply_transpose',
     "untrained": False,
     "varying_dim": False,
-    "num_neurons": 10,  # New parameter to specify max number of neurons
-    "min_neurons": 2,   # New parameter to specify min number of neurons
+    "num_neurons": 10,
+    "min_neurons": 2,
 }
 
 # Model mapping
@@ -38,7 +38,7 @@ MODELS_DIR ='saved_models/'
 # Import the path creation function from underlying
 from underlying.utils import get_dir_path
 
-def run(seed, num_neurons):
+def run(seed, num_neurons, project_name, config):
     torch.manual_seed(seed)
     
     # Use get_dir_path to create the dataset path
@@ -54,9 +54,9 @@ def run(seed, num_neurons):
     # Get the configuration string for wandb naming
     underlying_config_str = dataset_path.split('/')[-2]  # Extract the directory name
     
-    # Initialize wandb with a new project name
+    # Initialize wandb with the provided project name
     wandb.init(
-        project="decoder-neuron-ablation",  # Changed from "decoder" to "decoder-neuron-ablation"
+        project=project_name,
         config=config,
         name=f"{underlying_config_str}-{config['decoder_class']}-n{num_neurons}-s{seed}",
         group=f"{underlying_config_str}-{config['decoder_class']}-n{num_neurons}"
@@ -105,9 +105,72 @@ def run(seed, num_neurons):
     trainer.fit(model=lightning_model, datamodule=data_module)
     wandb.finish()
 
-if __name__ == '__main__':
+def run_ablation_experiments(min_neurons=None, max_neurons=None, num_seeds=5, experiment_config=None):
+    """
+    Run ablation experiments by varying the number of neurons.
+    
+    Args:
+        min_neurons (int, optional): Minimum number of neurons to use. Defaults to config value.
+        max_neurons (int, optional): Maximum number of neurons to use. Defaults to config value.
+        num_seeds (int, optional): Number of random seeds to use. Defaults to 5.
+        experiment_config (dict, optional): Configuration to use. Defaults to global config.
+    """
+    # Use global config if no config is provided
+    if experiment_config is None:
+        experiment_config = config.copy()
+    
+    # Use config values as defaults if not provided
+    min_neurons = min_neurons if min_neurons is not None else experiment_config['min_neurons']
+    max_neurons = max_neurons if max_neurons is not None else experiment_config['num_neurons']
+    
     # Loop through different numbers of neurons
-    for num_neurons in range(config['min_neurons'], config['num_neurons'] + 1):
+    for num_neurons in range(min_neurons, max_neurons + 1):
         print(f"Running experiments with {num_neurons} neurons")
-        for seed in range(1):
-            run(seed, num_neurons)
+        for seed in range(num_seeds):
+            run(seed, num_neurons, project_name="decoder-neuron-ablation", config=experiment_config)
+
+def run_main_experiments(num_seeds=5):
+    """
+    Run experiments with all neurons for different configurations:
+    1. The current config
+    2. A config with model_class_str='fully_connected'
+    3. A config with untrained=True
+    4. A config with varying_dim=True
+    
+    Each configuration is run with all neurons for multiple seeds.
+    
+    Args:
+        num_seeds (int, optional): Number of random seeds to use. Defaults to 5.
+    """
+    # Save the original config
+    original_config = config.copy()
+    
+    # First run with the current config
+    print("Running with current config")
+    current_config = original_config.copy()
+    for seed in range(num_seeds):
+        run(seed, current_config['num_neurons'], project_name="decoder-main-experiments", config=current_config)
+    
+    # Run with model_class_str='fully_connected'
+    fc_config = original_config.copy()
+    fc_config["model_class_str"] = 'fully_connected'
+    print(f"Running with model_class_str={fc_config['model_class_str']}")
+    for seed in range(num_seeds):
+        run(seed, fc_config['num_neurons'], project_name="decoder-main-experiments", config=fc_config)
+    
+    # Run with untrained=True
+    untrained_config = original_config.copy()
+    untrained_config["untrained"] = True
+    print(f"Running with untrained={untrained_config['untrained']}")
+    for seed in range(num_seeds):
+        run(seed, untrained_config['num_neurons'], project_name="decoder-main-experiments", config=untrained_config)
+    
+    # Run with varying_dim=True
+    varying_dim_config = original_config.copy()
+    varying_dim_config["varying_dim"] = True
+    print(f"Running with varying_dim={varying_dim_config['varying_dim']}")
+    for seed in range(num_seeds):
+        run(seed, varying_dim_config['num_neurons'], project_name="decoder-main-experiments", config=varying_dim_config)
+
+if __name__ == '__main__':
+    run_main_experiments()
