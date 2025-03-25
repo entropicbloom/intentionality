@@ -126,8 +126,12 @@ def run_ablation_experiments(min_neurons=None, max_neurons=None, num_seeds=5, ex
     # Loop through different numbers of neurons
     for num_neurons in range(min_neurons, max_neurons + 1):
         print(f"Running experiments with {num_neurons} neurons")
+        # Create a copy of the config for this specific number of neurons
+        current_config = experiment_config.copy()
+        # Update the num_neurons in the config
+        current_config['num_neurons'] = num_neurons
         for seed in range(num_seeds):
-            run(seed, num_neurons, project_name="decoder-neuron-ablation", config=experiment_config)
+            run(seed, num_neurons, project_name="decoder-neuron-ablation", config=current_config)
 
 def run_main_experiments(num_seeds=5):
     """
@@ -174,4 +178,4 @@ def run_main_experiments(num_seeds=5):
         run(seed, varying_dim_config['num_neurons'], project_name="decoder-main-experiments", config=varying_dim_config)
 
 if __name__ == '__main__':
-    run_main_experiments()
+    run_ablation_experiments()
