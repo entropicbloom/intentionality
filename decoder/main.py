@@ -158,9 +158,10 @@ def run_main_experiments(num_seeds=5):
     for seed in range(num_seeds):
         run(seed, fc_config['num_neurons'], project_name="decoder-main-experiments", config=fc_config)
     
-    # Run with untrained=True
+    # Run with untrained=True, model_class_str='fully_connected'
     untrained_config = original_config.copy()
     untrained_config["untrained"] = True
+    untrained_config["model_class_str"] = 'fully_connected'
     print(f"Running with untrained={untrained_config['untrained']}")
     for seed in range(num_seeds):
         run(seed, untrained_config['num_neurons'], project_name="decoder-main-experiments", config=untrained_config)
