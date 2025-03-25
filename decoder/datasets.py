@@ -61,7 +61,8 @@ class OneLayerDataset(Dataset):
         Returns:
             int: Number of samples in the dataset (number of models × effective number of classes)
         """
-        num_models = len(os.listdir(self.dataset_path))
+        # Only count files that match the expected model filename pattern
+        num_models = sum(1 for f in os.listdir(self.dataset_path) if f.startswith('seed-') and f[5:].isdigit())
         return num_models * self.effective_num_classes  # Use effective number of classes
 
     def __getitem__(self, idx):
