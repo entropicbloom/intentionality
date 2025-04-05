@@ -1,9 +1,5 @@
-fix:
-- rerun main experiments with new multiply_transpose preprocessing
-
-controls
-- try to decode based on only 0 and 1 underlying output neurons as decoder inputs (should fail because of symmetry)
-- trivial synthetic decoder input control (?)
+test
+- test new model saving in underlying/
 
 more decoding setups
 - train/valid splits with different network hidden layer sizes and num layers
