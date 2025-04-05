@@ -46,7 +46,8 @@ def run(seed, num_neurons, project_name, config):
     dataset_path = '../underlying/' + get_dir_path(
         model_class_str=config['model_class_str'],
         dataset_class_str=config['dataset_class_str'],
-        num_epochs=0 if config['untrained'] else 1,
+        num_epochs=0 if config['untrained'] else 2,
+        hidden_dim=config['hidden_dim'],
         varying_dim=config['varying_dim'], 
         models_dir=MODELS_DIR
     )

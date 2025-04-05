@@ -35,14 +35,14 @@ DATASET_MAP = {
 
 # Current training configuration
 CONFIG = {
-    'model_class_str': 'fully_connected',
+    'model_class_str': 'fully_connected_dropout',
     'dataset_class_str': 'mnist',
     'batch_size': 256,
-    'num_epochs': 0,
+    'num_epochs': 2,
     'learning_rate': 0.001,
     'num_workers': 4,
     'num_classes': 10,
-    'hidden_dim': [50, 50],
+    'hidden_dim': [100],
     'varying_dim_bounds': None
 }
 
@@ -97,7 +97,7 @@ def run(model_class_str, dataset_class_str, batch_size, num_epochs, learning_rat
         with suppress_output():
             trainer.fit(model=lightning_model, datamodule=data_module)
 
-    path = get_dir_path(model_class_str, dataset_class_str, num_epochs, varying_dim_bounds, MODELS_DIR)
+    path = get_dir_path(model_class_str, dataset_class_str, num_epochs, hidden_dim, varying_dim_bounds, MODELS_DIR)
     if not os.path.exists(path):
         os.makedirs(path)
     torch.save(pytorch_model.state_dict(), path + f'seed-{seed}')
@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     # Get the path and create directory if it doesn't exist
     path = get_dir_path(train_config['model_class_str'], train_config['dataset_class_str'], 
-                       train_config['num_epochs'], train_config['varying_dim_bounds'], MODELS_DIR)
+                       train_config['num_epochs'], train_config['hidden_dim'], train_config['varying_dim_bounds'], MODELS_DIR)
     if not os.path.exists(path):
         os.makedirs(path)
 
