@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision import datasets
 
-class OneLayerDataset(Dataset):
+class LastLayerDataset(Dataset):
     """
     Dataset for extracting neural network weights from trained models for decoding.
     
@@ -134,9 +134,9 @@ class OneLayerDataset(Dataset):
 
         return weights, torch.Tensor([class_idx_in_filtered])
 
-class OneLayerDataModule(pl.LightningDataModule):
+class LastLayerDataModule(pl.LightningDataModule):
     """
-    PyTorch Lightning DataModule for the OneLayerDataset.
+    PyTorch Lightning DataModule for the LastLayerDataset.
     
     This module handles dataset creation, splitting into train/validation sets,
     and creating appropriate DataLoaders.
@@ -184,14 +184,14 @@ class OneLayerDataModule(pl.LightningDataModule):
         """
         Set up the dataset and create train/validation splits.
         
-        This method creates a OneLayerDataset instance with the specified parameters,
+        This method creates a LastLayerDataset instance with the specified parameters,
         including any neuron filtering requested. Then splits it into train (80%) and
         validation (20%) subsets.
         
         Args:
             stage (str, optional): Stage of setup ('fit', 'validate', 'test')
         """
-        dataset = OneLayerDataset(
+        dataset = LastLayerDataset(
             self.dataset_path, 
             self.layer_idx, 
             transpose_weights=self.transpose_weights, 

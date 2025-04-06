@@ -7,7 +7,7 @@ import sys
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
-from datasets import OneLayerDataset, OneLayerDataModule
+from datasets import LastLayerDataset, LastLayerDataModule
 from decoder import TransformerDecoder, FCDecoder
 from lightning_model import LightningModel
 import pytorch_lightning as pl
@@ -79,7 +79,7 @@ def run(seed, num_neurons, project_name, config):
 
     # Setup training
     lightning_model = LightningModel(pytorch_model, learning_rate=0.001, num_classes=10)
-    data_module = OneLayerDataModule(
+    data_module = LastLayerDataModule(
         dataset_path,
         layer_idx=2,
         input_dim=50,
@@ -106,7 +106,7 @@ def run(seed, num_neurons, project_name, config):
     trainer.fit(model=lightning_model, datamodule=data_module)
     wandb.finish()
 
-def run_ablation_experiments(min_neurons=None, max_neurons=None, num_seeds=5, experiment_config=None):
+def run_ablation_experiments_classid(min_neurons=None, max_neurons=None, num_seeds=5, experiment_config=None):
     """
     Run ablation experiments by varying the number of neurons.
     
@@ -134,7 +134,7 @@ def run_ablation_experiments(min_neurons=None, max_neurons=None, num_seeds=5, ex
         for seed in range(num_seeds):
             run(seed, num_neurons, project_name="decoder-neuron-ablation", config=current_config)
 
-def run_main_experiments(num_seeds=5):
+def run_main_experiments_classid(num_seeds=5):
     """
     Run experiments with all neurons for different configurations:
     1. The current config
@@ -179,4 +179,4 @@ def run_main_experiments(num_seeds=5):
         run(seed, varying_dim_config['num_neurons'], project_name="decoder-main-experiments", config=varying_dim_config)
 
 if __name__ == '__main__':
-    run_ablation_experiments()
+    run_ablation_experiments_classid()
