@@ -1,5 +1,5 @@
-test
-- test new model saving in underlying/
+improvements:
+- multi-dimensional regression for input pixel setup? Reasoning: Predicting 784 pixel position attributes for the same input layer separately is probably wasteful, as the decoder likely uses the same representations over and over again. We could sve training time.
 
 more decoding setups
 - train/valid splits with different network hidden layer sizes and num layers
