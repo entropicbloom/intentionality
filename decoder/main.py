@@ -115,7 +115,7 @@ def run_inputpixels(seed, positional_encoding_type, label_dim, project_name, con
     dataset_path = '../underlying/' + get_dir_path(
         model_class_str=config['model_class_str'],
         dataset_class_str=config['dataset_class_str'],
-        num_epochs=2, # Assuming we use models trained for 2 epochs
+        num_epochs=4,
         hidden_dim=config['hidden_dim'], 
         varying_dim=config['varying_dim'], 
         models_dir=MODELS_DIR
