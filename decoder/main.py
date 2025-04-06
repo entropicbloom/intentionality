@@ -166,6 +166,8 @@ def run_inputpixels(seed, positional_encoding_type, label_dim, project_name, con
     callbacks = [ModelCheckpoint(save_top_k=1, mode="min", monitor="valid_mse")] 
     trainer = pl.Trainer(
         max_epochs=2,
+        val_check_interval=500,
+        limit_val_batches=0.1,
         callbacks=callbacks,
         accelerator="auto",
         devices="auto",
@@ -290,4 +292,4 @@ def run_main_experiments_inputpixels(num_seeds=5):
 if __name__ == '__main__':
     # run_ablation_experiments_classid()
     # run_main_experiments_classid()
-    run_main_experiments_inputpixels()
+    run_main_experiments_inputpixels(2)
