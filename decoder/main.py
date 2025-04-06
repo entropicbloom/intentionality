@@ -7,9 +7,9 @@ import sys
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
-from datasets import LastLayerDataset, LastLayerDataModule
+from datasets import LastLayerDataset, LastLayerDataModule, FirstLayerDataModule
 from decoder import TransformerDecoder, FCDecoder
-from lightning_model import LightningModel
+from lightning_model import LightningClassificationModel, LightningRegressionModel
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
@@ -78,7 +78,7 @@ def run(seed, num_neurons, project_name, config):
     )
 
     # Setup training
-    lightning_model = LightningModel(pytorch_model, learning_rate=0.001, num_classes=10)
+    lightning_model = LightningClassificationModel(pytorch_model, learning_rate=0.001, num_classes=10)
     data_module = LastLayerDataModule(
         dataset_path,
         layer_idx=2,
@@ -94,6 +94,78 @@ def run(seed, num_neurons, project_name, config):
     callbacks = [ModelCheckpoint(save_top_k=1, mode="max", monitor="valid_acc")]
     trainer = pl.Trainer(
         max_epochs=200,
+        callbacks=callbacks,
+        accelerator="auto",
+        devices="auto",
+        deterministic=False,
+        log_every_n_steps=10,
+        logger=WandbLogger()
+    )
+
+    # Train model
+    trainer.fit(model=lightning_model, datamodule=data_module)
+    wandb.finish()
+
+def run_inputpixels(seed, positional_encoding_type, label_dim, project_name, config):
+    """Runs a single experiment for input pixel decoding."""
+    torch.manual_seed(seed)
+    
+    # Use get_dir_path to create the dataset path for the *underlying* models
+    # Layer 0 weights are needed, these models should have been trained normally.
+    dataset_path = '../underlying/' + get_dir_path(
+        model_class_str=config['model_class_str'],
+        dataset_class_str=config['dataset_class_str'],
+        num_epochs=2, # Assuming we use models trained for 2 epochs
+        hidden_dim=config['hidden_dim'], 
+        varying_dim=config['varying_dim'], 
+        models_dir=MODELS_DIR
+    )
+
+    # Get the configuration string for wandb naming
+    underlying_config_str = dataset_path.split('/')[-2]  # Extract the directory name
+    
+    # Update config for logging this specific run
+    run_config = config.copy()
+    run_config['positional_encoding_type'] = positional_encoding_type
+    run_config['seed'] = seed
+    run_config['label_dim'] = label_dim
+    run_config['experiment_type'] = 'input_pixels'
+
+    # Initialize wandb with the provided project name
+    wandb.init(
+        project=project_name,
+        config=run_config,
+        name=f"{underlying_config_str}-{config['decoder_class']}-{positional_encoding_type}-s{seed}",
+        group=f"{underlying_config_str}-{config['decoder_class']}-{positional_encoding_type}"
+    )
+    
+    # Initialize model - Input dim is 784 (pixels), output dim depends on encoding
+    pytorch_model = decoder_dict[config['decoder_class']]( 
+        dim_input=784, # Number of input pixels
+        num_outputs=1, # Predicting property of one pixel at a time 
+        dim_output=label_dim, # Dimension of the positional encoding
+        num_inds=16, # TODO: Consider if this needs adjustment
+        dim_hidden=64, # TODO: Consider if this needs adjustment
+        num_heads=4,   # TODO: Consider if this needs adjustment
+        ln=False
+    )
+
+    # Setup training using FirstLayerDataModule
+    # Loss needs to handle regression (MSE) instead of classification
+    lightning_model = LightningRegressionModel(pytorch_model, learning_rate=0.001, label_dim=label_dim)
+    data_module = FirstLayerDataModule(
+        dataset_path,
+        positional_encoding_type=positional_encoding_type,
+        batch_size=64,
+        num_workers=0,
+    )
+
+    # Training configuration
+    # Monitor validation loss (MSE) instead of accuracy
+    # Checkpoint based on the validation metric (mse)
+    callbacks = [ModelCheckpoint(save_top_k=1, mode="min", monitor="valid_mse")] 
+    trainer = pl.Trainer(
+        max_epochs=2,
         callbacks=callbacks,
         accelerator="auto",
         devices="auto",
@@ -178,5 +250,44 @@ def run_main_experiments_classid(num_seeds=5):
     for seed in range(num_seeds):
         run(seed, varying_dim_config['num_neurons'], project_name="decoder-main-experiments", config=varying_dim_config)
 
+def run_main_experiments_inputpixels(num_seeds=5):
+    """
+    Run experiments decoding input pixel position for different encoding types.
+    Uses the first layer weights and column-wise cosine similarity.
+    
+    Args:
+        num_seeds (int, optional): Number of random seeds to use. Defaults to 5.
+    """
+    # Base config - modify as needed for these experiments
+    base_config = config.copy()
+    # Ensure settings are appropriate for loading standard trained models
+    base_config['untrained'] = False 
+    base_config['varying_dim'] = False # Or True, depending on which models to test
+    # Set a hidden_dim known to exist for the models being loaded
+    base_config['hidden_dim'] = [50, 50] # Example: Adjust if needed
+    base_config['decoder_class'] = 'TransformerDecoder' # Or FCDecoder
+    # Preprocessing is handled inside FirstLayerDataset, remove from main config?
+    if 'preprocessing' in base_config: del base_config['preprocessing']
+    
+    positional_encoding_configs = {
+        #'2d_normalized': {'label_dim': 2},
+        #'x_normalized': {'label_dim': 1},
+        #'y_normalized': {'label_dim': 1},
+        'dist_center': {'label_dim': 1}
+    }
+
+    project_name = "decoder-inputpixels"
+    
+    for encoding_type, encoding_params in positional_encoding_configs.items():
+        print(f"\nRunning input pixel experiments for encoding: {encoding_type}")
+        current_config = base_config.copy()
+        label_dim = encoding_params['label_dim']
+        
+        for seed in range(num_seeds):
+            print(f"  Seed: {seed}")
+            run_inputpixels(seed, encoding_type, label_dim, project_name=project_name, config=current_config)
+
 if __name__ == '__main__':
-    run_ablation_experiments_classid()
+    # run_ablation_experiments_classid()
+    # run_main_experiments_classid()
+    run_main_experiments_inputpixels()
