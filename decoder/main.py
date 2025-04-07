@@ -17,7 +17,7 @@ import wandb
 
 # Updated Configuration dictionary to align with underlying/main.py naming conventions
 config = {
-    "model_class_str": 'fully_connected_dropout',
+    "model_class_str": 'fully_connected',
     "dataset_class_str": 'mnist',
     "decoder_class": 'TransformerDecoder',
     "preprocessing": 'multiply_transpose',
@@ -165,7 +165,7 @@ def run_inputpixels(seed, positional_encoding_type, label_dim, project_name, con
     # Checkpoint based on the validation metric (mse)
     callbacks = [ModelCheckpoint(save_top_k=1, mode="min", monitor="valid_mse")] 
     trainer = pl.Trainer(
-        max_epochs=2,
+        max_epochs=4,
         val_check_interval=500,
         limit_val_batches=0.1,
         callbacks=callbacks,
