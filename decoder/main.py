@@ -262,8 +262,6 @@ def run_main_experiments_inputpixels(num_seeds=5):
     """
     # Base config - modify as needed for these experiments
     base_config = config.copy()
-    # Ensure settings are appropriate for loading standard trained models
-    base_config['untrained'] = False 
     base_config['varying_dim'] = False # Or True, depending on which models to test
     # Set a hidden_dim known to exist for the models being loaded
     base_config['hidden_dim'] = [50, 50] # Example: Adjust if needed
