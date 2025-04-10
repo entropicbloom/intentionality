@@ -55,4 +55,4 @@ The superior performance with dropout likely occurs because:
 - Output neurons representing similar digits share more features in their input weights
 - This creates more consistent and detectable patterns in the relational weight structure
 
-These results suggest that even simple MNIST-predicting ANNs structurally encode representations, making them decodable without knowing anything about how the network was linked to the 'outside world' (i.e. input pixels and output classes). Please consider reading [my article](https://pennfranc.github.io/consciousness/) for more details and to learn about possible implications in philosophy of mind.
+These results suggest that even simple MNIST-predicting ANNs structurally encode representations, making them decodable without knowing anything about how the network was linked to the 'outside world' (i.e. input pixels and output classes). Please consider reading [my article](https://entropicbloom.github.io/consciousness/) for more details and to learn about possible implications in philosophy of mind.
