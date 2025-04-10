@@ -1,3 +1,7 @@
+next steps (pixel experiment):
+- ablation: only include a line of neurons from outside to center, or randomly sample a subset.
+- add a colored plot with proximity distance in pixel space as illustration
+
 improvements (pixel experiment):
 - multi-dimensional regression for input pixel setup? Reasoning: Predicting 784 pixel position attributes for the same input layer separately is probably wasteful, as the decoder likely uses the same representations over and over again. We could sve training time.
 - proximity to center objective is probably quite imbalanced. (too many datapoints with very low proximity)
