@@ -7,7 +7,7 @@ import sys
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
-from datasets import LastLayerDataset, LastLayerDataModule, FirstLayerDataModule
+from underlying_datasets import  LastLayerDataModule, FirstLayerDataModule
 from decoder import TransformerDecoder, FCDecoder
 from lightning_model import LightningClassificationModel, LightningRegressionModel
 import pytorch_lightning as pl
@@ -21,7 +21,7 @@ config = {
     "dataset_class_str": 'mnist',
     "decoder_class": 'TransformerDecoder',
     "preprocessing": 'multiply_transpose',
-    "untrained": True,
+    "untrained": False,
     "varying_dim": False,
     "num_neurons": 10,
     "min_neurons": 2,
@@ -144,9 +144,9 @@ def run_inputpixels(seed, positional_encoding_type, label_dim, project_name, con
         dim_input=784, # Number of input pixels
         num_outputs=1, # Predicting property of one pixel at a time 
         dim_output=label_dim, # Dimension of the positional encoding
-        num_inds=16, # TODO: Consider if this needs adjustment
-        dim_hidden=64, # TODO: Consider if this needs adjustment
-        num_heads=4,   # TODO: Consider if this needs adjustment
+        num_inds=16,
+        dim_hidden=64,
+        num_heads=4,
         ln=False
     )
 
@@ -287,7 +287,25 @@ def run_main_experiments_inputpixels(num_seeds=5):
             print(f"  Seed: {seed}")
             run_inputpixels(seed, encoding_type, label_dim, project_name=project_name, config=current_config)
 
+def run_inputpixels_subsets(*, num_seeds=2, thickness=2):
+    """Radial vs. scrambled_radial (thickness = w)."""
+    for seed in range(num_seeds):
+        for subgraph_type in ("radial", "scrambled_radial"):
+            run_inputpixels(
+                seed=seed,
+                positional_encoding_type="dist_center",
+                label_dim=1,
+                project_name="decoder-inputpixels-subsets",
+                config={
+                    **config,
+                    "subgraph_type": subgraph_type,
+                    "subgraph_param": thickness,
+                    "untrained": False,        # trained, no‑dropout nets
+                },
+            )
+
 if __name__ == '__main__':
     # run_ablation_experiments_classid()
     # run_main_experiments_classid()
     run_main_experiments_inputpixels(2)
+    run_inputpixels_subsets(num_seeds=2, thickness=2)
