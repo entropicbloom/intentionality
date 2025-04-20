@@ -23,6 +23,7 @@ config = {
     "preprocessing": 'multiply_transpose',
     "untrained": False,
     "varying_dim": False,
+    "hidden_dim": [50, 50],
     "num_neurons": 10,
     "min_neurons": 2,
 }
@@ -158,6 +159,9 @@ def run_inputpixels(seed, positional_encoding_type, label_dim, project_name, con
         positional_encoding_type=positional_encoding_type,
         batch_size=64,
         num_workers=0,
+        # Extract subgraph parameters from config if they exist
+        subgraph_type=config.get("subgraph_type"),
+        subgraph_param=config.get("subgraph_param"),
     )
 
     # Training configuration
@@ -290,7 +294,7 @@ def run_main_experiments_inputpixels(num_seeds=5):
 def run_inputpixels_subsets(*, num_seeds=2, thickness=2):
     """Radial vs. scrambled_radial (thickness = w)."""
     for seed in range(num_seeds):
-        for subgraph_type in ("radial", "scrambled_radial"):
+        for subgraph_type in ("scrambled_radial", "radial"):
             run_inputpixels(
                 seed=seed,
                 positional_encoding_type="dist_center",
@@ -307,5 +311,5 @@ def run_inputpixels_subsets(*, num_seeds=2, thickness=2):
 if __name__ == '__main__':
     # run_ablation_experiments_classid()
     # run_main_experiments_classid()
-    run_main_experiments_inputpixels(2)
+    # run_main_experiments_inputpixels(2)
     run_inputpixels_subsets(num_seeds=2, thickness=2)
