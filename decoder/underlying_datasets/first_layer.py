@@ -113,6 +113,7 @@ class FirstLayerDataset(Dataset):
         *,
         subgraph_type: Optional[str] = None,
         subgraph_param: Optional[int] = None,
+        use_target_similarity_only: bool = False,
     ) -> None:
         super().__init__()
         self.dataset_path = dataset_path
@@ -120,6 +121,7 @@ class FirstLayerDataset(Dataset):
         self.positional_encoding_type = positional_encoding_type
         self.subgraph_type = subgraph_type
         self.subgraph_param = subgraph_param
+        self.use_target_similarity_only = use_target_similarity_only
 
         valid = {None, "random_k", "radial", "scrambled_radial"}
         if subgraph_type not in valid:
@@ -162,7 +164,13 @@ class FirstLayerDataset(Dataset):
             sim = self._mask(sim, pix_idx)
 
         label = get_positional_encoding(pix_idx, self.positional_encoding_type)
-        return sim, label
+        
+        if self.use_target_similarity_only:
+            sim_output = sim[0, :]
+        else:
+            sim_output = sim
+        
+        return sim_output, label
 
     # ------------------------------------------------------------------
     def _mask(self, sim: torch.Tensor, pix_idx: int) -> torch.Tensor:
@@ -211,6 +219,7 @@ class FirstLayerDataModule(pl.LightningDataModule):
         *,
         subgraph_type: Optional[str] = None,
         subgraph_param: Optional[int] = None,
+        use_target_similarity_only: bool = False,
     ) -> None:
         super().__init__()
         self.dataset_path = dataset_path
@@ -219,6 +228,7 @@ class FirstLayerDataModule(pl.LightningDataModule):
         self.num_workers = num_workers
         self.subgraph_type = subgraph_type
         self.subgraph_param = subgraph_param
+        self.use_target_similarity_only = use_target_similarity_only
 
     # ------------------------------------------------------------------
     def setup(self, stage: Optional[str] = None):
@@ -227,6 +237,7 @@ class FirstLayerDataModule(pl.LightningDataModule):
             positional_encoding_type=self.positional_encoding_type,
             subgraph_type=self.subgraph_type,
             subgraph_param=self.subgraph_param,
+            use_target_similarity_only=self.use_target_similarity_only,
         )
         n_train = int(0.8 * len(ds))
         self.train_set, self.val_set = random_split(ds, [n_train, len(ds) - n_train])

@@ -16,6 +16,7 @@ class TransformerDecoder(nn.Module):
         decoder_components: list = ['linear']  # List of decoder components
     ):
         super().__init__()
+        self.dim_input = dim_input
         
         # Build encoder sequence
         encoder_layers = []
@@ -46,15 +47,20 @@ class TransformerDecoder(nn.Module):
                 raise ValueError(f"Unknown decoder component: {comp}")
         self.dec = nn.Sequential(*decoder_layers)
 
+    # dimensionality of X is (batch_size, num_inputs, dim_inputs)
     def forward(self, X):
-        # multiply X matrix by transpose
-        #X = X @ X.transpose(1,2)
         
+        # If input is 2D (batch, seq_len) and dim_input is 1, reshape to (batch, seq_len, 1)
+        if X.ndim == 2 and self.dim_input == 1:
+            X = X.unsqueeze(-1)
 
         X = self.enc(X)
         return self.dec(X[:,0,:])
 
 class FCDecoder(nn.Module):
+    """
+    Only looks at the first neuron.
+    """
     def __init__(
         self, 
         dim_input: int, 
@@ -70,7 +76,7 @@ class FCDecoder(nn.Module):
         self.dim_output = dim_output
         
         self.layers = nn.Sequential(
-            nn.Linear(dim_input * dim_output, dim_hidden),
+            nn.Linear(dim_input, dim_hidden),
             nn.ReLU(),
             nn.Linear(dim_hidden, dim_hidden),
             nn.ReLU(),
@@ -78,4 +84,4 @@ class FCDecoder(nn.Module):
         )
 
     def forward(self, X):
-        return self.layers(X.flatten(1))
+        return self.layers(X[:, 0, :])

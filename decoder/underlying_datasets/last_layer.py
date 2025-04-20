@@ -25,8 +25,10 @@ class LastLayerDataset(Dataset):
         use_neurons: Optional list of specific neuron indices to use
         num_classes: Total number of classes/neurons in the original weight matrix
         effective_num_classes: Number of classes/neurons after filtering (if applicable)
+        use_target_similarity_only: Whether to use only the similarity vector of the target neuron when preprocessing is 'multiply_transpose'.
     """
-    def __init__(self, dataset_path, layer_idx, transpose_weights=False, preprocessing=None, use_neurons=None):
+    def __init__(self, dataset_path, layer_idx, transpose_weights=False, preprocessing=None, use_neurons=None,
+                use_target_similarity_only: bool = False):
         """
         Initialize the dataset.
         
@@ -37,12 +39,15 @@ class LastLayerDataset(Dataset):
             preprocessing (str, optional): Preprocessing method to apply ('multiply_transpose' or 'dim_reduction')
             use_neurons (list, optional): List of specific neuron indices to use. If provided, only these
                                          neurons will be included in the dataset.
+            use_target_similarity_only (bool, optional): If True and preprocessing is 'multiply_transpose', 
+                                                     only the target neuron's similarity vector is returned. Defaults to False.
         """
         self.dataset_path = dataset_path
         self.layer = f'layers.{layer_idx}.weight'
         self.transpose_weights = transpose_weights
         self.preprocessing = preprocessing
         self.use_neurons = use_neurons
+        self.use_target_similarity_only = use_target_similarity_only
 
         if not transpose_weights:
             self.num_classes = torch.load(self.dataset_path + f'seed-{0}')[self.layer].shape[0]
@@ -124,7 +129,11 @@ class LastLayerDataset(Dataset):
             # Normalize weights first
             weights_norm = weights / torch.norm(weights, dim=1, keepdim=True)
             # Then compute cosine similarities
-            weights = weights_norm @ weights_norm.T
+            sim_matrix = weights_norm @ weights_norm.T
+            if self.use_target_similarity_only:
+                weights = sim_matrix[0, :] # Return only the first row (target neuron similarity)
+            else:
+                weights = sim_matrix # Return the full similarity matrix
 
         elif self.preprocessing == 'dim_reduction':
             U, _, _ = torch.pca_lowrank(weights.T, q=self.num_classes, center=True)
@@ -151,9 +160,11 @@ class LastLayerDataModule(pl.LightningDataModule):
         transpose_weights: Whether to transpose the weight matrix
         preprocessing: Optional preprocessing method
         use_neurons: Optional list of specific neuron indices to use
+        use_target_similarity_only: Whether to use only the target neuron's similarity vector.
     """
     def __init__(self, dataset_path, layer_idx, input_dim, batch_size, num_workers, 
-                 transpose_weights=False, preprocessing=None, use_neurons=None):
+                 transpose_weights=False, preprocessing=None, use_neurons=None, 
+                 use_target_similarity_only: bool = False):
         """
         Initialize the data module.
         
@@ -167,6 +178,7 @@ class LastLayerDataModule(pl.LightningDataModule):
             preprocessing (str, optional): Preprocessing method to apply
             use_neurons (list, optional): List of specific neuron indices to use.
                                          If provided, only these neurons will be included.
+            use_target_similarity_only (bool, optional): Passed to LastLayerDataset. Defaults to False.
         """
         super().__init__()
         self.batch_size = batch_size
@@ -177,6 +189,7 @@ class LastLayerDataModule(pl.LightningDataModule):
         self.transpose_weights = transpose_weights
         self.preprocessing = preprocessing
         self.use_neurons = use_neurons
+        self.use_target_similarity_only = use_target_similarity_only
 
     def prepare_data(self):
         return
@@ -197,7 +210,8 @@ class LastLayerDataModule(pl.LightningDataModule):
             self.layer_idx, 
             transpose_weights=self.transpose_weights, 
             preprocessing=self.preprocessing,
-            use_neurons=self.use_neurons
+            use_neurons=self.use_neurons,
+            use_target_similarity_only=self.use_target_similarity_only
         )
 
         # Created using indices from 0 to train_size.

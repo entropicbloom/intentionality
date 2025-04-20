@@ -26,6 +26,7 @@ config = {
     "hidden_dim": [50, 50],
     "num_neurons": 10,
     "min_neurons": 2,
+    "use_target_similarity_only": False,
 }
 
 # Model mapping
@@ -133,16 +134,27 @@ def run_inputpixels(seed, positional_encoding_type, label_dim, project_name, con
     run_config['experiment_type'] = 'input_pixels'
 
     # Initialize wandb with the provided project name
+    wandb_name = f"{underlying_config_str}-{config['decoder_class']}-{positional_encoding_type}"
+    wandb_group = f"{underlying_config_str}-{config['decoder_class']}-{positional_encoding_type}"
+    # Optionally add suffix for target similarity only
+    if run_config['use_target_similarity_only']:
+        wandb_name += "-target_sim"
+        wandb_group += "-target_sim"
+    wandb_name += f"-s{seed}"
+        
     wandb.init(
         project=project_name,
         config=run_config,
-        name=f"{underlying_config_str}-{config['decoder_class']}-{positional_encoding_type}-s{seed}",
-        group=f"{underlying_config_str}-{config['decoder_class']}-{positional_encoding_type}"
+        name=wandb_name,
+        group=wandb_group
     )
     
     # Initialize model - Input dim is 784 (pixels), output dim depends on encoding
+    target_sim_only = config.get('use_target_similarity_only', False)
+    decoder_input_dim = 1 if target_sim_only else 784
+    
     pytorch_model = decoder_dict[config['decoder_class']]( 
-        dim_input=784, # Number of input pixels
+        dim_input=decoder_input_dim, # Adjust based on whether we have a vector or matrix
         num_outputs=1, # Predicting property of one pixel at a time 
         dim_output=label_dim, # Dimension of the positional encoding
         num_inds=16,
@@ -162,6 +174,7 @@ def run_inputpixels(seed, positional_encoding_type, label_dim, project_name, con
         # Extract subgraph parameters from config if they exist
         subgraph_type=config.get("subgraph_type"),
         subgraph_param=config.get("subgraph_param"),
+        use_target_similarity_only=config.get('use_target_similarity_only', False),
     )
 
     # Training configuration
@@ -311,5 +324,5 @@ def run_inputpixels_subsets(*, num_seeds=2, thickness=2):
 if __name__ == '__main__':
     # run_ablation_experiments_classid()
     # run_main_experiments_classid()
-    # run_main_experiments_inputpixels(2)
-    run_inputpixels_subsets(num_seeds=2, thickness=2)
+    run_main_experiments_inputpixels(2)
+    #run_inputpixels_subsets(num_seeds=2, thickness=2)
