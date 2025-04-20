@@ -17,7 +17,7 @@ import wandb
 
 # Updated Configuration dictionary to align with underlying/main.py naming conventions
 config = {
-    "model_class_str": 'fully_connected',
+    "model_class_str": 'fully_connected_dropout',
     "dataset_class_str": 'mnist',
     "decoder_class": 'TransformerDecoder',
     "preprocessing": 'multiply_transpose',
@@ -26,7 +26,7 @@ config = {
     "hidden_dim": [50, 50],
     "num_neurons": 10,
     "min_neurons": 2,
-    "use_target_similarity_only": False,
+    "use_target_similarity_only": True,
 }
 
 # Model mapping
@@ -89,7 +89,8 @@ def run(seed, num_neurons, project_name, config):
         num_workers=0,
         transpose_weights=False,
         preprocessing=config['preprocessing'],
-        use_neurons=use_neurons  # Pass the list of neurons to use
+        use_neurons=use_neurons,  # Pass the list of neurons to use
+        use_target_similarity_only=config.get('use_target_similarity_only', False),
     )
 
     # Training configuration
@@ -149,12 +150,8 @@ def run_inputpixels(seed, positional_encoding_type, label_dim, project_name, con
         group=wandb_group
     )
     
-    # Initialize model - Input dim is 784 (pixels), output dim depends on encoding
-    target_sim_only = config.get('use_target_similarity_only', False)
-    decoder_input_dim = 1 if target_sim_only else 784
-    
     pytorch_model = decoder_dict[config['decoder_class']]( 
-        dim_input=decoder_input_dim, # Adjust based on whether we have a vector or matrix
+        dim_input=784, # Number of input pixels
         num_outputs=1, # Predicting property of one pixel at a time 
         dim_output=label_dim, # Dimension of the positional encoding
         num_inds=16,
@@ -243,9 +240,10 @@ def run_main_experiments_classid(num_seeds=5):
     
     # First run with the current config
     print("Running with current config")
-    current_config = original_config.copy()
+    fcb_config = original_config.copy()
+    fcb_config["model_class_str"] = 'fully_connected_dropout'
     for seed in range(num_seeds):
-        run(seed, current_config['num_neurons'], project_name="decoder-main-experiments", config=current_config)
+        run(seed, fcb_config['num_neurons'], project_name="decoder-main-experiments", config=fcb_config)
     
     # Run with model_class_str='fully_connected'
     fc_config = original_config.copy()
@@ -323,6 +321,9 @@ def run_inputpixels_subsets(*, num_seeds=2, thickness=2):
 
 if __name__ == '__main__':
     # run_ablation_experiments_classid()
-    # run_main_experiments_classid()
+    #run_main_experiments_classid()
+    config['model_class_str'] = 'fully_connected_dropout'
+    run_main_experiments_inputpixels(2)
+    config['model_class_str'] = 'fully_connected'
     run_main_experiments_inputpixels(2)
     #run_inputpixels_subsets(num_seeds=2, thickness=2)

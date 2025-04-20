@@ -166,7 +166,7 @@ class FirstLayerDataset(Dataset):
         label = get_positional_encoding(pix_idx, self.positional_encoding_type)
         
         if self.use_target_similarity_only:
-            sim_output = sim[0, :]
+            sim_output = sim[0:1, :]
         else:
             sim_output = sim
         

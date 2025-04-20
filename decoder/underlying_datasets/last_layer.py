@@ -131,7 +131,7 @@ class LastLayerDataset(Dataset):
             # Then compute cosine similarities
             sim_matrix = weights_norm @ weights_norm.T
             if self.use_target_similarity_only:
-                weights = sim_matrix[0, :] # Return only the first row (target neuron similarity)
+                weights = sim_matrix[0:1, :] # Return only the first row (target neuron similarity) as a 2D tensor
             else:
                 weights = sim_matrix # Return the full similarity matrix
 
