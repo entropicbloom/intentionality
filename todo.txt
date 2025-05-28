@@ -1,5 +1,8 @@
 - put decoder/models.py into decoder/decoder_models.py
 
+NEXT STEP (kernel alignment metric):
+- compute knn overlap kernel alignment metric for output neurons in different training paradigms
+
 next steps (pixel experiment):
 - ablation: only include a line of neurons from outside to center, or randomly sample a subset.
 - add a colored plot with proximity distance in pixel space as illustration
