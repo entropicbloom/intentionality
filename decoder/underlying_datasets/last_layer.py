@@ -248,3 +248,108 @@ class LastLayerDataModule(pl.LightningDataModule):
             num_workers=self.num_workers,
         )
         return test_loader
+
+class MixedHiddenDimsDataModule(pl.LightningDataModule):
+    """
+    PyTorch Lightning DataModule that uses different datasets for training and validation.
+    This allows training on one set of models (e.g., hidden_dim=[100]) and validating 
+    on another set (e.g., hidden_dim=[50, 50]).
+    """
+    def __init__(self, train_dataset_path, valid_dataset_path, train_layer_idx, valid_layer_idx, 
+                 input_dim, batch_size, num_workers, transpose_weights=False, preprocessing=None, 
+                 use_neurons=None, use_target_similarity_only=False, 
+                 train_samples=800, valid_samples=200):
+        """
+        Initialize the mixed data module.
+        
+        Args:
+            train_dataset_path (str): Path to training dataset
+            valid_dataset_path (str): Path to validation dataset  
+            train_layer_idx (int): Index of the layer to extract weights from for training
+            valid_layer_idx (int): Index of the layer to extract weights from for validation
+            input_dim (int): Input dimension for the model
+            batch_size (int): Batch size for DataLoaders
+            num_workers (int): Number of workers for DataLoaders
+            transpose_weights (bool): Whether to transpose the weight matrix
+            preprocessing (str, optional): Preprocessing method to apply
+            use_neurons (list, optional): List of specific neuron indices to use
+            use_target_similarity_only (bool): Whether to use only target similarity vector
+            train_samples (int): Number of training samples to use
+            valid_samples (int): Number of validation samples to use
+        """
+        super().__init__()
+        self.train_dataset_path = train_dataset_path
+        self.valid_dataset_path = valid_dataset_path
+        self.train_layer_idx = train_layer_idx
+        self.valid_layer_idx = valid_layer_idx
+        self.input_dim = input_dim
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.transpose_weights = transpose_weights
+        self.preprocessing = preprocessing
+        self.use_neurons = use_neurons
+        self.use_target_similarity_only = use_target_similarity_only
+        self.train_samples = train_samples
+        self.valid_samples = valid_samples
+
+    def prepare_data(self):
+        return
+
+    def setup(self, stage=None):
+        """
+        Set up separate datasets for training and validation with different hidden dimensions.
+        """
+        # Create training dataset with appropriate layer index
+        train_dataset = LastLayerDataset(
+            self.train_dataset_path,
+            self.train_layer_idx,
+            transpose_weights=self.transpose_weights,
+            preprocessing=self.preprocessing,
+            use_neurons=self.use_neurons,
+            use_target_similarity_only=self.use_target_similarity_only
+        )
+        
+        # Create validation dataset with appropriate layer index
+        valid_dataset = LastLayerDataset(
+            self.valid_dataset_path,
+            self.valid_layer_idx,
+            transpose_weights=self.transpose_weights,
+            preprocessing=self.preprocessing,
+            use_neurons=self.use_neurons,
+            use_target_similarity_only=self.use_target_similarity_only
+        )
+        
+        # Limit to specified number of samples
+        train_indices = list(range(min(self.train_samples, len(train_dataset))))
+        valid_indices = list(range(min(self.valid_samples, len(valid_dataset))))
+        
+        self.train = torch.utils.data.Subset(train_dataset, train_indices)
+        self.valid = torch.utils.data.Subset(valid_dataset, valid_indices)
+        self.test = None
+
+    def train_dataloader(self):
+        return DataLoader(
+            dataset=self.train,
+            batch_size=self.batch_size,
+            drop_last=True,
+            shuffle=True,
+            num_workers=self.num_workers,
+        )
+
+    def val_dataloader(self):
+        return DataLoader(
+            dataset=self.valid,
+            batch_size=self.batch_size,
+            drop_last=True,
+            shuffle=False,
+            num_workers=self.num_workers,
+        )
+
+    def test_dataloader(self):
+        return DataLoader(
+            dataset=self.test,
+            batch_size=self.batch_size,
+            drop_last=False,
+            shuffle=False,
+            num_workers=self.num_workers,
+        )

@@ -12,10 +12,11 @@ from experiments import (
     run_main_experiments_classid,
     run_main_experiments_inputpixels,
     run_inputpixels_subsets,
-    run_similarity_comparison_classid
+    run_similarity_comparison_classid,
+    run_mixed_hidden_dims_classid
 )
 
 # Runner function definitions - MOVED to decoder/runners.py
 
 if __name__ == '__main__':
-    run_similarity_comparison_classid(num_seeds=1)
+    run_mixed_hidden_dims_classid(num_seeds=1)

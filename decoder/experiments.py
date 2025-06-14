@@ -1,6 +1,6 @@
 # Import base config and experiment setup functions
 from decoder.config import config as base_config
-from decoder.setup.class_id import setup_and_train as setup_and_train_class_id
+from decoder.setup.class_id import setup_and_train as setup_and_train_class_id, setup_and_train_mixed_hidden_dims
 from decoder.setup.input_pixel import setup_and_train as setup_and_train_input_pixel
 
 def run_ablation_experiments_classid(
@@ -173,4 +173,37 @@ def run_similarity_comparison_classid(num_seeds=5, project_name="classid-tgt-sim
                     num_neurons=current_config['num_neurons'], # Use num_neurons from config
                     project_name=project_name, 
                     config=current_config
-                ) 
+                )
+
+def run_mixed_hidden_dims_classid(num_seeds=5, project_name="classid-mixed-hidden-dims"):
+    """
+    Run experiments with different hidden dimensions for training and validation:
+    - Training: 800 samples from models with hidden_dim=[100]
+    - Validation: 200 samples from models with hidden_dim=[50, 50]
+
+    Args:
+        num_seeds (int, optional): Number of random seeds to use. Defaults to 5.
+        project_name (str, optional): W&B project name.
+    """
+    for seed in range(num_seeds):
+        print(f"Running mixed hidden dims experiment - Seed: {seed}")
+        
+        # Create configs for training and validation datasets
+        train_config = base_config.copy()
+        train_config["hidden_dim"] = [100]
+        train_config["varying_dim"] = False
+        train_config["untrained"] = False
+        
+        valid_config = base_config.copy()
+        valid_config["hidden_dim"] = [50, 50]
+        valid_config["varying_dim"] = False
+        valid_config["untrained"] = False
+        
+        setup_and_train_mixed_hidden_dims(
+            seed=seed,
+            train_config=train_config,
+            valid_config=valid_config,
+            train_samples=8000,
+            valid_samples=2000,
+            project_name=project_name
+        ) 
