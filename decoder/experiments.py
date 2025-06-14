@@ -175,27 +175,39 @@ def run_similarity_comparison_classid(num_seeds=5, project_name="classid-tgt-sim
                     config=current_config
                 )
 
-def run_mixed_hidden_dims_classid(num_seeds=5, project_name="classid-mixed-hidden-dims"):
+def run_mixed_hidden_dims_classid(num_seeds=5, project_name="classid-mixed-hidden-dims", 
+                                 train_hidden_dim=None, valid_hidden_dim=None,
+                                 train_samples=8000, valid_samples=2000):
     """
-    Run experiments with different hidden dimensions for training and validation:
-    - Training: 800 samples from models with hidden_dim=[100]
-    - Validation: 200 samples from models with hidden_dim=[50, 50]
+    Run experiments with different hidden dimensions for training and validation.
 
     Args:
         num_seeds (int, optional): Number of random seeds to use. Defaults to 5.
         project_name (str, optional): W&B project name.
+        train_hidden_dim (list, optional): Hidden dimensions for training data. Defaults to [100].
+        valid_hidden_dim (list, optional): Hidden dimensions for validation data. Defaults to [50, 50].
+        train_samples (int, optional): Number of training samples. Defaults to 8000.
+        valid_samples (int, optional): Number of validation samples. Defaults to 2000.
     """
+    # Set default architectures if not provided
+    if train_hidden_dim is None:
+        train_hidden_dim = [100]
+    if valid_hidden_dim is None:
+        valid_hidden_dim = [50, 50]
+        
     for seed in range(num_seeds):
         print(f"Running mixed hidden dims experiment - Seed: {seed}")
+        print(f"  Train architecture: {train_hidden_dim}")
+        print(f"  Valid architecture: {valid_hidden_dim}")
         
         # Create configs for training and validation datasets
         train_config = base_config.copy()
-        train_config["hidden_dim"] = [100]
+        train_config["hidden_dim"] = train_hidden_dim
         train_config["varying_dim"] = False
         train_config["untrained"] = False
         
         valid_config = base_config.copy()
-        valid_config["hidden_dim"] = [50, 50]
+        valid_config["hidden_dim"] = valid_hidden_dim
         valid_config["varying_dim"] = False
         valid_config["untrained"] = False
         
@@ -203,7 +215,7 @@ def run_mixed_hidden_dims_classid(num_seeds=5, project_name="classid-mixed-hidde
             seed=seed,
             train_config=train_config,
             valid_config=valid_config,
-            train_samples=8000,
-            valid_samples=2000,
+            train_samples=train_samples,
+            valid_samples=valid_samples,
             project_name=project_name
         ) 

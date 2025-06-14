@@ -42,7 +42,7 @@ CONFIG = {
     'learning_rate': 0.001,
     'num_workers': 4,
     'num_classes': 10,
-    'hidden_dim': [100],
+    'hidden_dim': [25, 25],
     'varying_dim_bounds': None
 }
 

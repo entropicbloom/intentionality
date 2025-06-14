@@ -19,4 +19,11 @@ from experiments import (
 # Runner function definitions - MOVED to decoder/runners.py
 
 if __name__ == '__main__':
-    run_mixed_hidden_dims_classid(num_seeds=1)
+    # Example usage with custom architectures
+    run_mixed_hidden_dims_classid(
+        num_seeds=5,
+        train_hidden_dim=[50, 50],
+        valid_hidden_dim=[25, 25],
+        train_samples=8000,
+        valid_samples=2000
+    )
