@@ -23,7 +23,8 @@ if __name__ == '__main__':
     run_mixed_hidden_dims_classid(
         num_seeds=5,
         train_hidden_dim=[50, 50],
-        valid_hidden_dim=[25, 25],
+        valid_hidden_dim=[100],
+        train_varying_dim=True,
         train_samples=8000,
         valid_samples=2000
     )
