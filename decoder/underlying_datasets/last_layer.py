@@ -320,8 +320,15 @@ class MixedHiddenDimsDataModule(pl.LightningDataModule):
         )
         
         # Limit to specified number of samples
-        train_indices = list(range(min(self.train_samples, len(train_dataset))))
-        valid_indices = list(range(min(self.valid_samples, len(valid_dataset))))
+        # If using the same dataset for both train and valid, ensure no overlap
+        if self.train_dataset_path == self.valid_dataset_path:
+            total_samples = len(train_dataset)
+            train_indices = list(range(min(self.train_samples, total_samples - self.valid_samples)))
+            valid_indices = list(range(total_samples - self.valid_samples, total_samples))
+        else:
+            # Different datasets, use from beginning of each
+            train_indices = list(range(min(self.train_samples, len(train_dataset))))
+            valid_indices = list(range(min(self.valid_samples, len(valid_dataset))))
         
         self.train = torch.utils.data.Subset(train_dataset, train_indices)
         self.valid = torch.utils.data.Subset(valid_dataset, valid_indices)
