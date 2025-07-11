@@ -9,7 +9,7 @@ from permutation import permutation_iterator, get_permutation_count
 def build_reference_geometry():
     """Build reference Gram matrix (mean over reference seeds)."""
     print("Building reference geometry …")
-    ref_grams = [gram(load_last_layer(s)) for s in REFERENCE_SEEDS]
+    ref_grams = [gram(load_last_layer(s, model_type="reference")) for s in REFERENCE_SEEDS]
     G_ref = np.mean(ref_grams, axis=0)       # still PSD, see discussion
     
     C = G_ref.shape[0]                       # number of classes / output neurons
@@ -26,7 +26,7 @@ def build_reference_geometry():
 
 def evaluate_seed(seed: int, G_ref: np.ndarray, C: int):
     """Evaluate a single test seed against reference geometry."""
-    W_test = load_last_layer(seed)
+    W_test = load_last_layer(seed, model_type="eval")
     G_test = gram(W_test)
     
     d_true = frob(G_ref, G_test)
