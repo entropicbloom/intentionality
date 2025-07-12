@@ -148,20 +148,25 @@ class FirstLayerDataset(Dataset):
         if W.shape[1] != NUM_PIXELS:
             raise ValueError("Unexpected input dimension in weights")
 
-        # ------- build permuted weight matrix (target col first)
-        target_col = W[:, pix_idx].clone()
-        remaining = [i for i in range(NUM_PIXELS) if i != pix_idx]
-        permuted = torch.zeros_like(W)
-        permuted[:, 0] = target_col
-        permuted[:, 1:] = W[:, random.sample(remaining, len(remaining))]
-
-        # cosine similarity matrix
-        normed = permuted / (torch.norm(permuted, dim=0, keepdim=True) + 1e-8)
-        sim = normed.T @ normed
-
-        # optional masking
+        # ------- determine which neurons to include based on subgraph
         if self.subgraph_type is not None:
-            sim = self._mask(sim, pix_idx)
+            selected_indices = self._get_selected_indices(pix_idx)
+        else:
+            selected_indices = list(range(NUM_PIXELS))
+
+        # ------- build permuted weight matrix using only selected neurons (target col first)
+        target_col = W[:, pix_idx].clone()
+        remaining = [i for i in selected_indices if i != pix_idx]
+        
+        # Create weight matrix with only selected neurons
+        selected_W = torch.zeros(W.shape[0], len(selected_indices))
+        selected_W[:, 0] = target_col
+        if remaining:
+            selected_W[:, 1:] = W[:, random.sample(remaining, len(remaining))]
+
+        # cosine similarity matrix (now smaller if subgraph is used)
+        normed = selected_W / (torch.norm(selected_W, dim=0, keepdim=True) + 1e-8)
+        sim = normed.T @ normed
 
         label = get_positional_encoding(pix_idx, self.positional_encoding_type)
         
@@ -173,28 +178,19 @@ class FirstLayerDataset(Dataset):
         return sim_output, label
 
     # ------------------------------------------------------------------
-    def _mask(self, sim: torch.Tensor, pix_idx: int) -> torch.Tensor:
-        mask = torch.zeros(NUM_PIXELS, dtype=torch.bool)
-        mask[0] = True  # always keep target (col/row 0)
-
+    def _get_selected_indices(self, pix_idx: int) -> List[int]:
+        """Get the list of neuron indices to include in the cosine similarity matrix."""
         if self.subgraph_type == "random_k":
             k = self._validate_param(self.subgraph_param, 1, NUM_PIXELS, "k")
-            mask[random_k_indices(k, pix_idx)] = True
+            return random_k_indices(k, pix_idx)
         elif self.subgraph_type in {"radial", "scrambled_radial"}:
             w = self._validate_param(self.subgraph_param, 1, WIDTH, "w")
             idxs = radial_indices(pix_idx, w)
             if self.subgraph_type == "scrambled_radial":
                 idxs = scramble_radial(idxs, pix_idx)
-            mask[idxs] = True
+            return idxs
         else:
             raise RuntimeError("Unsupported subgraph_type")
-
-        # zero rows/cols outside mask
-        masked = sim.clone()
-        absent = ~mask
-        masked[absent, :] = 0
-        masked[:, absent] = 0
-        return masked
 
     # ------------------------------------------------------------------
     @staticmethod
