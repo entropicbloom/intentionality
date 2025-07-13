@@ -13,18 +13,11 @@ from experiments import (
     run_main_experiments_inputpixels,
     run_inputpixels_subsets,
     run_similarity_comparison_classid,
-    run_mixed_hidden_dims_classid
+    run_mixed_hidden_dims_classid,
+    run_random_k_subgraph_inputpixels
 )
 
 # Runner function definitions - MOVED to decoder/runners.py
 
 if __name__ == '__main__':
-    # Example usage with custom architectures
-    run_mixed_hidden_dims_classid(
-        num_seeds=5,
-        train_hidden_dim=[50, 50],
-        valid_hidden_dim=[100],
-        train_varying_dim=True,
-        train_samples=8000,
-        valid_samples=2000
-    )
+    run_random_k_subgraph_inputpixels(k_values=[4, 8, 16, 32, 64, 128, 256, 512])

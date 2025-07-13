@@ -5,7 +5,7 @@ MODELS_DIR = 'saved_models/'
 
 # Default Configuration
 config = {
-    "model_class_str": 'fully_connected_dropout',
+    "model_class_str": 'fully_connected',
     "dataset_class_str": 'mnist',
     "decoder_class": 'TransformerDecoder',
     "preprocessing": 'multiply_transpose',

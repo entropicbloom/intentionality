@@ -52,20 +52,7 @@ def setup_and_train(seed, positional_encoding_type, label_dim, project_name, con
         group=wandb_group
     )
 
-    # Initialize model using decoder_dict from models.py
-    pytorch_model = decoder_dict[config['decoder_class']]( 
-        dim_input=784, # Number of input pixels
-        num_outputs=1, # Predicting property of one pixel at a time
-        dim_output=label_dim, # Dimension of the positional encoding
-        num_inds=16,
-        dim_hidden=64,
-        num_heads=4,
-        ln=False
-    )
-
-    # Setup training using FirstLayerDataModule
-    # Loss needs to handle regression (MSE) instead of classification
-    lightning_model = LightningRegressionModel(pytorch_model, learning_rate=0.001, label_dim=label_dim)
+    # Setup data module first to determine actual input dimensions
     data_module = FirstLayerDataModule(
         dataset_path,
         positional_encoding_type=positional_encoding_type,
@@ -76,6 +63,27 @@ def setup_and_train(seed, positional_encoding_type, label_dim, project_name, con
         subgraph_param=config.get("subgraph_param"),
         use_target_similarity_only=config.get('use_target_similarity_only', False),
     )
+    
+    # Setup the dataset to get actual input dimensions
+    data_module.setup()
+    
+    # Get actual input size by checking the similarity matrix from the dataset
+    sample_sim, _ = data_module.train_set.dataset[0]
+    actual_dim_input = sample_sim.shape[1]  # width of similarity matrix
+
+    # Initialize model using decoder_dict from models.py
+    pytorch_model = decoder_dict[config['decoder_class']]( 
+        dim_input=actual_dim_input, # Use actual similarity matrix size
+        num_outputs=1, # Predicting property of one pixel at a time
+        dim_output=label_dim, # Dimension of the positional encoding
+        num_inds=16,
+        dim_hidden=64,
+        num_heads=4,
+        ln=False
+    )
+
+    # Loss needs to handle regression (MSE) instead of classification
+    lightning_model = LightningRegressionModel(pytorch_model, learning_rate=0.001, label_dim=label_dim)
 
     # Training configuration
     # Monitor validation loss (MSE) instead of accuracy
