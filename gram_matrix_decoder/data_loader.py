@@ -5,15 +5,21 @@ import torch
 from config import BASEDIR, REFERENCE_MODEL_FMT, EVAL_MODEL_FMT
 
 
-def load_last_layer(seed: int, model_type: str = "eval") -> np.ndarray:
+def load_last_layer(seed: int, model_type: str = "eval", model_fmt: str = None, basedir=None) -> np.ndarray:
     """Load last-layer weight matrix (shape: [num_classes, hidden]).
     
     Args:
         seed: Random seed for model selection
         model_type: Either "reference" or "eval" to specify which model format to use
+        model_fmt: Custom model format string, overrides default based on model_type
+        basedir: Custom base directory, overrides default BASEDIR
     """
-    model_fmt = REFERENCE_MODEL_FMT if model_type == "reference" else EVAL_MODEL_FMT
-    path = BASEDIR / model_fmt.format(seed=seed)
+    if model_fmt is None:
+        model_fmt = REFERENCE_MODEL_FMT if model_type == "reference" else EVAL_MODEL_FMT
+    if basedir is None:
+        basedir = BASEDIR
+    
+    path = basedir / model_fmt.format(seed=seed)
     ckpt = torch.load(path, map_location="cpu")
     
     # Find the last layer dynamically by looking for the highest numbered layer
