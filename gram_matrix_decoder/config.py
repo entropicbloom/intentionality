@@ -5,7 +5,7 @@ from pathlib import Path
 # Reference model configuration
 REFERENCE_MODEL_TYPE = "fully_connected_dropout"
 REFERENCE_DATASET_TYPE = "mnist"
-REFERENCE_HIDDEN_DIM = "[100]"
+REFERENCE_HIDDEN_DIM = "[50,50]"
 REFERENCE_UNTRAINED = False
 
 # Evaluation model configuration
@@ -17,7 +17,7 @@ EVAL_UNTRAINED = False
 REFERENCE_SEEDS = range(0, 5)
 TEST_SEEDS = range(10, 15)
 N_RANDOM_PERMS = 100_000
-ALL_PERMS = True
+ALL_PERMS = False
 SAVE_DISTANCES = True
 
 BASEDIR = Path("../underlying/saved_models")
