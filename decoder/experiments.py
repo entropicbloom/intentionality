@@ -221,4 +221,43 @@ def run_mixed_hidden_dims_classid(num_seeds=5, project_name="classid-mixed-hidde
             train_samples=train_samples,
             valid_samples=valid_samples,
             project_name=project_name
-        ) 
+        )
+
+def run_random_k_subgraph_inputpixels(num_seeds=1, k_values=None, project_name="decoder-inputpixels-random-k"):
+    """
+    Run experiments with random_k subgraphs of varying sizes to see how performance 
+    increases as we include more neurons.
+    
+    Args:
+        num_seeds (int, optional): Number of random seeds to use. Defaults to 1.
+        k_values (list, optional): List of k values to test. Defaults to [5, 50, 500].
+        project_name (str, optional): W&B project name.
+    """
+    if k_values is None:
+        k_values = [5, 50, 500]
+    
+    # Base config for input pixel experiments
+    current_base_config = base_config.copy()
+    current_base_config['varying_dim'] = False
+    current_base_config['hidden_dim'] = [50, 50]
+    current_base_config['decoder_class'] = 'TransformerDecoder'
+    if 'preprocessing' in current_base_config: 
+        del current_base_config['preprocessing']
+    
+    for k in k_values:
+        print(f"\nRunning random_k subgraph experiments with k={k}")
+        
+        for seed in range(num_seeds):
+            print(f"  Seed: {seed}")
+            setup_and_train_input_pixel(
+                seed=seed,
+                positional_encoding_type="dist_center",
+                label_dim=1,
+                project_name=project_name,
+                config={
+                    **current_base_config,
+                    "subgraph_type": "random_k",
+                    "subgraph_param": k,
+                    "untrained": False,
+                },
+            ) 
