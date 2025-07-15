@@ -2,7 +2,7 @@
 
 from experiment import run_experiment
 from analysis import calculate_permutation_accuracy, plot_distance_distribution
-from runs.comparison import run_comparison_experiment
+from gram_matrix_decoder.runs.classid_comparison import run_comparison_experiment
 
 
 def run_standard_experiment():

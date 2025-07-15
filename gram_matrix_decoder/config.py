@@ -3,22 +3,22 @@
 from pathlib import Path
 
 # Reference model configuration
-REFERENCE_MODEL_TYPE = "fully_connected_dropout"
+REFERENCE_MODEL_TYPE = "fully_connected"
 REFERENCE_DATASET_TYPE = "mnist"
 REFERENCE_HIDDEN_DIM = "[50,50]"
 REFERENCE_UNTRAINED = False
 
 # Evaluation model configuration
-EVAL_MODEL_TYPE = "fully_connected_dropout"
+EVAL_MODEL_TYPE = "fully_connected"
 EVAL_DATASET_TYPE = "mnist"
 EVAL_HIDDEN_DIM = "[50,50]"
 EVAL_UNTRAINED = False
 
 REFERENCE_SEEDS = range(0, 5)
 TEST_SEEDS = range(10, 15)
-N_RANDOM_PERMS = 100_000
+N_RANDOM_PERMS = 6000
 ALL_PERMS = False
-SAVE_DISTANCES = True
+SAVE_DISTANCES = False
 
 BASEDIR = Path("../underlying/saved_models")
 REFERENCE_UNTRAINED_SUFFIX = "-untrained" if REFERENCE_UNTRAINED else ""
