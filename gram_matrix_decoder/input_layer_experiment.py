@@ -1,6 +1,7 @@
 """Input layer gram matrix decoder experiment for distance-from-center regression."""
 
 import numpy as np
+import time
 from sklearn.metrics import r2_score
 from config import REFERENCE_SEEDS, TEST_SEEDS, N_RANDOM_PERMS, RANDOM_SEED
 from input_layer_data_loader import load_first_layer, gram_input, get_distance_labels, frob
@@ -42,7 +43,7 @@ def evaluate_seed_regression(seed: int, G_ref: np.ndarray, N: int, eval_model_fm
     
     # Initialize with first random permutation
     first_random_perm = np.random.permutation(N)
-    G_perm = G_test[first_random_perm][:, first_random_perm]
+    G_perm = G_test[np.ix_(first_random_perm, first_random_perm)]
     first_random_distance = frob(G_ref, G_perm)
     
     # Start search with first random permutation
@@ -50,12 +51,14 @@ def evaluate_seed_regression(seed: int, G_ref: np.ndarray, N: int, eval_model_fm
     best_distance = first_random_distance
     
     # Search remaining random permutations
-    for _ in range(N_RANDOM_PERMS - 1):
+    start_time = time.time()
+    for i in range(N_RANDOM_PERMS - 1):
         # Random permutation
         perm = np.random.permutation(N)
         
-        # Apply permutation to test Gram matrix
-        G_perm = G_test[perm][:, perm]
+        # Apply permutation to test Gram matrix more efficiently
+        # Instead of G_test[perm][:, perm], use advanced indexing
+        G_perm = G_test[np.ix_(perm, perm)]
         
         # Calculate Frobenius distance
         perm_distance = frob(G_ref, G_perm)
@@ -64,9 +67,21 @@ def evaluate_seed_regression(seed: int, G_ref: np.ndarray, N: int, eval_model_fm
         if perm_distance < best_distance:
             best_distance = perm_distance
             best_permutation = perm
+        
+        # Progress tracking (print every 1000 permutations)
+        if (i + 1) % 1000 == 0:
+            elapsed = time.time() - start_time
+            rate = (i + 1) / elapsed
+            remaining = (N_RANDOM_PERMS - 1 - i) / rate
+            print(f"    Seed {seed}: {i + 1}/{N_RANDOM_PERMS - 1} permutations "
+                  f"({rate:.0f} perm/sec, {remaining:.0f}s remaining)")
     
-    # Get predicted distances using best permutation
+    total_time = time.time() - start_time
+    
+    # Get predicted distances using different permutations
     predicted_distances = true_distances[best_permutation]
+    identity_predicted = true_distances  # Identity permutation
+    first_random_predicted = true_distances[first_random_perm]
     
     # Calculate regression metrics
     mse = np.mean((true_distances - predicted_distances) ** 2)
@@ -82,7 +97,8 @@ def evaluate_seed_regression(seed: int, G_ref: np.ndarray, N: int, eval_model_fm
     
     print(f"Seed {seed:3d}: "
           f"Frob dist = {best_distance:.4f} (identity: {identity_distance:.4f})  |  "
-          f"R² = {r2:.4f}, MSE = {mse:.4f}  "
+          f"R² = {r2:.4f}, MSE = {mse:.4f}  |  "
+          f"Time: {total_time:.1f}s ({N_RANDOM_PERMS/total_time:.0f} perm/sec)  "
           f"→ {'✓ improved' if improvement else '✗ no improvement'}")
     
     return {
@@ -92,6 +108,8 @@ def evaluate_seed_regression(seed: int, G_ref: np.ndarray, N: int, eval_model_fm
         'first_random_frobenius_distance': first_random_distance,
         'identity_frobenius_distance': identity_distance,
         'predicted_distances': predicted_distances,
+        'identity_predicted': identity_predicted,
+        'first_random_predicted': first_random_predicted,
         'true_distances': true_distances,
         'mse': mse,
         'mae': mae,

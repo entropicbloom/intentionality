@@ -52,4 +52,6 @@ def get_distance_labels() -> np.ndarray:
 
 def frob(A: np.ndarray, B: np.ndarray) -> float:
     """Frobenius-norm distance ‖A-B‖_F."""
-    return np.linalg.norm(A - B, ord="fro")
+    # More efficient than np.linalg.norm for Frobenius norm
+    diff = A - B
+    return np.sqrt(np.sum(diff * diff))
