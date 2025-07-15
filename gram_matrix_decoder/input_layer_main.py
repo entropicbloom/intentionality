@@ -26,14 +26,33 @@ def plot_regression_results(results):
     ax1.legend()
     ax1.grid(True, alpha=0.3)
     
-    # Plot 2: R² distribution across seeds
+    # Plot 2: Relative improvement in distance-to-center prediction
     ax2 = axes[1]
-    r2_values = [r2_score(r['true_distances'], r['predicted_distances']) for r in results]
-    ax2.hist(r2_values, bins=10, alpha=0.7, edgecolor='black')
-    ax2.set_xlabel('R² Score')
-    ax2.set_ylabel('Frequency')
-    ax2.set_title(f'R² Distribution (Mean = {np.mean(r2_values):.3f} ± {np.std(r2_values):.3f})')
+    
+    # Calculate relative improvement for each seed
+    relative_improvements = []
+    
+    for result in results:
+        # Average distance between first random predictions and true distances
+        first_random_error = np.mean(np.abs(result['first_random_predicted'] - result['true_distances']))
+        
+        # Average distance between best permutation predictions and true distances
+        best_error = np.mean(np.abs(result['predicted_distances'] - result['true_distances']))
+        
+        # Relative improvement: (random_error - best_error) / random_error
+        relative_improvement = (first_random_error - best_error) / first_random_error
+        relative_improvements.append(relative_improvement)
+    
+    ax2.scatter(seeds, relative_improvements, alpha=0.7, s=50, c='green')
+    ax2.axhline(y=0, color='red', linestyle='--', alpha=0.5, label='No improvement')
+    ax2.set_xlabel('Seed')
+    ax2.set_ylabel('Relative Improvement')
+    ax2.set_title('Relative Improvement in Distance-to-Center Prediction\n(First Random → Best Permutation)')
+    ax2.legend()
     ax2.grid(True, alpha=0.3)
+    
+    # Format y-axis as percentage
+    ax2.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:.1%}'))
     
     plt.tight_layout()
     plt.show()
@@ -49,6 +68,16 @@ def main():
     # Calculate R² scores for summary
     r2_scores = [r2_score(r['true_distances'], r['predicted_distances']) for r in results]
     print(f"Average R² Score: {np.mean(r2_scores):.4f} ± {np.std(r2_scores):.4f}")
+    
+    # Calculate relative improvements
+    relative_improvements = []
+    for result in results:
+        first_random_error = np.mean(np.abs(result['first_random_predicted'] - result['true_distances']))
+        best_error = np.mean(np.abs(result['predicted_distances'] - result['true_distances']))
+        relative_improvement = (first_random_error - best_error) / first_random_error
+        relative_improvements.append(relative_improvement)
+    
+    print(f"Average Relative Improvement: {np.mean(relative_improvements):.2%} ± {np.std(relative_improvements):.2%}")
     
     # Plot results
     plot_regression_results(results)
