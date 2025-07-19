@@ -11,6 +11,7 @@ from utils import get_dir_path
 
 from datasets.CIFAR import CIFARDataModule
 from datasets.MNIST import MNISTDataModule
+from datasets.FashionMNIST import FashionMNISTDataModule
 from pytorch_models.alexnet import AlexNet
 from pytorch_models.fully_connected import FullyConnected, FullyConnectedDropout, FullyConnectedGenerative, FullyConnectedGenerativeDropout
 from lightning_model import LightningModel
@@ -30,7 +31,8 @@ MODEL_MAP = {
 
 DATASET_MAP = {
     'mnist': MNISTDataModule,
-    'cifar': CIFARDataModule
+    'cifar': CIFARDataModule,
+    'fashionmnist': FashionMNISTDataModule
 }
 
 # Current training configuration
@@ -42,7 +44,7 @@ CONFIG = {
     'learning_rate': 0.001,
     'num_workers': 4,
     'num_classes': 10,
-    'hidden_dim': [25, 25],
+    'hidden_dim': [50, 50],
     'varying_dim_bounds': None
 }
 
@@ -89,13 +91,12 @@ def run(model_class_str, dataset_class_str, batch_size, num_epochs, learning_rat
         logger=logger,
         deterministic=False,
         log_every_n_steps=LOG_STEPS,
-        enable_progress_bar=False,  # Disable progress bar
+        enable_progress_bar=True,  # Enable progress bar
         enable_model_summary=False,  # Disable model summary
     )
 
     if num_epochs > 0:
-        with suppress_output():
-            trainer.fit(model=lightning_model, datamodule=data_module)
+        trainer.fit(model=lightning_model, datamodule=data_module)
 
     path = get_dir_path(model_class_str, dataset_class_str, num_epochs, hidden_dim, varying_dim_bounds, MODELS_DIR)
     if not os.path.exists(path):
