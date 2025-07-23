@@ -17,7 +17,7 @@ Can we determine what a neuron "means" (which digit it classifies) just by looki
    - Extract output layer weights from trained networks
    - Shuffle the neurons (rows) randomly
    - Use a Set Transformer to predict which neuron corresponds to which digit
-   - Crucially: The decoder generalizes across different random seeds of base networks
+   - Crucially: The decoder generalizes across different random seeds of base networks, as well as across different architectures.
 
 ## Project Structure
 
