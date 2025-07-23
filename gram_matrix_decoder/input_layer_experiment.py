@@ -27,6 +27,83 @@ def build_reference_geometry_input(reference_seeds=None, reference_model_fmt=Non
     return G_ref, N
 
 
+def evaluate_seed_regression_subset(seed: int, G_ref: np.ndarray, N: int, k: int = 10, n_random_subsets: int = 100000, eval_model_fmt=None, basedir=None):
+    """Evaluate regression task using subset matching approach."""
+    np.random.seed(RANDOM_SEED + seed)
+    
+    # Load test model weights
+    W_test = load_first_layer(seed, model_type="eval", model_fmt=eval_model_fmt, basedir=basedir)
+    G_test = gram_input(W_test)
+    
+    # Get ground truth distance labels
+    true_distances = get_distance_labels()
+    
+    # Select random subset of k neurons from test weights
+    test_subset_indices = np.random.choice(N, size=k, replace=False)
+    test_subset_gram = G_test[np.ix_(test_subset_indices, test_subset_indices)]
+    
+    # Find best matching reference subset
+    best_distance = float('inf')
+    best_ref_indices = None
+    
+    start_time = time.time()
+    for i in range(n_random_subsets):
+        # Select random subset from reference matrix
+        ref_subset_indices = np.random.choice(N, size=k, replace=False)
+        ref_subset_gram = G_ref[np.ix_(ref_subset_indices, ref_subset_indices)]
+        
+        # Calculate distance between subsets
+        subset_distance = frob(ref_subset_gram, test_subset_gram)
+        
+        # Update best if this subset is better
+        if subset_distance < best_distance:
+            best_distance = subset_distance
+            best_ref_indices = ref_subset_indices
+        
+        # Progress tracking
+        if (i + 1) % 10000 == 0:
+            elapsed = time.time() - start_time
+            rate = (i + 1) / elapsed
+            remaining = (n_random_subsets - i - 1) / rate
+            print(f"    Seed {seed}: {i + 1}/{n_random_subsets} subsets "
+                  f"({rate:.0f} subset/sec, {remaining:.0f}s remaining)")
+    
+    total_time = time.time() - start_time
+    
+    # Get predicted distances using matched reference subset for test subset
+    predicted_distances_subset = true_distances[best_ref_indices]
+    true_distances_subset = true_distances[test_subset_indices]
+    
+    # Calculate regression metrics on the subset
+    mse = np.mean((true_distances_subset - predicted_distances_subset) ** 2)
+    mae = np.mean(np.abs(true_distances_subset - predicted_distances_subset))
+    r2 = r2_score(true_distances_subset, predicted_distances_subset)
+    
+    # Identity baseline (perfect match)
+    identity_predicted_subset = true_distances[test_subset_indices]
+    identity_mse = np.mean((true_distances_subset - identity_predicted_subset) ** 2)  # Should be 0
+    identity_r2 = r2_score(true_distances_subset, identity_predicted_subset)  # Should be 1
+    
+    print(f"Seed {seed:3d}: "
+          f"Best subset dist = {best_distance:.4f}  |  "
+          f"R² = {r2:.4f}, MSE = {mse:.4f}  |  "
+          f"Time: {total_time:.1f}s ({n_random_subsets/total_time:.0f} subset/sec)")
+    
+    return {
+        'seed': seed,
+        'k': k,
+        'test_subset_indices': test_subset_indices,
+        'best_ref_indices': best_ref_indices,
+        'best_subset_distance': best_distance,
+        'predicted_distances_subset': predicted_distances_subset,
+        'true_distances_subset': true_distances_subset,
+        'mse': mse,
+        'mae': mae,
+        'r2': r2,
+        'total_time': total_time
+    }
+
+
 def evaluate_seed_regression(seed: int, G_ref: np.ndarray, N: int, eval_model_fmt=None, basedir=None):
     """Evaluate regression task for a single test seed."""
     np.random.seed(RANDOM_SEED + seed)  # Reproducible random permutations
@@ -145,5 +222,36 @@ def run_input_layer_experiment():
     print(f"Average R² Score: {np.mean(all_r2):.4f} ± {np.std(all_r2):.4f}")
     print(f"Average MSE: {np.mean(all_mse):.4f} ± {np.std(all_mse):.4f}")
     print(f"Average MAE: {np.mean(all_mae):.4f} ± {np.std(all_mae):.4f}")
+    
+    return results
+
+
+def run_input_layer_experiment_subset(k: int = 10, n_random_subsets: int = 100000):
+    """Run the input layer subset-based regression experiment."""
+    print(f"=== Input Layer Subset-Based Regression (k={k}, {n_random_subsets:,} subsets) ===\n")
+    
+    # Build reference geometry
+    G_ref, N = build_reference_geometry_input()
+    
+    # Evaluate each test seed
+    results = []
+    
+    for seed in TEST_SEEDS:
+        result = evaluate_seed_regression_subset(seed, G_ref, N, k=k, n_random_subsets=n_random_subsets)
+        results.append(result)
+    
+    # Summary statistics
+    all_mse = [r['mse'] for r in results]
+    all_mae = [r['mae'] for r in results]
+    all_r2 = [r['r2'] for r in results]
+    all_times = [r['total_time'] for r in results]
+    
+    print(f"\n=== Summary ===")
+    print(f"Subset size k = {k}")
+    print(f"Random subsets per seed = {n_random_subsets:,}")
+    print(f"Average R² Score: {np.mean(all_r2):.4f} ± {np.std(all_r2):.4f}")
+    print(f"Average MSE: {np.mean(all_mse):.4f} ± {np.std(all_mse):.4f}")
+    print(f"Average MAE: {np.mean(all_mae):.4f} ± {np.std(all_mae):.4f}")
+    print(f"Average Time: {np.mean(all_times):.1f}s ± {np.std(all_times):.1f}s")
     
     return results
