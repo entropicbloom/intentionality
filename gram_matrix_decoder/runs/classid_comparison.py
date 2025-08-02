@@ -118,4 +118,14 @@ def run_comparison_experiment():
     plt.savefig('model_comparison.png', dpi=300, bbox_inches='tight')
     plt.show()
     
+    # Print summary table
+    print("\n" + "="*50)
+    print("DECODING ACCURACY RESULTS SUMMARY")
+    print("="*50)
+    print(f"{'Model':<15} {'Accuracy':<12} {'Std Dev':<12}")
+    print("-"*50)
+    for name, acc, std in zip(model_names, accuracies, accuracy_stds):
+        print(f"{name:<15} {acc:.3f}        {std:.3f}")
+    print("="*50)
+    
     return accuracies, accuracy_stds
