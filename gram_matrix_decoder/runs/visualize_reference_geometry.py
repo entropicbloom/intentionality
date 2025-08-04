@@ -2,9 +2,11 @@
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 import sys
 from pathlib import Path
+from scipy.spatial import Delaunay
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -59,9 +61,51 @@ def visualize_reference_gram_matrix_3d(model_config=None):
     
     # Plot the 10 class neurons
     colors = plt.cm.tab10(np.linspace(0, 1, C))
+    
+    # Option 1: K-nearest neighbors edges (cleaner)
+    from sklearn.neighbors import NearestNeighbors
+    
+    # Find k nearest neighbors for each point
+    k = 3  # Connect each point to its 3 nearest neighbors
+    nbrs = NearestNeighbors(n_neighbors=k+1).fit(coords_3d)  # +1 because point is neighbor to itself
+    distances, indices = nbrs.kneighbors(coords_3d)
+    
+    # Draw edges between neighbors with interpolated colors
+    for i in range(C):
+        for j in range(1, k+1):  # Skip first neighbor (itself)
+            neighbor_idx = indices[i, j]
+            # Calculate interpolated color (average of the two node colors)
+            edge_color = (colors[i] + colors[neighbor_idx]) / 2
+            # Draw line between point i and its neighbor
+            ax.plot([coords_3d[i, 0], coords_3d[neighbor_idx, 0]],
+                   [coords_3d[i, 1], coords_3d[neighbor_idx, 1]], 
+                   [coords_3d[i, 2], coords_3d[neighbor_idx, 2]],
+                   color=edge_color, alpha=0.7, linewidth=2)
+    
+    # Alternative: Minimum spanning tree (uncomment to try)
+    # from scipy.sparse.csgraph import minimum_spanning_tree
+    # from scipy.spatial.distance import pdist, squareform
+    # 
+    # # Calculate distance matrix
+    # dist_matrix = squareform(pdist(coords_3d))
+    # mst = minimum_spanning_tree(dist_matrix).toarray()
+    # 
+    # # Draw MST edges with interpolated colors
+    # for i in range(C):
+    #     for j in range(i+1, C):
+    #         if mst[i, j] > 0:
+    #             # Calculate interpolated color (average of the two node colors)
+    #             edge_color = (colors[i] + colors[j]) / 2
+    #             ax.plot([coords_3d[i, 0], coords_3d[j, 0]],
+    #                    [coords_3d[i, 1], coords_3d[j, 1]], 
+    #                    [coords_3d[i, 2], coords_3d[j, 2]],
+    #                    color=edge_color, alpha=0.7, linewidth=2)
+    
+    # Plot the digit nodes on top
     for i in range(C):
         ax.scatter(coords_3d[i, 0], coords_3d[i, 1], coords_3d[i, 2], 
-                  c=[colors[i]], s=100, alpha=0.8, label=f'Class {i}')
+                  c=[colors[i]], s=150, alpha=1.0, label=f'Class {i}', 
+                  edgecolors='black', linewidths=1)
         # Add digit label next to each point
         ax.text(coords_3d[i, 0], coords_3d[i, 1], coords_3d[i, 2], f'  {i}', 
                 color=colors[i], fontsize=12, fontweight='bold')
