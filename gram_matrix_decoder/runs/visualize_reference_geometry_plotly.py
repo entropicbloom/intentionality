@@ -138,30 +138,7 @@ def create_interactive_visualization(model_config=None):
     total_var = np.sum(eigenvalues)
     explained_var_3d = np.sum(eigenvalues[:3]) / total_var
     
-    # Create animation frames for auto-rotation
-    frames = []
-    n_frames = 36  # 360° / 10° per frame
-    
-    for i in range(n_frames):
-        angle = i * 10  # 10 degrees per frame
-        x_eye = 1.5 * np.cos(np.radians(angle))
-        y_eye = 1.5 * np.sin(np.radians(angle))
-        z_eye = 1.2
-        
-        frames.append(go.Frame(
-            layout=dict(
-                scene=dict(
-                    camera=dict(
-                        eye=dict(x=x_eye, y=y_eye, z=z_eye)
-                    )
-                )
-            ),
-            name=str(i)
-        ))
-    
-    fig.frames = frames
-    
-    # Update layout with animation controls
+    # Update layout
     fig.update_layout(
         title=dict(
             text=f'Reference Gram Matrix Geometry<br><sub>Explained variance: {explained_var_3d:.1%}</sub>',
