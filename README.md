@@ -1,5 +1,9 @@
 # Investigating Intrinsic Intentionality in Neural Networks
 
+<div align="center">
+<img src="images/relational_graph.png" alt="Relational Graph" width="500">
+</div>
+
 This project investigates whether neural networks develop inherent, discoverable meaning in their weight structures - what philosophers might call "intrinsic intentionality". Specifically, I examine whether the functional role of neurons can be determined solely from their weight patterns, without requiring knowledge of that specific network's training history (i.e. how it was hooked up to inputs and outputs).
 
 ## Research Question
