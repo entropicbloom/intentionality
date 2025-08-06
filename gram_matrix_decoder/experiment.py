@@ -1,7 +1,7 @@
 """Main experiment runner for gram matrix decoder."""
 
 import numpy as np
-from config import REFERENCE_SEEDS, TEST_SEEDS, SAVE_DISTANCES, TOLERANCE, ALL_PERMS
+from config import REFERENCE_SEEDS, TEST_SEEDS, SAVE_DISTANCES, TOLERANCE, ALL_PERMS, N_RANDOM_PERMS
 from data_loader import load_last_layer, gram, frob
 from permutation import permutation_iterator, get_permutation_count
 
@@ -23,11 +23,6 @@ def build_reference_geometry(reference_seeds=None, reference_model_fmt=None, bas
     C = G_ref.shape[0]                       # number of classes / output neurons
     print(f"  → Averaged over {len(reference_seeds)} seeds, C = {C}\n")
     
-    total_perms = get_permutation_count(C)
-    if all_perms:
-        print(f"Evaluating ALL permutations: {total_perms:,} possibilities per seed - may take a while!\n")
-    else:
-        print(f"Evaluating {total_perms:,} random permutations per seed.\n")
     
     return G_ref, C
 
@@ -88,6 +83,13 @@ def evaluate_seed(seed: int, G_ref: np.ndarray, C: int, eval_model_fmt=None, bas
 def run_experiment():
     """Run the full gram matrix decoder experiment."""
     G_ref, C = build_reference_geometry()
+    
+    # Print permutation evaluation info
+    total_perms = get_permutation_count(C)
+    if ALL_PERMS:
+        print(f"Evaluating ALL permutations: {total_perms:,} possibilities per seed - may take a while!\n")
+    else:
+        print(f"Evaluating {N_RANDOM_PERMS:,} random permutations per seed.\n")
     
     hit_counter = 0
     best_permutations = []
