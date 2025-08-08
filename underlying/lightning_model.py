@@ -73,7 +73,7 @@ class LightningModel(pl.LightningModule):
         self.log("train_acc", self.train_acc, on_epoch=True, on_step=False)
         self.model.train()
 
-        return loss  # this is passed to the optimzer for training
+        return loss  # this is passed to the optimizer for training
 
     def validation_step(self, batch, batch_idx):
         loss, true_labels, predicted_labels = self._shared_step(batch)
