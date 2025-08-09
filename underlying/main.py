@@ -38,9 +38,9 @@ DATASET_MAP = {
 # Current training configuration
 CONFIG = {
     'model_class_str': 'fully_connected_dropout',
-    'dataset_class_str': 'mnist',
+    'dataset_class_str': 'fashionmnist',
     'batch_size': 256,
-    'num_epochs': 2,
+    'num_epochs': 4,
     'learning_rate': 0.001,
     'num_workers': 4,
     'num_classes': 10,
