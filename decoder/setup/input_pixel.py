@@ -6,7 +6,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 
 # Assuming these are in the parent directories or installed packages
-from underlying_datasets import FirstLayerDataModule
+from underlying_datasets import FirstLayerDataModule, MixedDatasetFirstLayerDataModule
 from lightning_model import LightningRegressionModel
 from underlying.utils import get_dir_path
 from decoder.models import decoder_dict # Changed back to absolute import
@@ -73,6 +73,119 @@ def setup_and_train(seed, positional_encoding_type, label_dim, project_name, con
 
     # Initialize model using decoder_dict from models.py
     pytorch_model = decoder_dict[config['decoder_class']]( 
+        dim_input=actual_dim_input, # Use actual similarity matrix size
+        num_outputs=1, # Predicting property of one pixel at a time
+        dim_output=label_dim, # Dimension of the positional encoding
+        num_inds=16,
+        dim_hidden=64,
+        num_heads=4,
+        ln=False
+    )
+
+    # Loss needs to handle regression (MSE) instead of classification
+    lightning_model = LightningRegressionModel(pytorch_model, learning_rate=0.001, label_dim=label_dim)
+
+    # Training configuration
+    # Monitor validation loss (MSE) instead of accuracy
+    # Checkpoint based on the validation metric (mse)
+    callbacks = [ModelCheckpoint(save_top_k=1, mode="min", monitor="valid_mse")]
+    trainer = pl.Trainer(
+        max_epochs=4,
+        val_check_interval=500,
+        limit_val_batches=0.1,
+        callbacks=callbacks,
+        accelerator="auto",
+        devices="auto",
+        deterministic=False,
+        log_every_n_steps=10,
+        logger=WandbLogger()
+    )
+
+    # Train model
+    trainer.fit(model=lightning_model, datamodule=data_module)
+    wandb.finish()
+
+def setup_and_train_mixed_datasets(seed, train_config, valid_config, positional_encoding_type, 
+                                  label_dim, train_samples, valid_samples, project_name):
+    """Sets up and trains a decoder model for input pixel decoding with different underlying datasets for train and validation."""
+    torch.manual_seed(seed)
+
+    # Get dataset paths for both configurations
+    train_dataset_path = '../underlying/' + get_dir_path(
+        model_class_str=train_config['model_class_str'],
+        dataset_class_str=train_config['dataset_class_str'],
+        num_epochs=0 if train_config['untrained'] else 2,
+        hidden_dim=train_config['hidden_dim'],
+        varying_dim=train_config['varying_dim'],
+        models_dir=train_config['models_dir']
+    )
+    
+    valid_dataset_path = '../underlying/' + get_dir_path(
+        model_class_str=valid_config['model_class_str'],
+        dataset_class_str=valid_config['dataset_class_str'],
+        num_epochs=0 if valid_config['untrained'] else 2,
+        hidden_dim=valid_config['hidden_dim'],
+        varying_dim=valid_config['varying_dim'],
+        models_dir=valid_config['models_dir']
+    )
+
+    # Get configuration strings for wandb naming
+    train_config_str = train_dataset_path.split('/')[-2]
+    valid_config_str = valid_dataset_path.split('/')[-2]
+
+    # Update config for logging this specific run
+    run_config = {
+        "train_config": train_config,
+        "valid_config": valid_config,
+        "positional_encoding_type": positional_encoding_type,
+        "seed": seed,
+        "label_dim": label_dim,
+        "experiment_type": "input_pixels_mixed_datasets",
+        "train_samples": train_samples,
+        "valid_samples": valid_samples,
+        "decoder_class": train_config['decoder_class']
+    }
+
+    # Initialize wandb with the provided project name
+    wandb_name = f"mixed-{train_config_str}-{valid_config_str}-{train_config['decoder_class']}-{positional_encoding_type}"
+    wandb_group = f"mixed-{train_config_str}-{valid_config_str}-{train_config['decoder_class']}-{positional_encoding_type}"
+    # Optionally add suffix for target similarity only
+    if train_config.get('use_target_similarity_only', False):
+        wandb_name += "-target_sim"
+        wandb_group += "-target_sim"
+    wandb_name += f"-s{seed}"
+
+    wandb.init(
+        project=project_name,
+        config=run_config,
+        name=wandb_name,
+        group=wandb_group
+    )
+
+    # Setup data module with mixed datasets
+    data_module = MixedDatasetFirstLayerDataModule(
+        train_dataset_path=train_dataset_path,
+        valid_dataset_path=valid_dataset_path,
+        positional_encoding_type=positional_encoding_type,
+        batch_size=64,
+        num_workers=0,
+        # Extract subgraph parameters from config if they exist
+        subgraph_type=train_config.get("subgraph_type"),
+        subgraph_param=train_config.get("subgraph_param"),
+        use_target_similarity_only=train_config.get('use_target_similarity_only', False),
+        train_samples=train_samples,
+        valid_samples=valid_samples
+    )
+    
+    # Setup the dataset to get actual input dimensions
+    data_module.setup()
+    
+    # Get actual input size by checking the similarity matrix from the dataset
+    sample_sim, _ = data_module.train_set.dataset[0]
+    actual_dim_input = sample_sim.shape[1]  # width of similarity matrix
+
+    # Initialize model using decoder_dict from models.py
+    pytorch_model = decoder_dict[train_config['decoder_class']]( 
         dim_input=actual_dim_input, # Use actual similarity matrix size
         num_outputs=1, # Predicting property of one pixel at a time
         dim_output=label_dim, # Dimension of the positional encoding
