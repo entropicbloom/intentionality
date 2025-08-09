@@ -322,6 +322,14 @@ class MixedDatasetFirstLayerDataModule(pl.LightningDataModule):
         train_indices = list(range(min(self.train_samples, len(train_dataset))))
         valid_indices = list(range(min(self.valid_samples, len(valid_dataset))))
         
+        # Debug prints to diagnose validation batch issue
+        print(f"Train dataset length: {len(train_dataset)}")
+        print(f"Train samples requested: {self.train_samples}")
+        print(f"Actual train indices: {len(train_indices)}")
+        print(f"Valid dataset length: {len(valid_dataset)}")
+        print(f"Valid samples requested: {self.valid_samples}")
+        print(f"Actual valid indices: {len(valid_indices)}")
+        
         self.train_set = torch.utils.data.Subset(train_dataset, train_indices)
         self.val_set = torch.utils.data.Subset(valid_dataset, valid_indices)
 
