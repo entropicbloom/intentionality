@@ -280,12 +280,12 @@ def run_mixed_datasets_inputpixels(
         project_name (str, optional): W&B project name.
         train_dataset_str (str, optional): Dataset string for training models. Defaults to 'mnist'.
         valid_dataset_str (str, optional): Dataset string for validation models. Defaults to 'fashionmnist'.
-        train_samples (int, optional): Number of training samples. Defaults to 800.
-        valid_samples (int, optional): Number of validation samples. Defaults to 200.
+        train_samples (int, optional): Number of training samples. Defaults to 800 * 784.
+        valid_samples (int, optional): Number of validation samples. Defaults to 200 * 784.
         positional_encoding_type (str, optional): Type of positional encoding. Defaults to 'dist_center'.
     """
     # Model types to test
-    model_types = ['fully_connected', 'fully_connected_dropout']
+    model_types = ['fully_connected_dropout']
     
     for model_str in model_types:
         print(f"\nRunning mixed dataset experiments for model: {model_str}")

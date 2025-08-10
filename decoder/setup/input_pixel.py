@@ -147,8 +147,12 @@ def setup_and_train_mixed_datasets(seed, train_config, valid_config, positional_
     }
 
     # Initialize wandb with the provided project name
-    wandb_name = f"mixed-{train_config_str}-{valid_config_str}-{train_config['decoder_class']}-{positional_encoding_type}"
-    wandb_group = f"mixed-{train_config_str}-{valid_config_str}-{train_config['decoder_class']}-{positional_encoding_type}"
+    # Shorten wandb names to avoid 128 char limit
+    decoder_short = train_config['decoder_class'].replace('TransformerDecoder', 'TD').replace('_dropout', '_dr')
+    train_model = train_config['model_class_str'].replace('fully_connected', 'fc')
+    valid_model = valid_config['model_class_str'].replace('fully_connected', 'fc')
+    wandb_name = f"mixed-{train_model}-{valid_model}-{decoder_short}-{positional_encoding_type}"
+    wandb_group = f"mixed-{train_model}-{valid_model}-{decoder_short}-{positional_encoding_type}"
     # Optionally add suffix for target similarity only
     if train_config.get('use_target_similarity_only', False):
         wandb_name += "-target_sim"
