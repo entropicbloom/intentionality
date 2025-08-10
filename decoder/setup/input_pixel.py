@@ -4,12 +4,44 @@ import wandb
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
+import os
+import uuid
+import json
 
 # Assuming these are in the parent directories or installed packages
 from underlying_datasets import FirstLayerDataModule, MixedDatasetFirstLayerDataModule
 from lightning_model import LightningRegressionModel
 from underlying.utils import get_dir_path
 from decoder.models import decoder_dict # Changed back to absolute import
+
+def save_decoder_model(pytorch_model, config, positional_encoding_type, seed, label_dim, 
+                      actual_dim_input, **extra_metadata):
+    """Helper function to save decoder models with UUID directory names and config."""
+    model_uuid = str(uuid.uuid4())
+    decoder_save_dir = f"../decoder_models/{model_uuid}"
+    os.makedirs(decoder_save_dir, exist_ok=True)
+    
+    # Save model
+    model_save_path = f"{decoder_save_dir}/model.pt"
+    torch.save(pytorch_model.state_dict(), model_save_path)
+    
+    # Save config with additional metadata
+    save_config = config.copy()
+    save_config.update({
+        "uuid": model_uuid,
+        "positional_encoding_type": positional_encoding_type,
+        "seed": seed,
+        "label_dim": label_dim,
+        "actual_dim_input": actual_dim_input,
+        **extra_metadata
+    })
+    config_save_path = f"{decoder_save_dir}/config.json"
+    with open(config_save_path, 'w') as f:
+        json.dump(save_config, f, indent=2)
+    
+    print(f"Saved decoder model to: {decoder_save_dir}")
+    print(f"Model UUID: {model_uuid}")
+    return model_uuid
 
 def setup_and_train(seed, positional_encoding_type, label_dim, project_name, config):
     """Sets up and trains a decoder model for input pixel decoding."""
@@ -103,6 +135,11 @@ def setup_and_train(seed, positional_encoding_type, label_dim, project_name, con
 
     # Train model
     trainer.fit(model=lightning_model, datamodule=data_module)
+    
+    # Save the trained decoder model
+    save_decoder_model(pytorch_model, config, positional_encoding_type, seed, 
+                      label_dim, actual_dim_input)
+    
     wandb.finish()
 
 def setup_and_train_mixed_datasets(seed, train_config, valid_config, positional_encoding_type, 
@@ -220,4 +257,9 @@ def setup_and_train_mixed_datasets(seed, train_config, valid_config, positional_
 
     # Train model
     trainer.fit(model=lightning_model, datamodule=data_module)
+    
+    # Save the trained decoder model (only train_config affects decoder weights)
+    save_decoder_model(pytorch_model, train_config, positional_encoding_type, seed, 
+                      label_dim, actual_dim_input, train_samples=train_samples)
+    
     wandb.finish() 
