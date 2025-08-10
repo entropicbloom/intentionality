@@ -18,7 +18,7 @@ def save_decoder_model(pytorch_model, config, positional_encoding_type, seed, la
                       actual_dim_input, **extra_metadata):
     """Helper function to save decoder models with UUID directory names and config."""
     model_uuid = str(uuid.uuid4())
-    decoder_save_dir = f"../decoder_models/{model_uuid}"
+    decoder_save_dir = f"decoder_models/{model_uuid}"
     os.makedirs(decoder_save_dir, exist_ok=True)
     
     # Save model
@@ -262,4 +262,81 @@ def setup_and_train_mixed_datasets(seed, train_config, valid_config, positional_
     save_decoder_model(pytorch_model, train_config, positional_encoding_type, seed, 
                       label_dim, actual_dim_input, train_samples=train_samples)
     
-    wandb.finish() 
+    wandb.finish()
+
+def setup_and_eval(model_uuid: str, eval_dataset_path: str, batch_size: int = 64, num_workers: int = 0):
+    """
+    Load a saved decoder model by UUID and evaluate it on a specified dataset.
+    
+    Args:
+        model_uuid: UUID of the saved decoder model
+        eval_dataset_path: Path to the evaluation dataset
+        batch_size: Batch size for evaluation
+        num_workers: Number of workers for data loading
+        
+    Returns:
+        Dict containing evaluation metrics
+    """
+    # Load saved model configuration
+    config_path = f"decoder_models/{model_uuid}/config.json"
+    with open(config_path, 'r') as f:
+        saved_config = json.load(f)
+    
+    # Extract configuration parameters
+    decoder_class = saved_config['decoder_class']
+    positional_encoding_type = saved_config['positional_encoding_type']
+    label_dim = saved_config['label_dim']
+    actual_dim_input = saved_config['actual_dim_input']
+    
+    # Reconstruct the decoder model with same parameters as training
+    pytorch_model = decoder_dict[decoder_class](
+        dim_input=actual_dim_input,
+        num_outputs=1,
+        dim_output=label_dim,
+        num_inds=16,
+        dim_hidden=64,
+        num_heads=4,
+        ln=False
+    )
+    
+    # Load the trained weights
+    model_path = f"decoder_models/{model_uuid}/model.pt"
+    pytorch_model.load_state_dict(torch.load(model_path, map_location="cpu"))
+    
+    # Wrap in Lightning model
+    lightning_model = LightningRegressionModel(pytorch_model, learning_rate=0.001, label_dim=label_dim)
+    
+    # Setup evaluation data module using same configuration as training
+    data_module = FirstLayerDataModule(
+        eval_dataset_path,
+        positional_encoding_type=positional_encoding_type,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        subgraph_type=saved_config.get("subgraph_type"),
+        subgraph_param=saved_config.get("subgraph_param"),
+        use_target_similarity_only=saved_config.get('use_target_similarity_only', False),
+    )
+    
+    # Setup the dataset
+    data_module.setup()
+    
+    # Create trainer for evaluation only
+    trainer = pl.Trainer(
+        accelerator="auto",
+        devices="auto",
+        logger=False,  # No logging for evaluation
+        enable_progress_bar=True,
+        enable_model_summary=False,
+        limit_val_batches=0.1  # Match training config - only use 10% of validation data
+    )
+    
+    # Run evaluation using validation dataloader
+    print(f"Evaluating model {model_uuid} on dataset: {eval_dataset_path}")
+    validation_results = trainer.validate(model=lightning_model, datamodule=data_module)
+    
+    return {
+        "model_uuid": model_uuid,
+        "eval_dataset_path": eval_dataset_path,
+        "results": validation_results[0] if validation_results else {},
+        "config": saved_config
+    } 
