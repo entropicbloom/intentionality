@@ -327,6 +327,7 @@ def run_mixed_datasets_inputpixels(
 def run_dataset_classification_experiments(
     num_seeds=5,
     project_name="dataset-classification",
+    model_class_str='fully_connected_dropout',
     train_samples=800,  # 400 MNIST + 400 Fashion-MNIST models
     valid_samples=200   # 100 MNIST + 100 Fashion-MNIST models
 ):
@@ -342,7 +343,7 @@ def run_dataset_classification_experiments(
     """
     # Base config for dataset classification experiments
     current_config = base_config.copy()
-    current_config['model_class_str'] = 'fully_connected_dropout'
+    current_config['model_class_str'] = model_class_str
     current_config['decoder_class'] = 'TransformerDecoder'
     current_config['hidden_dim'] = [50, 50]
     current_config['varying_dim'] = False

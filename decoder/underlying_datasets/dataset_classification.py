@@ -97,16 +97,21 @@ class DatasetClassificationDataset(Dataset):
         model = torch.load(dataset_path + f'seed-{model_idx}')
         weights = model[self.layer].to('cpu')  # Shape: [10, hidden_dim] for output layer
         
-        # Compute cosine similarities between output neurons
+        # Randomly permute the neuron order to avoid any positional bias
+        # This follows the same pattern as last_layer.py with preprocessing='multiply_transpose'
+        perm_indices = torch.randperm(weights.shape[0])
+        weights = weights[perm_indices, :]
+        
+        # Compute cosine similarities between output neurons (multiply_transpose preprocessing)
         # Normalize weights first
         weights_norm = weights / torch.norm(weights, dim=1, keepdim=True)
         # Compute cosine similarity matrix
         sim_matrix = weights_norm @ weights_norm.T  # Shape: [10, 10]
         
-        # Extract upper triangular part (excluding diagonal) as feature vector
-        # This gives us all pairwise similarities without redundancy
-        upper_tri_indices = torch.triu_indices(10, 10, offset=1)
-        cosine_similarities = sim_matrix[upper_tri_indices[0], upper_tri_indices[1]]  # Shape: [45]
+        # Return the full cosine similarity matrix (no upper triangular extraction)
+        # This matches the behavior of last_layer.py with preprocessing='multiply_transpose'
+        # Flatten the matrix to a 1D vector for the transformer input
+        cosine_similarities = sim_matrix.flatten()  # Shape: [100]
         
         return cosine_similarities, torch.tensor(dataset_label, dtype=torch.long)
 

@@ -19,12 +19,13 @@ if __name__ == "__main__":
     print("Running dataset classification experiments...")
     print("Classifying MNIST vs Fashion-MNIST based on output neuron cosine similarities")
     
-    # Run the experiment with default parameters
-    run_dataset_classification_experiments(
-        num_seeds=3,  # Start with 3 seeds for testing
-        project_name="dataset-classification-cosine-similarities",
-        train_samples=800,  # 400 MNIST + 400 Fashion-MNIST models
-        valid_samples=200   # 100 MNIST + 100 Fashion-MNIST models
-    )
+    for model_class_str in ['fully_connected', 'fully_connected_dropout']:
+        run_dataset_classification_experiments(
+            num_seeds=5,
+            project_name="dataset-classification-cosine-similarities",
+            model_class_str=model_class_str,
+            train_samples=800,  # 400 MNIST + 400 Fashion-MNIST networks
+            valid_samples=200   # 100 MNIST + 100 Fashion-MNIST networks
+        )
     
     print("Experiments completed!")
