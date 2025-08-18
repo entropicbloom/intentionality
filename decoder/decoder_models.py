@@ -53,6 +53,9 @@ class TransformerDecoder(nn.Module):
         # If input is 2D (batch, seq_len) and dim_input is 1, reshape to (batch, seq_len, 1)
         if X.ndim == 2 and self.dim_input == 1:
             X = X.unsqueeze(-1)
+        # If input is 2D and represents a feature vector, reshape to (batch, 1, features)
+        elif X.ndim == 2 and X.shape[1] == self.dim_input:
+            X = X.unsqueeze(1)
 
         X = self.enc(X)
         return self.dec(X[:,0,:])

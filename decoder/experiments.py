@@ -2,6 +2,7 @@
 from decoder.config import config as base_config
 from decoder.setup.class_id import setup_and_train as setup_and_train_class_id, setup_and_train_mixed_hidden_dims
 from decoder.setup.input_pixel import setup_and_train as setup_and_train_input_pixel, setup_and_train_mixed_datasets
+from decoder.setup.dataset_classification import setup_and_train_dataset_classification
 
 def run_ablation_experiments_classid(
     min_neurons=None, max_neurons=None, num_seeds=5, experiment_config=None,
@@ -322,3 +323,40 @@ def run_mixed_datasets_inputpixels(
                 valid_samples=valid_samples,
                 project_name=project_name
             ) 
+
+def run_dataset_classification_experiments(
+    num_seeds=5,
+    project_name="dataset-classification",
+    train_samples=800,  # 400 MNIST + 400 Fashion-MNIST models
+    valid_samples=200   # 100 MNIST + 100 Fashion-MNIST models
+):
+    """
+    Run experiments to classify whether a network was trained on MNIST or Fashion-MNIST
+    based on cosine similarities of output neurons using set transformer.
+    
+    Args:
+        num_seeds (int, optional): Number of random seeds to use. Defaults to 5.
+        project_name (str, optional): W&B project name.
+        train_samples (int, optional): Total number of training samples. Defaults to 800.
+        valid_samples (int, optional): Total number of validation samples. Defaults to 200.
+    """
+    # Base config for dataset classification experiments
+    current_config = base_config.copy()
+    current_config['model_class_str'] = 'fully_connected_dropout'
+    current_config['decoder_class'] = 'TransformerDecoder'
+    current_config['hidden_dim'] = [50, 50]
+    current_config['varying_dim'] = False
+    current_config['untrained'] = False
+    
+    for seed in range(num_seeds):
+        print(f"Running dataset classification experiment - Seed: {seed}")
+        print(f"  Train samples: {train_samples} ({train_samples//2} per dataset)")
+        print(f"  Valid samples: {valid_samples} ({valid_samples//2} per dataset)")
+        
+        setup_and_train_dataset_classification(
+            seed=seed,
+            train_samples=train_samples,
+            valid_samples=valid_samples,
+            project_name=project_name,
+            config=current_config
+        )
