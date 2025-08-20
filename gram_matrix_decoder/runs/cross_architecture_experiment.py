@@ -172,20 +172,21 @@ def print_cross_architecture_summary(all_results):
 def plot_cross_architecture_heatmap(all_results, save_name="cross_architecture_heatmap.png"):
     """Plot cross-architecture results as a heatmap."""
     
-    # Get architecture names
-    arch_names = ['2L_50W', '2L_25W', '1L_100W']
+    # Get architecture names for display and lookup
+    arch_display_names = ['[50, 50]', '[25, 25]', '[100]']
+    arch_keys = ['2L_50W', '2L_25W', '1L_100W']  # Keys for lookup in results
     
     # Initialize matrices for accuracy and hit rates
-    accuracy_matrix = np.zeros((len(arch_names), len(arch_names)))
-    hit_rate_matrix = np.zeros((len(arch_names), len(arch_names)))
+    accuracy_matrix = np.zeros((len(arch_keys), len(arch_keys)))
+    hit_rate_matrix = np.zeros((len(arch_keys), len(arch_keys)))
     
     # Fill matrices
-    for i, ref_name in enumerate(arch_names):
-        if ref_name in all_results and 'error' not in all_results[ref_name]:
-            results = all_results[ref_name]
-            for j, eval_name in enumerate(arch_names):
-                if eval_name in results['arch_names']:
-                    idx = results['arch_names'].index(eval_name)
+    for i, ref_key in enumerate(arch_keys):
+        if ref_key in all_results and 'error' not in all_results[ref_key]:
+            results = all_results[ref_key]
+            for j, eval_key in enumerate(arch_keys):
+                if eval_key in results['arch_names']:
+                    idx = results['arch_names'].index(eval_key)
                     accuracy_matrix[i, j] = results['accuracies'][idx]
                     hit_rate_matrix[i, j] = results['hit_rates'][idx]
     
@@ -194,27 +195,29 @@ def plot_cross_architecture_heatmap(all_results, save_name="cross_architecture_h
     
     # Accuracy heatmap
     sns.heatmap(accuracy_matrix, 
-                xticklabels=arch_names, 
-                yticklabels=arch_names,
+                xticklabels=arch_display_names, 
+                yticklabels=arch_display_names,
                 annot=True, 
                 fmt='.3f', 
                 cmap='viridis',
                 vmin=0, vmax=1,
+                linewidths=0.5,
                 ax=ax1)
-    ax1.set_title('Position Accuracy\n(Reference → Evaluation)')
+    ax1.set_title('Decoding Accuracy')
     ax1.set_xlabel('Evaluation Architecture')
     ax1.set_ylabel('Reference Architecture')
     
     # Hit rate heatmap
     sns.heatmap(hit_rate_matrix, 
-                xticklabels=arch_names, 
-                yticklabels=arch_names,
+                xticklabels=arch_display_names, 
+                yticklabels=arch_display_names,
                 annot=True, 
                 fmt='.3f', 
                 cmap='plasma',
                 vmin=0, vmax=1,
+                linewidths=0.5,
                 ax=ax2)
-    ax2.set_title('Hit Rate\n(Reference → Evaluation)')
+    ax2.set_title('Hit Rate')
     ax2.set_xlabel('Evaluation Architecture')
     ax2.set_ylabel('Reference Architecture')
     
@@ -226,13 +229,14 @@ def plot_cross_architecture_heatmap(all_results, save_name="cross_architecture_h
     # Accuracy heatmap only
     plt.figure(figsize=(8, 6))
     sns.heatmap(accuracy_matrix, 
-                xticklabels=arch_names, 
-                yticklabels=arch_names,
+                xticklabels=arch_display_names, 
+                yticklabels=arch_display_names,
                 annot=True, 
                 fmt='.3f', 
                 cmap='viridis',
-                vmin=0, vmax=1)
-    plt.title('Position Accuracy\n(Reference → Evaluation)')
+                vmin=0, vmax=1,
+                linewidths=0.5)
+    plt.title('Decoding Accuracy')
     plt.xlabel('Evaluation Architecture')
     plt.ylabel('Reference Architecture')
     plt.tight_layout()
@@ -243,13 +247,14 @@ def plot_cross_architecture_heatmap(all_results, save_name="cross_architecture_h
     # Hit rate heatmap only
     plt.figure(figsize=(8, 6))
     sns.heatmap(hit_rate_matrix, 
-                xticklabels=arch_names, 
-                yticklabels=arch_names,
+                xticklabels=arch_display_names, 
+                yticklabels=arch_display_names,
                 annot=True, 
                 fmt='.3f', 
                 cmap='plasma',
-                vmin=0, vmax=1)
-    plt.title('Hit Rate\n(Reference → Evaluation)')
+                vmin=0, vmax=1,
+                linewidths=0.5)
+    plt.title('Hit Rate')
     plt.xlabel('Evaluation Architecture')
     plt.ylabel('Reference Architecture')
     plt.tight_layout()
