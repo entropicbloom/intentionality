@@ -110,8 +110,8 @@ class DatasetClassificationDataset(Dataset):
         
         # Return the full cosine similarity matrix (no upper triangular extraction)
         # This matches the behavior of last_layer.py with preprocessing='multiply_transpose'
-        # Flatten the matrix to a 1D vector for the transformer input
-        cosine_similarities = sim_matrix.flatten()  # Shape: [100]
+        # Keep the 2D matrix structure for self-attention decoder
+        cosine_similarities = sim_matrix  # Shape: [10, 10]
         
         return cosine_similarities, torch.tensor(dataset_label, dtype=torch.long)
 

@@ -24,12 +24,12 @@ def setup_and_train_dataset_classification(seed, train_samples, valid_samples, p
 
     # Initialize model using decoder_dict from models.py
     # For dataset classification, we use cosine similarities of output neurons
-    # Full 10x10 similarity matrix gives us 100 features (following multiply_transpose preprocessing)
+    # 10x10 similarity matrix preserves neuron-by-neuron structure for self-attention
     pytorch_model = decoder_dict[config['decoder_class']](
-        dim_input=100,  # 100 cosine similarity features (full 10x10 matrix)
+        dim_input=10,   # 10 similarity features per neuron (10x10 matrix structure)
         num_outputs=1,
-        dim_output=2,  # Binary classification: MNIST vs Fashion-MNIST
-        num_inds=16,
+        dim_output=2,   # Binary classification: MNIST vs Fashion-MNIST
+        num_inds=10,    # 10 neurons (output layer size)
         dim_hidden=64,
         num_heads=4,
         ln=False
@@ -48,7 +48,7 @@ def setup_and_train_dataset_classification(seed, train_samples, valid_samples, p
     # Training configuration
     callbacks = [ModelCheckpoint(save_top_k=1, mode="max", monitor="valid_acc")]
     trainer = pl.Trainer(
-        max_epochs=200,
+        max_epochs=100,
         callbacks=callbacks,
         accelerator="auto",
         devices="auto",
