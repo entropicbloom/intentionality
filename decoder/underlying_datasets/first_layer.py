@@ -246,3 +246,108 @@ class FirstLayerDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         return DataLoader(self.val_set, batch_size=self.batch_size, shuffle=False,
                           num_workers=self.num_workers, pin_memory=True)
+
+
+class MixedDatasetFirstLayerDataModule(pl.LightningDataModule):
+    """
+    PyTorch Lightning DataModule that uses different datasets for training and validation.
+    This allows training on models trained on one dataset (e.g., MNIST) and validating 
+    on models trained on another dataset (e.g., Fashion-MNIST).
+    """
+    def __init__(
+        self, 
+        train_dataset_path: str, 
+        valid_dataset_path: str,
+        positional_encoding_type: str,
+        batch_size: int = 64, 
+        num_workers: int = 4,
+        *,
+        subgraph_type: Optional[str] = None,
+        subgraph_param: Optional[int] = None,
+        use_target_similarity_only: bool = False,
+        train_samples: int = 800, 
+        valid_samples: int = 200
+    ) -> None:
+        """
+        Initialize the mixed dataset data module for first layer weights.
+        
+        Args:
+            train_dataset_path (str): Path to training dataset (e.g., MNIST models)
+            valid_dataset_path (str): Path to validation dataset (e.g., Fashion-MNIST models)
+            positional_encoding_type (str): Type of positional encoding to use
+            batch_size (int): Batch size for DataLoaders
+            num_workers (int): Number of workers for DataLoaders
+            subgraph_type (str, optional): Type of subgraph to use
+            subgraph_param (int, optional): Parameter for subgraph
+            use_target_similarity_only (bool): Whether to use only target similarity vector
+            train_samples (int): Number of training samples to use
+            valid_samples (int): Number of validation samples to use
+        """
+        super().__init__()
+        self.train_dataset_path = train_dataset_path
+        self.valid_dataset_path = valid_dataset_path
+        self.positional_encoding_type = positional_encoding_type
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.subgraph_type = subgraph_type
+        self.subgraph_param = subgraph_param
+        self.use_target_similarity_only = use_target_similarity_only
+        self.train_samples = train_samples
+        self.valid_samples = valid_samples
+
+    def setup(self, stage: Optional[str] = None):
+        """
+        Set up separate datasets for training and validation with different underlying datasets.
+        """
+        # Create training dataset from one underlying dataset (e.g., MNIST)
+        train_dataset = FirstLayerDataset(
+            self.train_dataset_path,
+            positional_encoding_type=self.positional_encoding_type,
+            subgraph_type=self.subgraph_type,
+            subgraph_param=self.subgraph_param,
+            use_target_similarity_only=self.use_target_similarity_only,
+        )
+        
+        # Create validation dataset from different underlying dataset (e.g., Fashion-MNIST)
+        valid_dataset = FirstLayerDataset(
+            self.valid_dataset_path,
+            positional_encoding_type=self.positional_encoding_type,
+            subgraph_type=self.subgraph_type,
+            subgraph_param=self.subgraph_param,
+            use_target_similarity_only=self.use_target_similarity_only,
+        )
+        
+        # Limit to specified number of samples
+        # Since we're using different datasets, use from beginning of each
+        train_indices = list(range(min(self.train_samples, len(train_dataset))))
+        valid_indices = list(range(min(self.valid_samples, len(valid_dataset))))
+        
+        # Debug prints to diagnose validation batch issue
+        print(f"Train dataset length: {len(train_dataset)}")
+        print(f"Train samples requested: {self.train_samples}")
+        print(f"Actual train indices: {len(train_indices)}")
+        print(f"Valid dataset length: {len(valid_dataset)}")
+        print(f"Valid samples requested: {self.valid_samples}")
+        print(f"Actual valid indices: {len(valid_indices)}")
+        
+        self.train_set = torch.utils.data.Subset(train_dataset, train_indices)
+        self.val_set = torch.utils.data.Subset(valid_dataset, valid_indices)
+
+    def train_dataloader(self):
+        return DataLoader(
+            self.train_set, 
+            batch_size=self.batch_size, 
+            shuffle=True,
+            num_workers=self.num_workers, 
+            pin_memory=True, 
+            drop_last=True
+        )
+
+    def val_dataloader(self):
+        return DataLoader(
+            self.val_set, 
+            batch_size=self.batch_size, 
+            shuffle=False,
+            num_workers=self.num_workers, 
+            pin_memory=True
+        )

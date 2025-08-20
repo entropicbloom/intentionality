@@ -6,3 +6,4 @@ underlying/saved_models/
 decoder/logs/
 decoder/lightning_logs/
 decoder/wandb/
+decoder/decoder_models/

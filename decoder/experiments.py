@@ -1,7 +1,8 @@
 # Import base config and experiment setup functions
 from decoder.config import config as base_config
 from decoder.setup.class_id import setup_and_train as setup_and_train_class_id, setup_and_train_mixed_hidden_dims
-from decoder.setup.input_pixel import setup_and_train as setup_and_train_input_pixel
+from decoder.setup.input_pixel import setup_and_train as setup_and_train_input_pixel, setup_and_train_mixed_datasets
+from decoder.setup.dataset_classification import setup_and_train_dataset_classification
 
 def run_ablation_experiments_classid(
     min_neurons=None, max_neurons=None, num_seeds=5, experiment_config=None,
@@ -260,4 +261,103 @@ def run_random_k_subgraph_inputpixels(num_seeds=1, k_values=None, project_name="
                     "subgraph_param": k,
                     "untrained": False,
                 },
+            )
+
+def run_mixed_datasets_inputpixels(
+    num_seeds=5, 
+    project_name="inputpixels-mixed-datasets",
+    train_dataset_str='mnist',
+    valid_dataset_str='fashionmnist',
+    train_samples=800 * 784,  # 800 models × 784 pixels per model
+    valid_samples=200 * 784,  # 200 models × 784 pixels per model
+    positional_encoding_type='dist_center'
+):
+    """
+    Run experiments with input pixel decoding where the decoder is trained on models 
+    from one dataset and validated on models from another dataset.
+    
+    Args:
+        num_seeds (int, optional): Number of random seeds to use. Defaults to 5.
+        project_name (str, optional): W&B project name.
+        train_dataset_str (str, optional): Dataset string for training models. Defaults to 'mnist'.
+        valid_dataset_str (str, optional): Dataset string for validation models. Defaults to 'fashionmnist'.
+        train_samples (int, optional): Number of training samples. Defaults to 800 * 784.
+        valid_samples (int, optional): Number of validation samples. Defaults to 200 * 784.
+        positional_encoding_type (str, optional): Type of positional encoding. Defaults to 'dist_center'.
+    """
+    # Model types to test
+    model_types = ['fully_connected_dropout']
+    
+    for model_str in model_types:
+        print(f"\nRunning mixed dataset experiments for model: {model_str}")
+        print(f"  Train dataset: {train_dataset_str}")
+        print(f"  Valid dataset: {valid_dataset_str}")
+        
+        for seed in range(num_seeds):
+            print(f"  Seed: {seed}")
+            
+            # Create configs for training and validation datasets
+            train_config = base_config.copy()
+            train_config["model_class_str"] = model_str
+            train_config["dataset_class_str"] = train_dataset_str
+            train_config["hidden_dim"] = [50, 50]
+            train_config["varying_dim"] = False
+            train_config["untrained"] = False
+            train_config["decoder_class"] = 'TransformerDecoder'
+            
+            valid_config = base_config.copy()
+            valid_config["model_class_str"] = model_str
+            valid_config["dataset_class_str"] = valid_dataset_str
+            valid_config["hidden_dim"] = [50, 50]
+            valid_config["varying_dim"] = False
+            valid_config["untrained"] = False
+            valid_config["decoder_class"] = 'TransformerDecoder'
+            
+            setup_and_train_mixed_datasets(
+                seed=seed,
+                train_config=train_config,
+                valid_config=valid_config,
+                positional_encoding_type=positional_encoding_type,
+                label_dim=1,  # dist_center is 1-dimensional
+                train_samples=train_samples,
+                valid_samples=valid_samples,
+                project_name=project_name
             ) 
+
+def run_dataset_classification_experiments(
+    num_seeds=5,
+    project_name="dataset-classification",
+    model_class_str='fully_connected_dropout',
+    train_samples=800,  # 400 MNIST + 400 Fashion-MNIST models
+    valid_samples=200   # 100 MNIST + 100 Fashion-MNIST models
+):
+    """
+    Run experiments to classify whether a network was trained on MNIST or Fashion-MNIST
+    based on cosine similarities of output neurons using set transformer.
+    
+    Args:
+        num_seeds (int, optional): Number of random seeds to use. Defaults to 5.
+        project_name (str, optional): W&B project name.
+        train_samples (int, optional): Total number of training samples. Defaults to 800.
+        valid_samples (int, optional): Total number of validation samples. Defaults to 200.
+    """
+    # Base config for dataset classification experiments
+    current_config = base_config.copy()
+    current_config['model_class_str'] = model_class_str
+    current_config['decoder_class'] = 'TransformerDecoder'
+    current_config['hidden_dim'] = [50, 50]
+    current_config['varying_dim'] = False
+    current_config['untrained'] = False
+    
+    for seed in range(num_seeds):
+        print(f"Running dataset classification experiment - Seed: {seed}")
+        print(f"  Train samples: {train_samples} ({train_samples//2} per dataset)")
+        print(f"  Valid samples: {valid_samples} ({valid_samples//2} per dataset)")
+        
+        setup_and_train_dataset_classification(
+            seed=seed,
+            train_samples=train_samples,
+            valid_samples=valid_samples,
+            project_name=project_name,
+            config=current_config
+        )
