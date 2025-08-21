@@ -15,7 +15,7 @@ from config import (
     EVAL_MODEL_TYPE, EVAL_DATASET_TYPE, EVAL_HIDDEN_DIM, EVAL_UNTRAINED
 )
 from data_loader import load_last_layer, gram, frob
-from permutation import permutation_iterator
+from permutation import permutation_iterator, get_permutation_count
 import math
 
 
@@ -23,17 +23,15 @@ def run_neuron_ablation_experiment(
     neuron_counts=None,
     test_seeds=range(10, 15),
     reference_seeds=range(0, 5),
-    n_random_perms=3000,
     save_results=True
 ):
     """
-    Run gram matrix decoder ablation study with different neuron counts.
+    Run gram matrix decoder ablation study with different neuron counts using ALL permutations.
     
     Args:
         neuron_counts (list): List of neuron counts to test (e.g., [2, 3, 4, 5, 6, 7, 8, 9, 10])
         test_seeds (range): Seeds to use for testing
         reference_seeds (range): Seeds to use for building reference geometry
-        n_random_perms (int): Number of random permutations to test
         save_results (bool): Whether to save results to CSV
     
     Returns:
@@ -48,7 +46,7 @@ def run_neuron_ablation_experiment(
     print(f"Testing neuron counts: {neuron_counts}")
     print(f"Test seeds: {list(test_seeds)}")
     print(f"Reference seeds: {list(reference_seeds)}")
-    print(f"Random permutations per test: {n_random_perms}")
+    print("Using ALL permutations for each neuron count")
     print()
     
     results = []
@@ -70,9 +68,11 @@ def run_neuron_ablation_experiment(
         G_ref = np.mean(ref_grams, axis=0)
         print(f"  → Reference geometry built with {neuron_count} neurons")
         
-        # Calculate random guessing baseline
+        # Calculate random guessing baseline and show permutation count
         random_baseline = 1.0 / neuron_count
+        total_perms = get_permutation_count(neuron_count)
         print(f"  → Random guessing baseline: {random_baseline:.4f}")
+        print(f"  → Testing all {total_perms:,} permutations ({neuron_count}!)")
         
         # Evaluate each test seed
         seed_results = []
@@ -83,17 +83,14 @@ def run_neuron_ablation_experiment(
             
             d_true = frob(G_ref, G_test)
             
-            # Test random permutations
+            # Test all permutations
             better_count = 0
             total_tested = 0
             
-            rng = np.random.default_rng(RANDOM_SEED + seed)
-            
-            for _ in range(n_random_perms):
-                # Generate random permutation
-                perm = rng.permutation(neuron_count)
+            for perm in permutation_iterator(neuron_count):
+                perm_array = np.array(perm, dtype=int)
                 # Permute weight matrix rows (original correct approach)
-                W_perm = W_test_subset[perm]
+                W_perm = W_test_subset[perm_array]
                 G_perm = gram(W_perm)
                 d_perm = frob(G_ref, G_perm)
                 
