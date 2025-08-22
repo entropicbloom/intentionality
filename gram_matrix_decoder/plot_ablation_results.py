@@ -26,10 +26,10 @@ def plot_gram_ablation_results(csv_path=None):
     # Create figure with subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
     
-    # Colors
-    accuracy_color = "#8e44ad"  # Purple
-    baseline_color = "#2ecc71"  # Green  
-    relative_color = "#e74c3c"  # Red
+    # Colors - Blue-green palette with purple accent
+    accuracy_color = "#2980b9"  # Blue
+    baseline_color = "#16a085"  # Teal  
+    relative_color = "#8e44ad"  # Purple
     
     # Top panel: Validation accuracy vs random baseline
     neuron_counts = summary['neuron_count']
@@ -74,13 +74,6 @@ def plot_gram_ablation_results(csv_path=None):
     ax2.set_xlim(1.5, 10.5)
     ax2.set_ylim(0, 12)
     
-    # Add key findings as text
-    ax2.text(0.02, 0.95, 
-             f'2-neuron: {rel_means.iloc[0]:.1f}x (expected ~1.0x)\n' + 
-             f'10-neuron: {rel_means.iloc[-1]:.1f}x\n' +
-             f'Performance gain: {rel_means.iloc[-1]/rel_means.iloc[0]:.1f}x',
-             transform=ax2.transAxes, fontsize=11,
-             verticalalignment='top', bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray", alpha=0.8))
     
     plt.tight_layout()
     
@@ -113,16 +106,16 @@ def compare_with_original_results():
     # Plot gram matrix results
     ax.plot(gram_summary['neuron_count'], gram_summary['relative_performance'],
            marker='o', linewidth=2.5, markersize=8, 
-           color="#3498db", label='Gram Matrix Decoder')
+           color="#2980b9", label='Gram Matrix Decoder')
     
     # Plot original self-attention results (limited data)
     ax.scatter([2, 10], [1.0, 7.36], 
-              marker='s', s=100, color="#e74c3c", 
+              marker='s', s=100, color="#16a085", 
               label='Self-Attention Decoder (original)', zorder=5)
     
     # Connect the self-attention points with a dashed line
     ax.plot([2, 10], [1.0, 7.36], 
-           linestyle='--', color="#e74c3c", alpha=0.5, linewidth=2)
+           linestyle='--', color="#16a085", alpha=0.5, linewidth=2)
     
     ax.axhline(y=1.0, color='gray', linestyle='--', alpha=0.7, linewidth=1)
     ax.text(8.5, 1.2, '1.0x (random)', fontsize=10, color='gray')
