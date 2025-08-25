@@ -75,7 +75,7 @@ plt.axhline(y=0, color='black', linestyle='-', alpha=0.3, linewidth=0.8)
 
 # Adjust layout and save (match gram matrix style)
 plt.tight_layout()
-plt.savefig('input_neuron_distance_r2_comparison.png', dpi=300, bbox_inches='tight')
+plt.savefig('plots/input_neuron_distance_r2_comparison.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 # Print summary table (match gram matrix style)

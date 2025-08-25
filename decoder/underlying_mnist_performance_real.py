@@ -73,7 +73,7 @@ def main():
 
     # Adjust layout and save (match gram matrix style)
     plt.tight_layout()
-    plt.savefig('underlying_mnist_performance_comparison_real.png', dpi=300, bbox_inches='tight')
+    plt.savefig('plots/underlying_mnist_performance_comparison_real.png', dpi=300, bbox_inches='tight')
     plt.show()
 
     # Print summary table (match gram matrix style)
