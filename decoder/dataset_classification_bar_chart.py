@@ -28,7 +28,7 @@ def main():
     stds = [np.std(results[model]) for model in model_names]
     
     # Create the plot - thinner and more elegant
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(6, 4))
     
     # Use the same colors as previous gram matrix plots
     colors = ["#2980b9", "#16a085", "#8e44ad"]  # Blue, Teal, Purple
@@ -68,6 +68,9 @@ def main():
     
     # Add grid for better readability
     plt.grid(axis='y', alpha=0.3, linestyle='--')
+    
+    # Add horizontal line at 0.5 for chance accuracy
+    plt.axhline(y=0.5, color='gray', linestyle='--', alpha=0.6, linewidth=1.5, label='Chance (0.5)')
     
     # Adjust layout
     plt.tight_layout()
