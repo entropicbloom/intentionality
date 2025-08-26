@@ -69,6 +69,9 @@ plt.title('Class ID Decoding Performance', fontsize=14, pad=20)
 plt.ylim(0, 1.0)
 plt.grid(True, alpha=0.3)
 
+# Add horizontal line at 0.1 for chance accuracy
+plt.axhline(y=0.1, color='gray', linestyle='--', alpha=0.6, linewidth=1.5, label='Chance (0.1)')
+
 # Add value labels on bars
 for bar, mean_val, upper_err in zip(bars, means, upper_errors):
     plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + upper_err + 0.02,
@@ -81,12 +84,12 @@ plt.xticks(x_positions, bar_labels, fontsize=10)
 
 # Second level: group labels
 group_centers = [(x_positions[0] + x_positions[1])/2, (x_positions[2] + x_positions[3])/2]
-group_labels = ['Fully Connected', 'Fully Connected\nDropout']
+group_labels = ['No Dropout', 'Dropout']
 
 # Add group labels below the individual labels
 ax = plt.gca()
 for center, label in zip(group_centers, group_labels):
-    plt.text(center, -0.08, label, ha='center', va='top', fontweight='bold', 
+    plt.text(center, -0.12, label, ha='center', va='top', fontweight='bold', 
              fontsize=12)
 
 # Add separating line between groups
@@ -95,7 +98,7 @@ plt.axvline(x=line_x, color='gray', linestyle='--', alpha=0.5, linewidth=1)
 
 # Adjust layout and save
 plt.tight_layout()
-plt.savefig('output_class_id_accuracy_4_conditions.png', dpi=300, bbox_inches='tight')
+plt.savefig('tgt_sim_only_output_class_id_accuracy.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 # Print summary table

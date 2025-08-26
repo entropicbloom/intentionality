@@ -90,7 +90,7 @@ group_labels = ['Dropout', 'No Dropout']
 # Add group labels below the individual labels (using data coordinates for better alignment)
 ax = plt.gca()
 for center, label in zip(group_centers, group_labels):
-    plt.text(center, -0.08, label, ha='center', va='top', fontweight='bold', 
+    plt.text(center, -0.12, label, ha='center', va='top', fontweight='bold', 
              fontsize=12)
 
 # Add separating line between groups
@@ -99,7 +99,7 @@ plt.axvline(x=line_x, color='gray', linestyle='--', alpha=0.5, linewidth=1)
 
 # Adjust layout and save (match gram matrix style)
 plt.tight_layout()
-plt.savefig('input_neuron_distance_r2_4_conditions.png', dpi=300, bbox_inches='tight')
+plt.savefig('tgt_sim_only_input_neuron_distance.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 # Print summary table (match gram matrix style)
