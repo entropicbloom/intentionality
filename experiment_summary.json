@@ -1,0 +1,423 @@
+{
+  "input-pixels": {
+    "no-dropout-y": {
+      "rows": 76,
+      "columns": [
+        "Step",
+        "model_class_str: fully_connected - valid_mse",
+        "model_class_str: fully_connected - valid_mse__MIN",
+        "model_class_str: fully_connected - valid_mse__MAX"
+      ],
+      "numeric_stats": {
+        "Step": {
+          "mean": 2009.0,
+          "std": 1152.401839637546,
+          "min": 50.0,
+          "max": 3968.0
+        },
+        "model_class_str: fully_connected - valid_mse": {
+          "mean": 0.08884133521075312,
+          "std": 0.000493292798479123,
+          "min": 0.08837011456489563,
+          "max": 0.09189105406403542
+        },
+        "model_class_str: fully_connected - valid_mse__MIN": {
+          "mean": 0.0886087417602539,
+          "std": 0.0004200253633873689,
+          "min": 0.08820408582687378,
+          "max": 0.09155531972646713
+        },
+        "model_class_str: fully_connected - valid_mse__MAX": {
+          "mean": 0.08907392866125233,
+          "std": 0.0006481410000997869,
+          "min": 0.08843258768320084,
+          "max": 0.0922267884016037
+        }
+      }
+    },
+    "dropout-tgt-sim-only": {
+      "rows": 76,
+      "columns": [
+        "Step",
+        "model_class_str: fully_connected_dropout - valid_mse",
+        "model_class_str: fully_connected_dropout - valid_mse__MIN",
+        "model_class_str: fully_connected_dropout - valid_mse__MAX"
+      ],
+      "numeric_stats": {
+        "Step": {
+          "mean": 2009.0,
+          "std": 1152.401839637546,
+          "min": 50.0,
+          "max": 3968.0
+        },
+        "model_class_str: fully_connected_dropout - valid_mse": {
+          "mean": 0.031206165256566908,
+          "std": 0.0013939782488217427,
+          "min": 0.029915879480540752,
+          "max": 0.037406016141176224
+        },
+        "model_class_str: fully_connected_dropout - valid_mse__MIN": {
+          "mean": 0.03081004537249866,
+          "std": 0.001319480377126905,
+          "min": 0.02948877587914467,
+          "max": 0.037045918405056
+        },
+        "model_class_str: fully_connected_dropout - valid_mse__MAX": {
+          "mean": 0.03160228514063515,
+          "std": 0.0015035430286576613,
+          "min": 0.029936587437987328,
+          "max": 0.03794606029987335
+        }
+      }
+    },
+    "no-dropout-tgt-sim-only": {
+      "rows": 76,
+      "columns": [
+        "Step",
+        "model_class_str: fully_connected - valid_mse",
+        "model_class_str: fully_connected - valid_mse__MIN",
+        "model_class_str: fully_connected - valid_mse__MAX"
+      ],
+      "numeric_stats": {
+        "Step": {
+          "mean": 2009.0,
+          "std": 1152.401839637546,
+          "min": 50.0,
+          "max": 3968.0
+        },
+        "model_class_str: fully_connected - valid_mse": {
+          "mean": 0.013439603296941832,
+          "std": 0.00020950323975937,
+          "min": 0.013226436916738749,
+          "max": 0.014578371308743954
+        },
+        "model_class_str: fully_connected - valid_mse__MIN": {
+          "mean": 0.013204988680387797,
+          "std": 0.00019691285735884035,
+          "min": 0.012921122834086418,
+          "max": 0.013983243145048618
+        },
+        "model_class_str: fully_connected - valid_mse__MAX": {
+          "mean": 0.013674217913495866,
+          "std": 0.0002808774834067926,
+          "min": 0.013333391398191452,
+          "max": 0.015173499472439289
+        }
+      }
+    },
+    "dropout-y": {
+      "rows": 76,
+      "columns": [
+        "Step",
+        "model_class_str: fully_connected_dropout - valid_mse",
+        "model_class_str: fully_connected_dropout - valid_mse__MIN",
+        "model_class_str: fully_connected_dropout - valid_mse__MAX"
+      ],
+      "numeric_stats": {
+        "Step": {
+          "mean": 2009.0,
+          "std": 1152.401839637546,
+          "min": 50.0,
+          "max": 3968.0
+        },
+        "model_class_str: fully_connected_dropout - valid_mse": {
+          "mean": 0.08873786713535849,
+          "std": 0.0005015749598545307,
+          "min": 0.08803406730294228,
+          "max": 0.09022444114089012
+        },
+        "model_class_str: fully_connected_dropout - valid_mse__MIN": {
+          "mean": 0.08851294003819164,
+          "std": 0.0004870347666642624,
+          "min": 0.08776392787694931,
+          "max": 0.08986417949199677
+        },
+        "model_class_str: fully_connected_dropout - valid_mse__MAX": {
+          "mean": 0.08896279423252533,
+          "std": 0.0005523706290707341,
+          "min": 0.08819949626922607,
+          "max": 0.0908622220158577
+        }
+      }
+    },
+    "subgraph_varying_k": {
+      "rows": 8,
+      "columns": [
+        "Name",
+        "subgraph_param",
+        "_wandb",
+        "valid_mse"
+      ],
+      "numeric_stats": {
+        "subgraph_param": {
+          "mean": 127.5,
+          "std": 165.63136780211653,
+          "min": 4.0,
+          "max": 512.0
+        },
+        "valid_mse": {
+          "mean": 0.016156440076883882,
+          "std": 0.008666034389655334,
+          "min": 0.007195968646556139,
+          "max": 0.033500585705041885
+        }
+      }
+    },
+    "untrained-y": {
+      "rows": 76,
+      "columns": [
+        "Step",
+        "model_class_str: fully_connected - valid_mse",
+        "model_class_str: fully_connected - valid_mse__MIN",
+        "model_class_str: fully_connected - valid_mse__MAX"
+      ],
+      "numeric_stats": {
+        "Step": {
+          "mean": 2009.0,
+          "std": 1152.401839637546,
+          "min": 50.0,
+          "max": 3968.0
+        },
+        "model_class_str: fully_connected - valid_mse": {
+          "mean": 0.08980020380725987,
+          "std": 0.00022407513615314107,
+          "min": 0.08954786136746407,
+          "max": 0.09107616916298866
+        },
+        "model_class_str: fully_connected - valid_mse__MIN": {
+          "mean": 0.08956698043958138,
+          "std": 0.0002095171258083847,
+          "min": 0.08927245438098907,
+          "max": 0.09024714678525925
+        },
+        "model_class_str: fully_connected - valid_mse__MAX": {
+          "mean": 0.09003342717493835,
+          "std": 0.0002863370703563451,
+          "min": 0.08976779133081436,
+          "max": 0.09190519154071808
+        }
+      }
+    },
+    "dropout": {
+      "rows": 76,
+      "columns": [
+        "Step",
+        "model_class_str: fully_connected_dropout - valid_mse",
+        "model_class_str: fully_connected_dropout - valid_mse__MIN",
+        "model_class_str: fully_connected_dropout - valid_mse__MAX"
+      ],
+      "numeric_stats": {
+        "Step": {
+          "mean": 2009.0,
+          "std": 1152.401839637546,
+          "min": 50.0,
+          "max": 3968.0
+        },
+        "model_class_str: fully_connected_dropout - valid_mse": {
+          "mean": 0.021894599292672387,
+          "std": 0.008156672446994744,
+          "min": 0.012909123208373785,
+          "max": 0.03812721371650696
+        },
+        "model_class_str: fully_connected_dropout - valid_mse__MIN": {
+          "mean": 0.021454662832088377,
+          "std": 0.007993811650014879,
+          "min": 0.012582178227603436,
+          "max": 0.03756970912218094
+        },
+        "model_class_str: fully_connected_dropout - valid_mse__MAX": {
+          "mean": 0.022334535753256397,
+          "std": 0.008331063481288313,
+          "min": 0.013118241913616657,
+          "max": 0.03868471831083298
+        }
+      }
+    },
+    "untrained": {
+      "rows": 76,
+      "columns": [
+        "Step",
+        "model_class_str: fully_connected - valid_mse",
+        "model_class_str: fully_connected - valid_mse__MIN",
+        "model_class_str: fully_connected - valid_mse__MAX"
+      ],
+      "numeric_stats": {
+        "Step": {
+          "mean": 2009.0,
+          "std": 1152.401839637546,
+          "min": 50.0,
+          "max": 3968.0
+        },
+        "model_class_str: fully_connected - valid_mse": {
+          "mean": 0.04393997210028924,
+          "std": 0.00012559287142171213,
+          "min": 0.043773092329502106,
+          "max": 0.044489536434412
+        },
+        "model_class_str: fully_connected - valid_mse__MIN": {
+          "mean": 0.043569546732071196,
+          "std": 0.00014644222734417077,
+          "min": 0.04336749389767647,
+          "max": 0.04411953687667847
+        },
+        "model_class_str: fully_connected - valid_mse__MAX": {
+          "mean": 0.04431039746850729,
+          "std": 0.0001846871712699508,
+          "min": 0.04411328211426735,
+          "max": 0.04533388093113899
+        }
+      }
+    },
+    "no-dropout": {
+      "rows": 76,
+      "columns": [
+        "Step",
+        "model_class_str: fully_connected - valid_mse",
+        "model_class_str: fully_connected - valid_mse__MIN",
+        "model_class_str: fully_connected - valid_mse__MAX"
+      ],
+      "numeric_stats": {
+        "Step": {
+          "mean": 2009.0,
+          "std": 1152.401839637546,
+          "min": 50.0,
+          "max": 3968.0
+        },
+        "model_class_str: fully_connected - valid_mse": {
+          "mean": 0.008775149205528004,
+          "std": 0.0022104423785956452,
+          "min": 0.006759661249816418,
+          "max": 0.013834238518029451
+        },
+        "model_class_str: fully_connected - valid_mse__MIN": {
+          "mean": 0.008553079599024434,
+          "std": 0.0022079163606700076,
+          "min": 0.006435309071093798,
+          "max": 0.013750670477747917
+        },
+        "model_class_str: fully_connected - valid_mse__MAX": {
+          "mean": 0.008997218812031573,
+          "std": 0.0022227361664973297,
+          "min": 0.006823220755904913,
+          "max": 0.014159951359033585
+        }
+      }
+    }
+  },
+  "dataset-classification": {
+    "dataset_classification": {
+      "rows": 10,
+      "columns": [
+        "Name",
+        "model_class_str",
+        "_wandb",
+        "valid_acc"
+      ],
+      "numeric_stats": {
+        "valid_acc": {
+          "mean": 0.9205000042915344,
+          "std": 0.07827675152186371,
+          "min": 0.8199999928474426,
+          "max": 1.0
+        }
+      }
+    }
+  },
+  "output-classes": {
+    "tgt-sim-only-experiment": {
+      "rows": 8,
+      "columns": [
+        "Name",
+        "use_target_similarity_only",
+        "model_class_str",
+        "_wandb",
+        "valid_acc"
+      ],
+      "numeric_stats": {
+        "valid_acc": {
+          "mean": 0.3870967701077461,
+          "std": 0.22145966272064205,
+          "min": 0.1854838728904724,
+          "max": 0.7540322542190552
+        }
+      }
+    },
+    "mnist_ablation_results": {
+      "rows": 45,
+      "columns": [
+        "Name",
+        "num_neurons",
+        "_wandb",
+        "valid_acc"
+      ],
+      "numeric_stats": {
+        "num_neurons": {
+          "mean": 6.0,
+          "std": 2.581988897471611,
+          "min": 2.0,
+          "max": 10.0
+        },
+        "valid_acc": {
+          "mean": 0.7114571889241537,
+          "std": 0.08273885672616403,
+          "min": 0.5,
+          "max": 0.8052083253860474
+        }
+      }
+    },
+    "cross_dim_evals": {
+      "rows": 35,
+      "columns": [
+        "Name",
+        "_wandb",
+        "valid_acc"
+      ],
+      "numeric_stats": {
+        "valid_acc": {
+          "mean": 0.6407258042267391,
+          "std": 0.1136806935866131,
+          "min": 0.43094757199287415,
+          "max": 0.789818525314331
+        }
+      }
+    },
+    "cross_dim_evals_extra_data": {
+      "rows": 10,
+      "columns": [
+        "Name",
+        "untrained",
+        "varying_dim",
+        "model_class_str",
+        "_wandb",
+        "valid_acc"
+      ],
+      "numeric_stats": {
+        "valid_acc": {
+          "mean": 0.7438003897666932,
+          "std": 0.0117690264319725,
+          "min": 0.7253023982048035,
+          "max": 0.7620967626571655
+        }
+      }
+    },
+    "classid-decoding-accuracy-final": {
+      "rows": 15,
+      "columns": [
+        "Name",
+        "varying_dim",
+        "untrained",
+        "model_class_str",
+        "_wandb",
+        "valid_acc"
+      ],
+      "numeric_stats": {
+        "valid_acc": {
+          "mean": 0.3580645109216372,
+          "std": 0.27836728280288303,
+          "min": 0.08366935700178146,
+          "max": 0.7530242204666138
+        }
+      }
+    }
+  }
+}

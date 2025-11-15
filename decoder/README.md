@@ -69,6 +69,48 @@ from decoder.config import validate_config
 validate_config(my_config)  # Raises ValueError if invalid
 ```
 
+## Tools & Utilities
+
+### Experiment Results Analyzer 📊
+
+Analyze and compare experiment results easily:
+
+```bash
+# List all available experiments
+python decoder/analyze_results.py
+
+# Show statistics for a specific experiment
+python decoder/analyze_results.py --stats input-pixels
+
+# Compare two configurations
+python decoder/analyze_results.py --compare dropout no-dropout input-pixels
+
+# Export summary to JSON
+python decoder/analyze_results.py --export
+```
+
+**Features:**
+- Works with or without pandas (stdlib fallback)
+- Quick statistics for all numeric columns
+- Side-by-side configuration comparisons
+- JSON export for programmatic access
+- Beautiful terminal output with emojis
+
+### Setup Verification
+
+Verify your decoder installation:
+
+```bash
+python decoder/verify_setup.py
+```
+
+This checks:
+- All imports work correctly
+- Directory structure is valid
+- Model registry is properly configured
+- Config validation works
+- Helpful error messages if something's wrong
+
 ## Recent Improvements
 
 - ✅ Fixed all relative imports to absolute
@@ -78,3 +120,5 @@ validate_config(my_config)  # Raises ValueError if invalid
 - ✅ Made layer indices dynamic based on architecture
 - ✅ Added safe config access throughout
 - ✅ Added validation and verification tools
+- ✅ Added experiment results analyzer
+- ✅ Enhanced error messages and debugging tools
