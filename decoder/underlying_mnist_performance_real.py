@@ -1,18 +1,10 @@
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
 from pathlib import Path
 
 def main():
-    # Add the underlying directory to the path to import analysis_utils
-    sys.path.insert(0, str(Path(__file__).parent / "../underlying"))
-
-    # Change to underlying directory so the relative path works
-    import os
-    os.chdir(Path(__file__).parent / "../underlying")
-
-    import analysis_utils
+    from underlying import analysis_utils
 
     # Set parameters
     hidden_dim = [50, 50]

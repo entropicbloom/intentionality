@@ -6,13 +6,6 @@ This script runs experiments where the decoder is trained on models from one dat
 (MNIST) and evaluated on models from another dataset (Fashion-MNIST).
 """
 
-import sys
-import os
-
-# Add parent directories to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
-
 from decoder.experiments import run_mixed_datasets_inputpixels
 
 if __name__ == "__main__":

@@ -5,9 +5,9 @@ from torch.utils.data import Dataset
 import pytorch_lightning as pl
 from torch.utils.data.dataset import random_split
 from torch.utils.data import DataLoader
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'underlying'))
-from utils import get_dir_path
+
+from underlying.utils import get_dir_path
+from decoder.config import get_underlying_path
 
 class DatasetClassificationDataset(Dataset):
     """
@@ -34,26 +34,30 @@ class DatasetClassificationDataset(Dataset):
         self.valid_samples = valid_samples
         
         # Get paths for both MNIST and Fashion-MNIST models
-        self.mnist_path = '../underlying/' + get_dir_path(
+        self.mnist_path = get_underlying_path(get_dir_path(
             model_class_str=config['model_class_str'],
             dataset_class_str='mnist',
-            num_epochs=0 if config['untrained'] else 2,
-            hidden_dim=config['hidden_dim'],
-            varying_dim=config['varying_dim'],
-            models_dir=config['models_dir']
-        )
-        
-        self.fashionmnist_path = '../underlying/' + get_dir_path(
+            num_epochs=0 if config.get('untrained', False) else 2,
+            hidden_dim=config.get('hidden_dim', [50, 50]),
+            varying_dim=config.get('varying_dim', False),
+            models_dir=config.get('models_dir', 'saved_models/')
+        ))
+
+        self.fashionmnist_path = get_underlying_path(get_dir_path(
             model_class_str=config['model_class_str'],
             dataset_class_str='fashionmnist',
-            num_epochs=0 if config['untrained'] else 2,
-            hidden_dim=config['hidden_dim'],
-            varying_dim=config['varying_dim'],
-            models_dir=config['models_dir']
-        )
-        
-        # Layer to extract (output layer)
-        self.layer = 'layers.2.weight'  # Assuming output layer is at index 2
+            num_epochs=0 if config.get('untrained', False) else 2,
+            hidden_dim=config.get('hidden_dim', [50, 50]),
+            varying_dim=config.get('varying_dim', False),
+            models_dir=config.get('models_dir', 'saved_models/')
+        ))
+
+        # Calculate layer index based on number of hidden layers
+        # hidden_dim=[50, 50] -> 2 hidden layers -> output at index 2
+        # hidden_dim=[100] -> 1 hidden layer -> output at index 1
+        hidden_dim = config.get('hidden_dim', [50, 50])
+        layer_idx = len(hidden_dim)
+        self.layer = f'layers.{layer_idx}.weight'
         
         # Set up train/valid split
         if split == 'train':

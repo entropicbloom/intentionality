@@ -1,6 +1,6 @@
 # from https://github.com/juho-lee/set_transformer
 
-from modules import *
+from decoder.modules import *
 
 class TransformerDecoder(nn.Module):
     def __init__(

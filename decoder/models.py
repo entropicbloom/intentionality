@@ -1,7 +1,7 @@
 # Model definitions and mapping for the decoder
 
-# Assuming FCDecoder and TransformerDecoder are available via the decoder package
-from decoder_models import FCDecoder, TransformerDecoder # Absolute import
+# Import decoder model classes
+from decoder.decoder_models import FCDecoder, TransformerDecoder
 
 # Model mapping dictionary
 decoder_dict = {
