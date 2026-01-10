@@ -24,55 +24,57 @@ def plot_gram_ablation_results(csv_path=None):
     summary.columns = ['neuron_count', 'acc_mean', 'acc_std', 'rel_mean', 'rel_std']
     
     # Create figure with subplots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
-    
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 11))
+
     # Colors - Blue-green palette with purple accent
     accuracy_color = "#2980b9"  # Blue
-    baseline_color = "#16a085"  # Teal  
+    baseline_color = "#16a085"  # Teal
     relative_color = "#8e44ad"  # Purple
-    
+
     # Top panel: Validation accuracy vs random baseline
     neuron_counts = summary['neuron_count']
     acc_means = summary['acc_mean']
     acc_stds = summary['acc_std']
-    
+
     # Calculate random baselines
     random_baselines = 1.0 / neuron_counts
-    
-    ax1.errorbar(neuron_counts, acc_means, yerr=acc_stds, 
-                marker='o', linewidth=2.5, markersize=8, capsize=5,
+
+    ax1.errorbar(neuron_counts, acc_means, yerr=acc_stds,
+                marker='o', linewidth=3, markersize=10, capsize=6,
                 color=accuracy_color, label='Validation accuracy')
-    
-    ax1.plot(neuron_counts, random_baselines, 
-             marker='s', linewidth=2.5, markersize=8,
+
+    ax1.plot(neuron_counts, random_baselines,
+             marker='s', linewidth=3, markersize=10,
              color=baseline_color, label='Random guessing baseline')
-    
-    ax1.set_xlabel('Number of output neurons', fontsize=12)
-    ax1.set_ylabel('Validation accuracy', fontsize=12)
-    ax1.set_title('Gram Matrix Decoder: Neuron Count Performance', fontsize=14, pad=20)
+
+    ax1.set_xlabel('Number of output neurons', fontsize=18)
+    ax1.set_ylabel('Validation accuracy', fontsize=18)
+    ax1.set_title('Gram Matrix Decoder: Neuron Count Performance', fontsize=20, pad=20)
     ax1.grid(True, alpha=0.3)
-    ax1.legend(fontsize=11)
+    ax1.legend(fontsize=14)
     ax1.set_xlim(1.5, 10.5)
     ax1.set_ylim(0, 1.1)
-    
-    # Bottom panel: Relative performance  
+    ax1.tick_params(axis='both', which='major', labelsize=14)
+
+    # Bottom panel: Relative performance
     rel_means = summary['rel_mean']
     rel_stds = summary['rel_std']
-    
+
     ax2.errorbar(neuron_counts, rel_means, yerr=rel_stds,
-                marker='o', linewidth=2.5, markersize=8, capsize=5,
+                marker='o', linewidth=3, markersize=10, capsize=6,
                 color=relative_color, label='Relative to random')
-    
+
     # Add horizontal line at 1.0x
-    ax2.axhline(y=1.0, color='gray', linestyle='--', alpha=0.7, linewidth=1)
-    ax2.text(9, 1.2, '1.0x (random)', fontsize=10, color='gray')
-    
-    ax2.set_xlabel('Number of output neurons', fontsize=12)
-    ax2.set_ylabel('Performance relative to random guessing', fontsize=12) 
+    ax2.axhline(y=1.0, color='gray', linestyle='--', alpha=0.7, linewidth=1.5)
+    ax2.text(9, 1.3, '1.0x (random)', fontsize=14, color='gray')
+
+    ax2.set_xlabel('Number of output neurons', fontsize=18)
+    ax2.set_ylabel('Performance relative to random guessing', fontsize=18)
     ax2.grid(True, alpha=0.3)
-    ax2.legend(fontsize=11)
+    ax2.legend(fontsize=14)
     ax2.set_xlim(1.5, 10.5)
     ax2.set_ylim(0, 12)
+    ax2.tick_params(axis='both', which='major', labelsize=14)
     
     
     plt.tight_layout()

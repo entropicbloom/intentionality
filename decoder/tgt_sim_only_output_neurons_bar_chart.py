@@ -47,7 +47,7 @@ upper_errors = [max_val - mean for mean, max_val in zip(means, maxs)]
 errors = [lower_errors, upper_errors]
 
 # Create figure and axis (match input neurons style)
-plt.figure(figsize=(8, 6))  # Tighter figure for compact layout
+plt.figure(figsize=(10, 7))  # Slightly larger for better readability
 
 # Create grouped bar positions with tighter spacing
 bar_width = 0.25  # Tighter bar width
@@ -59,15 +59,16 @@ x_positions = [0, bar_width + group_gap, 1 + middle_separation, 1 + middle_separ
 colors = ["#16a085", "#27ae60", "#2980b9", "#8e44ad"]  # Teal, Green for fully-connected; Blue, Purple for fully-connected-dropout
 
 # Create bar chart with error bars
-bars = plt.bar(x_positions, means, yerr=errors, 
+bars = plt.bar(x_positions, means, yerr=errors,
                color=colors, alpha=0.7, width=bar_width,
-               capsize=5, error_kw={'linewidth': 2})
+               capsize=6, error_kw={'linewidth': 2.5})
 
-# Customize the plot
-plt.ylabel('Validation Accuracy', fontsize=12)
-plt.title('Class ID Decoding Performance', fontsize=14, pad=20)
+# Customize the plot (paper-ready font sizes)
+plt.ylabel('Validation Accuracy', fontsize=18)
+plt.title('Class ID Decoding Performance', fontsize=20, pad=20)
 plt.ylim(0, 1.0)
 plt.grid(True, alpha=0.3)
+plt.yticks(fontsize=14)
 
 # Add horizontal line at 0.1 for chance accuracy
 plt.axhline(y=0.1, color='gray', linestyle='--', alpha=0.6, linewidth=1.5, label='Chance (0.1)')
@@ -75,12 +76,12 @@ plt.axhline(y=0.1, color='gray', linestyle='--', alpha=0.6, linewidth=1.5, label
 # Add value labels on bars
 for bar, mean_val, upper_err in zip(bars, means, upper_errors):
     plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + upper_err + 0.02,
-            f'{mean_val:.3f}', ha='center', va='bottom', fontweight='bold')
+            f'{mean_val:.3f}', ha='center', va='bottom', fontweight='bold', fontsize=14)
 
 # Create two-level x-axis labels
 # First level: individual bar labels
 bar_labels = ['Full', 'Target Sim\nOnly', 'Full', 'Target Sim\nOnly']
-plt.xticks(x_positions, bar_labels, fontsize=10)
+plt.xticks(x_positions, bar_labels, fontsize=14)
 
 # Second level: group labels
 group_centers = [(x_positions[0] + x_positions[1])/2, (x_positions[2] + x_positions[3])/2]
@@ -89,8 +90,8 @@ group_labels = ['No Dropout', 'Dropout']
 # Add group labels below the individual labels
 ax = plt.gca()
 for center, label in zip(group_centers, group_labels):
-    plt.text(center, -0.12, label, ha='center', va='top', fontweight='bold', 
-             fontsize=12)
+    plt.text(center, -0.12, label, ha='center', va='top', fontweight='bold',
+             fontsize=16)
 
 # Add separating line between groups
 line_x = (x_positions[1] + x_positions[2]) / 2

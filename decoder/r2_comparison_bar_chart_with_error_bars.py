@@ -55,20 +55,22 @@ plt.figure(figsize=(10, 6))
 colors = ["#2980b9", "#16a085", "#8e44ad"]  # Blue, Teal, Purple (same as gram matrix)
 
 # Create bar chart with error bars (match gram matrix style)
-bars = plt.bar(model_names, means, yerr=errors, 
-               color=colors, alpha=0.7, 
-               capsize=5, error_kw={'linewidth': 2})
+bars = plt.bar(model_names, means, yerr=errors,
+               color=colors, alpha=0.7,
+               capsize=6, error_kw={'linewidth': 2.5})
 
-# Customize the plot (match gram matrix style exactly)
-plt.ylabel('R² Score', fontsize=12)
-plt.title('Input Neuron Distance to Center Decoding R² Score Comparison', fontsize=14, pad=20)
+# Customize the plot (paper-ready font sizes)
+plt.ylabel('R² Score', fontsize=18)
+plt.title('Input Neuron Distance to Center Decoding R² Score Comparison', fontsize=20, pad=20)
 plt.ylim(-0.1, 1.0)
 plt.grid(True, alpha=0.3)
+plt.xticks(fontsize=16)
+plt.yticks(fontsize=14)
 
 # Add value labels on bars (match gram matrix style)
 for bar, mean_val, upper_err in zip(bars, means, upper_errors):
     plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + upper_err + 0.02,
-            f'{mean_val:.3f}', ha='center', va='bottom', fontweight='bold')
+            f'{mean_val:.3f}', ha='center', va='bottom', fontweight='bold', fontsize=14)
 
 # Add horizontal line at y=0 for reference
 plt.axhline(y=0, color='black', linestyle='-', alpha=0.3, linewidth=0.8)

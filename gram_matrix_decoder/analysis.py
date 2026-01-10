@@ -22,62 +22,66 @@ def calculate_permutation_accuracy(best_permutations, C):
     return acc_mean, acc_std
 
 
-def plot_distance_distribution(distances, seed_idx=0):
+def plot_distance_distribution(distances, seed_idx=0, save_path=None):
     """Plot distance distribution for a given seed."""
     sorted_distances = np.sort(distances[seed_idx])
-    
-    fig, axs = plt.subplots(1, 2, figsize=(12, 4), gridspec_kw={'width_ratios': [2, 1]})
-    
+
+    fig, axs = plt.subplots(1, 2, figsize=(14, 5), gridspec_kw={'width_ratios': [2, 1]})
+
     main_color = "#26a69a"   # teal
     dot_color = "#0288d1"    # blue
     highlight_color = "#ef5350"  # red/pink for highlight
-    
+
     # Full plot (left)
     axs[0].plot(
         sorted_distances,
         color=main_color,
-        linewidth=2.2,
+        linewidth=2.5,
         alpha=0.92,
     )
-    axs[0].set_xlabel("Neuron permutations", fontsize=12, labelpad=8)
-    axs[0].set_ylabel("Distance to reference", fontsize=12, labelpad=8)
-    axs[0].set_title("All permutations", fontsize=14, pad=10)
+    axs[0].set_xlabel("Neuron permutations", fontsize=18, labelpad=10)
+    axs[0].set_ylabel("Distance to reference", fontsize=18, labelpad=10)
+    axs[0].set_title("All permutations", fontsize=20, pad=12)
     axs[0].grid(alpha=0.18, linestyle="--")
     axs[0].spines["top"].set_visible(False)
     axs[0].spines["right"].set_visible(False)
-    
+    axs[0].tick_params(axis="both", which="major", labelsize=14)
+
     # Zoomed plot (right)
-    zoomed_xlim = 10
-    axs[1].scatter(
-        np.arange(1, zoomed_xlim),      # All except index 0
-        sorted_distances[1:zoomed_xlim],
-        color=dot_color,
-        s=48,
-        edgecolor="#009688",
-        linewidth=1.3,
-        zorder=2,
-    )
+    zoomed_xlim = min(10, len(sorted_distances))
+    if zoomed_xlim > 1:
+        axs[1].scatter(
+            np.arange(1, zoomed_xlim),      # All except index 0
+            sorted_distances[1:zoomed_xlim],
+            color=dot_color,
+            s=80,
+            edgecolor="#009688",
+            linewidth=1.5,
+            zorder=2,
+        )
     # Highlight index 0
     axs[1].scatter(
         0,
         sorted_distances[0],
         color=highlight_color,
-        s=90,
+        s=120,
         edgecolor="black",
-        linewidth=1.5,
+        linewidth=2,
         zorder=3,
         label="Permutation 0"
     )
     axs[1].set_xlim(-1, zoomed_xlim)
     axs[1].set_ylim(sorted_distances[:zoomed_xlim].min() - 0.05, sorted_distances[:zoomed_xlim].max() + 0.05)
-    axs[1].set_xlabel("Permutation (zoomed)", fontsize=12, labelpad=8)
-    axs[1].set_title(f"Zoom: first {zoomed_xlim}", fontsize=14, pad=10)
+    axs[1].set_xlabel("Permutation (zoomed)", fontsize=18, labelpad=10)
+    axs[1].set_title(f"Zoom: first {zoomed_xlim}", fontsize=20, pad=12)
     axs[1].grid(alpha=0.18, linestyle="--")
     axs[1].spines["top"].set_visible(False)
     axs[1].spines["right"].set_visible(False)
-    axs[1].tick_params(axis="both", which="major", labelsize=11)
-    
+    axs[1].tick_params(axis="both", which="major", labelsize=14)
+
     plt.tight_layout(pad=1.5)
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.show()
-    
+
     return fig, axs

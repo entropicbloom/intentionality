@@ -4,13 +4,13 @@ from pathlib import Path
 
 # Reference model configuration
 REFERENCE_MODEL_TYPE = "fully_connected"
-REFERENCE_DATASET_TYPE = "fashionmnist"
+REFERENCE_DATASET_TYPE = "mnist"
 REFERENCE_HIDDEN_DIM = "[50,50]"
 REFERENCE_UNTRAINED = False
 
 # Evaluation model configuration
 EVAL_MODEL_TYPE = "fully_connected"
-EVAL_DATASET_TYPE = "fashionmnist"
+EVAL_DATASET_TYPE = "mnist"
 EVAL_HIDDEN_DIM = "[50,50]"
 EVAL_UNTRAINED = False
 
@@ -18,7 +18,7 @@ REFERENCE_SEEDS = range(0, 5)
 TEST_SEEDS = range(10, 20)
 N_RANDOM_PERMS = 3000
 ALL_PERMS = True
-SAVE_DISTANCES = False
+SAVE_DISTANCES = True
 
 BASEDIR = Path(__file__).parent.parent / "underlying" / "saved_models"
 REFERENCE_UNTRAINED_SUFFIX = "-untrained" if REFERENCE_UNTRAINED else ""

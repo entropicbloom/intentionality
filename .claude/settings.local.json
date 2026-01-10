@@ -1,3 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(python -m gram_matrix_decoder.plot_ablation_results:*)",
+      "Bash(python -m decoder.underlying_mnist_performance_real:*)",
+      "Bash(python:*)"
+    ]
+  },
   "enableAllProjectMcpServers": false
 }

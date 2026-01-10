@@ -56,20 +56,22 @@ def main():
     colors = ["#2980b9", "#16a085", "#8e44ad"]  # Blue, Teal, Purple (same as gram matrix)
 
     # Create bar chart with error bars (match gram matrix style)
-    bars = plt.bar(model_names, means, yerr=stds, 
-                   color=colors, alpha=0.7, 
-                   capsize=5, error_kw={'linewidth': 2})
+    bars = plt.bar(model_names, means, yerr=stds,
+                   color=colors, alpha=0.7,
+                   capsize=6, error_kw={'linewidth': 2.5})
 
-    # Customize the plot (match gram matrix style exactly)
-    plt.ylabel('Test Accuracy', fontsize=12)
-    plt.title('Underlying Model Performance on MNIST', fontsize=14, pad=20)
+    # Customize the plot (paper-ready font sizes)
+    plt.ylabel('Test Accuracy', fontsize=18)
+    plt.title('Underlying Model Performance on MNIST', fontsize=20, pad=20)
     plt.ylim(0, 1.0)
     plt.grid(True, alpha=0.3)
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=14)
 
     # Add value labels on bars (match gram matrix style)
     for bar, mean_val, std_val in zip(bars, means, stds):
         plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + std_val + 0.02,
-                f'{mean_val:.3f}', ha='center', va='bottom', fontweight='bold')
+                f'{mean_val:.3f}', ha='center', va='bottom', fontweight='bold', fontsize=14)
 
     # Adjust layout and save (match gram matrix style)
     plt.tight_layout()

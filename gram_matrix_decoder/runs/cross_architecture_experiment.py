@@ -191,72 +191,80 @@ def plot_cross_architecture_heatmap(all_results, save_name="cross_architecture_h
                     hit_rate_matrix[i, j] = results['hit_rates'][idx]
     
     # Create subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
-    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
+
     # Accuracy heatmap
-    sns.heatmap(accuracy_matrix, 
-                xticklabels=arch_display_names, 
+    sns.heatmap(accuracy_matrix,
+                xticklabels=arch_display_names,
                 yticklabels=arch_display_names,
-                annot=True, 
-                fmt='.3f', 
+                annot=True,
+                fmt='.3f',
                 cmap='viridis',
                 vmin=0, vmax=1,
                 linewidths=0.5,
+                annot_kws={'size': 16},
                 ax=ax1)
-    ax1.set_title('Decoding Accuracy')
-    ax1.set_xlabel('Evaluation Architecture')
-    ax1.set_ylabel('Reference Architecture')
-    
+    ax1.set_title('Decoding Accuracy', fontsize=20, pad=15)
+    ax1.set_xlabel('Evaluation Architecture', fontsize=18)
+    ax1.set_ylabel('Reference Architecture', fontsize=18)
+    ax1.tick_params(axis='both', which='major', labelsize=14)
+
     # Hit rate heatmap
-    sns.heatmap(hit_rate_matrix, 
-                xticklabels=arch_display_names, 
+    sns.heatmap(hit_rate_matrix,
+                xticklabels=arch_display_names,
                 yticklabels=arch_display_names,
-                annot=True, 
-                fmt='.3f', 
+                annot=True,
+                fmt='.3f',
                 cmap='plasma',
                 vmin=0, vmax=1,
                 linewidths=0.5,
+                annot_kws={'size': 16},
                 ax=ax2)
-    ax2.set_title('Hit Rate')
-    ax2.set_xlabel('Evaluation Architecture')
-    ax2.set_ylabel('Reference Architecture')
-    
+    ax2.set_title('Hit Rate', fontsize=20, pad=15)
+    ax2.set_xlabel('Evaluation Architecture', fontsize=18)
+    ax2.set_ylabel('Reference Architecture', fontsize=18)
+    ax2.tick_params(axis='both', which='major', labelsize=14)
+
     plt.tight_layout()
     plt.savefig(save_name, dpi=300, bbox_inches='tight')
     plt.show()
-    
+
     # Save individual heatmaps as separate files
     # Accuracy heatmap only
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(accuracy_matrix, 
-                xticklabels=arch_display_names, 
+    plt.figure(figsize=(9, 7))
+    sns.heatmap(accuracy_matrix,
+                xticklabels=arch_display_names,
                 yticklabels=arch_display_names,
-                annot=True, 
-                fmt='.3f', 
+                annot=True,
+                fmt='.3f',
                 cmap='viridis',
                 vmin=0, vmax=1,
-                linewidths=0.5)
-    plt.title('Decoding Accuracy')
-    plt.xlabel('Evaluation Architecture')
-    plt.ylabel('Reference Architecture')
+                linewidths=0.5,
+                annot_kws={'size': 18})
+    plt.title('Decoding Accuracy', fontsize=20, pad=15)
+    plt.xlabel('Evaluation Architecture', fontsize=18)
+    plt.ylabel('Reference Architecture', fontsize=18)
+    plt.tick_params(axis='both', which='major', labelsize=14)
     plt.tight_layout()
     accuracy_save_name = save_name.replace('.png', '_accuracy.png')
     plt.savefig(accuracy_save_name, dpi=300, bbox_inches='tight')
     plt.close()
-    
+
     # Hit rate heatmap only
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(hit_rate_matrix, 
-                xticklabels=arch_display_names, 
+    plt.figure(figsize=(9, 7))
+    sns.heatmap(hit_rate_matrix,
+                xticklabels=arch_display_names,
                 yticklabels=arch_display_names,
-                annot=True, 
-                fmt='.3f', 
+                annot=True,
+                fmt='.3f',
                 cmap='plasma',
                 vmin=0, vmax=1,
-                linewidths=0.5)
-    plt.title('Hit Rate')
-    plt.xlabel('Evaluation Architecture')
-    plt.ylabel('Reference Architecture')
+                linewidths=0.5,
+                annot_kws={'size': 18})
+    plt.title('Hit Rate', fontsize=20, pad=15)
+    plt.xlabel('Evaluation Architecture', fontsize=18)
+    plt.ylabel('Reference Architecture', fontsize=18)
+    plt.tick_params(axis='both', which='major', labelsize=14)
     plt.tight_layout()
     hit_rate_save_name = save_name.replace('.png', '_hit_rate.png')
     plt.savefig(hit_rate_save_name, dpi=300, bbox_inches='tight')
