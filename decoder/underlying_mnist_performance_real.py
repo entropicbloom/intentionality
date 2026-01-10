@@ -21,9 +21,9 @@ def main():
 
     # Dictionary to store results for each model (match gram matrix order)
     results = {
-        "untrained": [],
-        "no_dropout": [],  # renamed from fully_connected for consistency
-        "dropout": []      # renamed from fully_connected_dropout for consistency
+        "Untrained": [],
+        "No Dropout": [],  # renamed from fully_connected for consistency
+        "Dropout": []      # renamed from fully_connected_dropout for consistency
     }
 
     print("Evaluating models across seeds...")
@@ -34,15 +34,15 @@ def main():
         
         # Untrained model
         accuracy = analysis_utils.test_model("fully_connected", dataset_type, seed, "-untrained", hidden_dim)
-        results["untrained"].append(accuracy)
-        
+        results["Untrained"].append(accuracy)
+
         # Fully connected model (no dropout)
         accuracy = analysis_utils.test_model("fully_connected", dataset_type, seed, "", hidden_dim)
-        results["no_dropout"].append(accuracy)
-        
+        results["No Dropout"].append(accuracy)
+
         # Fully connected with dropout
         accuracy = analysis_utils.test_model("fully_connected_dropout", dataset_type, seed, "", hidden_dim)
-        results["dropout"].append(accuracy)
+        results["Dropout"].append(accuracy)
 
     # Calculate means and standard deviations (convert from percentage to proportion)
     model_names = list(results.keys())

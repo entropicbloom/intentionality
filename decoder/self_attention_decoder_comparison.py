@@ -10,7 +10,7 @@ import numpy as np
 
 # Self-attention decoder final validation accuracies (from paper Figure 1)
 # These are the converged values after training
-model_names = ['untrained', 'no_dropout', 'dropout']
+model_names = ['Untrained', 'No Dropout', 'Dropout']
 means = [0.10, 0.25, 0.75]  # Final validation accuracies
 stds = [0.01, 0.02, 0.03]   # Approximate standard deviations
 

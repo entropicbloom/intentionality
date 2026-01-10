@@ -18,21 +18,21 @@ def run_comparison_experiment():
     # Define model configurations in desired order
     model_configs = [
         {
-            'name': 'untrained',
+            'name': 'Untrained',
             'ref_model_type': 'fully_connected',
             'eval_model_type': 'fully_connected',
             'ref_untrained': True,
             'eval_untrained': True
         },
         {
-            'name': 'no_dropout',
+            'name': 'No Dropout',
             'ref_model_type': 'fully_connected', 
             'eval_model_type': 'fully_connected',
             'ref_untrained': False,
             'eval_untrained': False
         },
         {
-            'name': 'dropout',
+            'name': 'Dropout',
             'ref_model_type': 'fully_connected_dropout',
             'eval_model_type': 'fully_connected_dropout', 
             'ref_untrained': False,
@@ -109,7 +109,7 @@ def run_comparison_experiment():
     bars = plt.bar(model_names, accuracies, yerr=accuracy_stds,
                    color=colors, alpha=0.7,
                    capsize=6, error_kw={'linewidth': 2.5})
-    plt.ylabel('Position Accuracy', fontsize=18)
+    plt.ylabel('Decoding Accuracy', fontsize=18)
     plt.title('Gram Matrix Decoder Performance', fontsize=20, pad=20)
     plt.ylim(0, 1.1)
     plt.grid(True, alpha=0.3)

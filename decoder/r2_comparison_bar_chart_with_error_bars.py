@@ -38,7 +38,7 @@ no_dropout_mean, no_dropout_min, no_dropout_max = get_final_r2_stats(no_dropout_
 untrained_mean, untrained_min, untrained_max = get_final_r2_stats(untrained_df, label_variance)
 
 # Prepare data for plotting (match gram matrix order and names)
-model_names = ['untrained', 'no_dropout', 'dropout']  # Match gram matrix order
+model_names = ['Untrained', 'No Dropout', 'Dropout']  # Match gram matrix order
 means = [untrained_mean, no_dropout_mean, dropout_mean]  # Reorder to match
 mins = [untrained_min, no_dropout_min, dropout_min]
 maxs = [untrained_max, no_dropout_max, dropout_max]
