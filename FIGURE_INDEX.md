@@ -6,7 +6,7 @@ This document maps figures from the paper to their source scripts and provides i
 
 | Paper Figure | Description | Script/Source | Output Location |
 |--------------|-------------|---------------|-----------------|
-| Fig 1 | Decoder validation accuracy (training curves) | WANDB | `images/valid_acc.png` |
+| Fig 1 | Decoder validation accuracy | `decoder/self_attention_decoder_comparison.py` | `decoder/plots/self_attention_decoder_comparison.png` |
 | Fig 2 | MNIST model validation accuracies | `decoder/underlying_mnist_performance_real.py` | `underlying/plots/underlying_mnist_performance_comparison_real.png` |
 | Fig 3 | Permutation distances | `gram_matrix_decoder/analysis.py` | `images/perm_distances_*.png` |
 | Fig 4 | Target-similarity-only output neurons | `decoder/tgt_sim_only_output_neurons_bar_chart.py` | `decoder/tgt_sim_only_output_class_id_accuracy.png` |
@@ -20,23 +20,24 @@ This document maps figures from the paper to their source scripts and provides i
 
 ## Detailed Regeneration Instructions
 
-### Figure 1: Decoder Validation Accuracy (Training Curves)
+### Figure 1: Decoder Validation Accuracy
 
-**Type:** WANDB screenshot
+**Script:** `decoder/self_attention_decoder_comparison.py`
 
-**Semantic equivalent:** `images/valid_acc.png`
-
-**Bar chart alternative:**
+**Regenerate:**
 ```bash
-cd gram_matrix_decoder
-python -c "from runs.classid_comparison import run_comparison_experiment; run_comparison_experiment()"
+cd decoder
+python self_attention_decoder_comparison.py
 ```
-**Output:** `gram_matrix_decoder/model_comparison.png`
+
+**Output:** `decoder/plots/self_attention_decoder_comparison.png`
 
 **Expected values:**
-- untrained: ~10% (chance)
-- no_dropout: ~25%
-- dropout: ~75%
+- untrained: 10% (chance)
+- no_dropout: 25%
+- dropout: 75%
+
+**Note:** This bar chart shows final validation accuracies for the self-attention decoder. The original WANDB training curves are available at `images/valid_acc.png`.
 
 ---
 
@@ -192,7 +193,7 @@ python tgt_sim_only_input_neurons_bar_chart.py
 
 ## Additional Plots
 
-### Gram Matrix Decoder Position Accuracy Comparison
+### Gram Matrix Decoder Performance (New Figure)
 
 **Script:** `gram_matrix_decoder/runs/classid_comparison.py`
 
@@ -204,10 +205,14 @@ python -c "from runs.classid_comparison import run_comparison_experiment; run_co
 
 **Output:** `gram_matrix_decoder/model_comparison.png`
 
+**Paper location:** `gram-matrix-decoder-performance.png`
+
 **Expected values (gram matrix decoder):**
-- untrained: ~12%
-- no_dropout: ~38%
-- dropout: ~100%
+- untrained: 12%
+- no_dropout: 38%
+- dropout: 100%
+
+**Note:** This bar chart can replace the table showing gram matrix decoder results in the paper, matching the style of the self-attention decoder figure.
 
 ---
 
