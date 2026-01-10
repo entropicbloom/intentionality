@@ -215,7 +215,7 @@ def plot_cross_architecture_heatmap(all_results, save_name="cross_architecture_h
                 yticklabels=arch_display_names,
                 annot=True,
                 fmt='.3f',
-                cmap='plasma',
+                cmap='viridis',
                 vmin=0, vmax=1,
                 linewidths=0.5,
                 annot_kws={'size': 16},
@@ -257,7 +257,7 @@ def plot_cross_architecture_heatmap(all_results, save_name="cross_architecture_h
                 yticklabels=arch_display_names,
                 annot=True,
                 fmt='.3f',
-                cmap='plasma',
+                cmap='viridis',
                 vmin=0, vmax=1,
                 linewidths=0.5,
                 annot_kws={'size': 18})
