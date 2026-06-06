@@ -18,6 +18,38 @@ from data_loader import load_last_layer, gram, frob
 from permutation import permutation_iterator, get_permutation_count
 import math
 
+# Use dropout networks as the base, matching the main geometric-matching result
+# (Figure 3 / §3.1.2), which reports 100% for dropout. The ablation is the same
+# experiment restricted to k of the 10 output neurons.
+DROPOUT_MODEL_FMT = "fully_connected_dropout-mnist-hidden_dim_[50,50]/seed-{seed}"
+
+
+def position_accuracy_for_subset(G_ref, W_test_subset, k, tolerance):
+    """Hard position-wise accuracy of the argmin permutation for a k-neuron subset.
+
+    Mirrors experiment.evaluate_seed + analysis.calculate_permutation_accuracy:
+    find the permutation(s) minimizing Frobenius distance to the reference, then
+    score the fraction of neuron positions they place correctly (averaging over
+    ties). This is the SAME metric as the main result in §3.1.2 / Figure 3.
+    """
+    identity = np.arange(k)
+
+    # The iterator yields every permutation (including identity), so let it
+    # populate the argmin set rather than pre-seeding identity (which would
+    # double-count it and inflate tie cases such as k=2).
+    best_dist = np.inf
+    best_perms = []
+    for perm in permutation_iterator(k):
+        p = np.asarray(perm, dtype=int)
+        d_perm = frob(G_ref, gram(W_test_subset[p]))
+        if d_perm < best_dist - tolerance:
+            best_dist = d_perm
+            best_perms = [p]
+        elif abs(d_perm - best_dist) <= tolerance:
+            best_perms.append(p)
+
+    return float(np.mean([(np.asarray(p) == identity).mean() for p in best_perms]))
+
 
 def run_neuron_ablation_experiment(
     neuron_counts=None,
@@ -56,11 +88,11 @@ def run_neuron_ablation_experiment(
         print(f"TESTING WITH {neuron_count} NEURONS")
         print(f"{'='*50}")
         
-        # Build reference geometry with reduced neurons
+        # Build reference geometry with reduced neurons (dropout networks)
         print("Building reference geometry...")
         ref_grams = []
         for seed in reference_seeds:
-            W_ref = load_last_layer(seed, model_type="reference")
+            W_ref = load_last_layer(seed, model_fmt=DROPOUT_MODEL_FMT)
             # Take only first neuron_count neurons
             W_ref_subset = W_ref[:neuron_count]
             ref_grams.append(gram(W_ref_subset))
@@ -77,49 +109,25 @@ def run_neuron_ablation_experiment(
         # Evaluate each test seed
         seed_results = []
         for seed in test_seeds:
-            W_test = load_last_layer(seed, model_type="eval") 
+            W_test = load_last_layer(seed, model_fmt=DROPOUT_MODEL_FMT)
             W_test_subset = W_test[:neuron_count]
-            G_test = gram(W_test_subset)
-            
-            d_true = frob(G_ref, G_test)
-            
-            # Test all permutations
-            better_count = 0
-            total_tested = 0
-            
-            for perm in permutation_iterator(neuron_count):
-                perm_array = np.array(perm, dtype=int)
-                # Permute weight matrix rows (original correct approach)
-                W_perm = W_test_subset[perm_array]
-                G_perm = gram(W_perm)
-                d_perm = frob(G_ref, G_perm)
-                
-                total_tested += 1
-                # Handle ties properly: identical distances should count as 0.5 "better"
-                if abs(d_perm - d_true) <= TOLERANCE:
-                    better_count += 0.5  # Ties are indistinguishable, so random chance
-                elif d_perm < d_true:
-                    better_count += 1
-            
-            # Calculate validation accuracy (fraction of permutations that are worse)
-            validation_accuracy = 1.0 - (better_count / total_tested)
-            
-            # Calculate relative performance vs random guessing
+
+            # Hard position-wise accuracy of the argmin permutation (same metric
+            # as §3.1.2 / Figure 3). Chance level is 1/k, so relative = acc * k.
+            validation_accuracy = position_accuracy_for_subset(
+                G_ref, W_test_subset, neuron_count, TOLERANCE
+            )
             relative_performance = validation_accuracy / random_baseline
-            
+
             seed_results.append({
                 'neuron_count': neuron_count,
                 'seed': seed,
                 'validation_accuracy': validation_accuracy,
                 'relative_performance': relative_performance,
-                'distance_true': d_true,
-                'permutations_better': better_count,
-                'total_tested': total_tested
             })
-            
+
             print(f"  Seed {seed:2d}: acc={validation_accuracy:.4f} "
-                  f"rel={relative_performance:.2f}x "
-                  f"better_perms={better_count:4.1f}/{total_tested}")
+                  f"rel={relative_performance:.2f}x")
         
         results.extend(seed_results)
         
