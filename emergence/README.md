@@ -97,6 +97,32 @@ later CE 7 → 6 portion. This is a correlation, not yet a functional link — t
 needs the stitching test (does identifiability onset predict when a layer can be
 transplanted across seeds?).
 
+### Functional test: does it predict interchangeability? (stitching)
+
+![stitching](outputs/stitch.png)
+
+We splice seed1 into seed2 at layer 8 (`stitch_sweep.py`): run seed1 up to the
+layer, map its residual stream into seed2's space, let seed2 finish, and measure
+held-out CE. The map that matters is the **orthogonal Procrustes** rotation — the
+alignment our rotation-invariant metric implies. Confound control (your models
+also just get better around emergence): a **shuffle** null uses the same map on
+position-shuffled activations — identical competence, correspondence destroyed.
+
+- **Genuine, confound-free interchangeable content emerges with training.**
+  content transmitted = shuffle − procrustes rises from 0 to ~3.9 nats through
+  the emergence window and plateaus. Because shuffle is competence-matched, this
+  is not "both models got better" — it is real cross-seed correspondence.
+- **But interchangeability stays partial.** Procrustes never reaches seed2's solo
+  floor, and the penalty (procrustes − solo) *grows* to ~1.2 nats as seeds
+  specialize — full swapability never arrives, echoing the seed idiosyncrasy in
+  the late divergence. Raw identity (no map) fails entirely.
+
+So the emergence threshold marks when cross-seed geometry becomes functionally
+*alignable*, not perfectly *swappable*. Caveats: one pair, one layer; the
+supervised Procrustes fit is a different (easier) probe than the label-free Gram
+metric and is somewhat underdetermined (d=768 vs a modest fit corpus), so the
+co-emergence is qualitative.
+
 Caveats: one architecture (160m); 6 seed pairs (all combinations of 4 seeds, so
 the pairs share seeds and the spread is a robustness range, not a formal CI). The
 transition *sharpness* still rests on a coarse step grid — densify steps 64–512
