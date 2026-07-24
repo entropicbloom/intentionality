@@ -120,6 +120,19 @@ reaches peak at step 1430. So:
   cross-run comparison. (Causal vs coincidental can't be settled without a
   different-warmup run, which Pythia doesn't provide.)
 
+**Schedule-agnostic resolution** (`distance_sweep.py` → `plot_distance.py`):
+re-plot against the actual weight-space distance moved, ‖θ − θ₀‖, which absorbs
+the step-size confound directly.
+
+![distance axis](outputs/distance.png)
+
+Identity still crystallizes **early — within the first ~12% of the total
+weight-space journey** (distance ~189 of 1543, ≈ step 1000) — and then persists,
+slightly decaying, while the model travels 8× further. So "early emergence" is
+not merely a warmup illusion; it holds on the schedule-agnostic axis. The
+activations-before-unembedding ordering is unchanged (a monotone x-reparametrization
+preserves it), confirming the structural findings never depended on the step axis.
+
 ### Functional test: stitching — INCONCLUSIVE (kept as an honest negative)
 
 ![stitching](outputs/stitch.png)
