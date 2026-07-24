@@ -36,6 +36,21 @@ Metric note: the plotted line is the robust **subset** metric — 200 random
 8-token sub-Grams matched exhaustively over all 8! permutations, chance = 1/8.
 The harder full-120 metric and CKA are also stored in `curve.json`.
 
+### By layer
+
+![layer emergence curve](outputs/emergence_layers.png)
+
+Probing every other layer (`layer_sweep.py` → `plot_layers.py`) resolves the
+emergence by depth:
+
+- **Deep layers first.** At the onset (step 256) the deepest probed layers are
+  already well above chance (layer 11 ≈ 0.65) while layer 1 is still at chance —
+  recoverable geometry crystallizes top-down and the shallowest layer only
+  catches up near step 1000.
+- **Mid-depth is most seed-stable at convergence.** Late in training the
+  middle layers (≈5–7) carry the most seed-invariant structure; the deepest and
+  shallowest layers sit lower and drift more across seeds.
+
 Caveats: one architecture (160m), one seed pair. The transition *sharpness* and
 the family ordering rest on a coarse step grid — densify steps 64–512 and add
 seed pairs before making a phase-transition or ordering claim.
