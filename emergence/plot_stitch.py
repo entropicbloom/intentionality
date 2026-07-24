@@ -1,18 +1,23 @@
-"""Model-stitching across checkpoints, with a competence-matched control.
+"""Model-stitching across checkpoints — an INCONCLUSIVE functional probe.
 
 Top: held-out CE of the stitched seed1->seed2 network at layer L, for three maps
 (identity, orthogonal Procrustes, learned linear) plus seed2's solo floor. The
-orthogonal alignment nearly reaches the floor; raw identity and the shuffle
-control fail.
+one clean, competence-free fact: an orthogonal rotation suffices to graft one
+seed into another (procrustes works; raw identity fails and worsens with
+training) — a rotation-equivalence result, but static, with no bearing on the
+emergence threshold.
 
-Bottom: the two confound-free quantities.
-  - content transmitted = shuffle - procrustes: how much the *correct*
-    correspondence helps over a competence-matched scramble. Rises through the
-    identity-emergence window (shaded), then plateaus -> genuine interchangeable
-    content emerges with training, not just "both models got better".
-  - residual penalty = procrustes - solo: the stitch never fully reaches the
-    floor, and the gap *grows* as seeds specialize -> full interchangeability
-    never arrives; seed geometry stays idiosyncratic.
+Bottom: two derived curves that we initially read as "interchangeable content
+emerges" — but every loss-based readout here is confounded by model competence,
+which changes fastest exactly in the emergence window:
+  - procrustes reaches the solo floor *before* identity emerges (penalty ~0 at
+    step 64-256) -> vacuous, the floor is garbage there (ppl ~5000).
+  - penalty (procrustes - solo) grows later -> confounded: the floor becomes
+    demanding as the model improves, not necessarily "seeds diverge".
+  - content (shuffle - procrustes) grows -> confounded by content-*amount*, not
+    graft fidelity.
+So this does NOT establish that the threshold marks a functional change. Kept as
+an honest negative; the clean results are the geometric ones.
 
     python -m emergence.plot_stitch
 """
@@ -100,10 +105,11 @@ def main():
     ax1.text(np.sqrt(w0 * w1), ax1.get_ylim()[1], "identity emerges", ha="center",
              va="top", fontsize=8.5, color=MUTED, style="italic")
 
-    fig.text(0.125, 0.975, "Stitching: aligned cross-seed content emerges, but interchangeability stays partial",
+    fig.text(0.125, 0.975, "Loss-based stitching is competence-confounded — no clean functional threshold",
              fontsize=11.5, color=INK, ha="left", va="bottom")
     fig.text(0.125, 0.93, f"{meta['model']} · seed1→seed2 at layer {meta['layer']} · "
-             "held-out CE · shaded = identity-emergence window", fontsize=9, color=MUTED, ha="left", va="bottom")
+             "held-out CE · clean fact: rotation grafts (identity fails); curves confounded by competence",
+             fontsize=8.5, color=MUTED, ha="left", va="bottom")
 
     out = os.path.join(OUT_DIR, "stitch.png")
     fig.savefig(out, facecolor="white", bbox_inches="tight")

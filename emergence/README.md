@@ -97,31 +97,34 @@ later CE 7 → 6 portion. This is a correlation, not yet a functional link — t
 needs the stitching test (does identifiability onset predict when a layer can be
 transplanted across seeds?).
 
-### Functional test: does it predict interchangeability? (stitching)
+### Functional test: stitching — INCONCLUSIVE (kept as an honest negative)
 
 ![stitching](outputs/stitch.png)
 
-We splice seed1 into seed2 at layer 8 (`stitch_sweep.py`): run seed1 up to the
-layer, map its residual stream into seed2's space, let seed2 finish, and measure
-held-out CE. The map that matters is the **orthogonal Procrustes** rotation — the
-alignment our rotation-invariant metric implies. Confound control (your models
-also just get better around emergence): a **shuffle** null uses the same map on
-position-shuffled activations — identical competence, correspondence destroyed.
+We tried to give the threshold a functional meaning by splicing seed1 into seed2
+at layer 8 (`stitch_sweep.py`): run seed1 up to the layer, map its residual
+stream into seed2's space, let seed2 finish, measure held-out CE. It does **not**
+work as a test of "the threshold marks a functional change" — every loss-based
+readout is confounded by model competence, which changes fastest exactly in the
+emergence window.
 
-- **Genuine, confound-free interchangeable content emerges with training.**
-  content transmitted = shuffle − procrustes rises from 0 to ~3.9 nats through
-  the emergence window and plateaus. Because shuffle is competence-matched, this
-  is not "both models got better" — it is real cross-seed correspondence.
-- **But interchangeability stays partial.** Procrustes never reaches seed2's solo
-  floor, and the penalty (procrustes − solo) *grows* to ~1.2 nats as seeds
-  specialize — full swapability never arrives, echoing the seed idiosyncrasy in
-  the late divergence. Raw identity (no map) fails entirely.
+- The one **clean, competence-free** fact: an **orthogonal rotation suffices** to
+  graft one seed into another (procrustes tracks seed2's floor; raw identity
+  fails and *worsens* with training). That is a rotation-equivalence result — but
+  static, with no bearing on the emergence threshold.
+- The curves that looked like a functional onset are all confounded:
+  procrustes reaches the solo floor *before* identity emerges (penalty ≈ 0 at
+  step 64–256) — vacuous, since the floor there is garbage (ppl ~5000); the
+  penalty's later growth is confounded by the floor becoming demanding; the
+  `shuffle − procrustes` "content" is confounded by content-*amount*, not graft
+  fidelity. All move because the model is learning.
 
-So the emergence threshold marks when cross-seed geometry becomes functionally
-*alignable*, not perfectly *swappable*. Caveats: one pair, one layer; the
-supervised Procrustes fit is a different (easier) probe than the label-free Gram
-metric and is somewhat underdetermined (d=768 vs a modest fit corpus), so the
-co-emergence is qualitative.
+Verdict: the functional importance of the emergence threshold is **not
+established** — loss-based stitching is the wrong instrument (too
+competence-confounded), and what signal exists points to "the graft was fine all
+along," not "compatibility emerges." The clean, competence-free results in this
+repo are the geometric ones (label-free identifiability is chance-anchored and
+not competence-confounded).
 
 Caveats: one architecture (160m); 6 seed pairs (all combinations of 4 seeds, so
 the pairs share seeds and the spread is a robustness range, not a formal CI). The
