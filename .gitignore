@@ -9,3 +9,5 @@ decoder/lightning_logs/
 decoder/wandb/
 decoder/decoder_models/
 .claude/settings.local.json
+# stray working-tree cache from the sibling jspace-gram branch (not tracked here)
+jspace_gram/
