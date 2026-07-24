@@ -3,9 +3,10 @@
 When during pretraining does convergent representational geometry crystallize —
 and does standard similarity (CKA) see it?
 
-We take two **independently seeded** pythia-160m runs and, at each of ~14
-published checkpoints (`step0` → `step143000`), ask a label-free question: can
-the identity of concept tokens be recovered from **relational structure alone**?
+We take **independently seeded** pythia-160m runs (seed1–seed4, grouped into two
+disjoint cross-seed pairs) and, at each of ~14 published checkpoints
+(`step0` → `step143000`), ask a label-free question: can the identity of concept
+tokens be recovered from **relational structure alone**?
 For each model we build the cosine-Gram matrix of a fixed 120-word concept set
 and match the two Grams across seeds — no labels, only the shape of the
 similarity structure (the method of `gram_matrix_decoder`).
@@ -56,11 +57,15 @@ The two regimes side by side (`plot_layer_bars.py`):
 ![layer organization at onset vs end](outputs/layer_bars.png)
 
 At the onset (step 256) identifiability rises monotonically with depth; by the
-end of training the profile is an inverted-U peaked around layer 5.
+end of training the profile is an inverted-U peaked around layer 5. Whiskers show
+the range across the two seed pairs: the deep-first staircase is tight (robust),
+while the deepest layers carry the most spread at convergence — consistent with
+deep-layer late divergence across seeds.
 
-Caveats: one architecture (160m), one seed pair. The transition *sharpness* and
-the family ordering rest on a coarse step grid — densify steps 64–512 and add
-seed pairs before making a phase-transition or ordering claim.
+Caveats: one architecture (160m); two seed pairs (more pairs → tighter bands).
+The transition *sharpness* still rests on a coarse step grid — densify steps
+64–512 before making a phase-transition claim. The family/depth *ordering* now
+reproduces across both pairs.
 
 ## Run
 

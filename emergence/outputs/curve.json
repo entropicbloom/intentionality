@@ -4,217 +4,557 @@
     "layer_idx": 8,
     "n_layers": 12,
     "n_tokens": 120,
-    "subset_size": 8
+    "subset_size": 8,
+    "pairs": [
+      "seedA|seedB",
+      "seedC|seedD"
+    ]
   },
   "curve": [
     {
       "step": 0,
       "act": {
-        "subset_acc": 0.1175,
-        "subset_hit": 0.0,
-        "full_acc": 0.0083,
-        "cka": 0.6455
+        "subset_acc": [
+          0.1175,
+          0.115
+        ],
+        "subset_hit": [
+          0.0,
+          0.0
+        ],
+        "full_acc": [
+          0.0083,
+          0.0
+        ],
+        "cka": [
+          0.6455,
+          0.6514
+        ]
       },
       "unembed": {
-        "subset_acc": 0.1306,
-        "subset_hit": 0.0,
-        "full_acc": 0.0083,
-        "cka": 0.8664
+        "subset_acc": [
+          0.1306,
+          0.1338
+        ],
+        "subset_hit": [
+          0.0,
+          0.0
+        ],
+        "full_acc": [
+          0.0083,
+          0.0083
+        ],
+        "cka": [
+          0.8664,
+          0.8671
+        ]
       }
     },
     {
       "step": 8,
       "act": {
-        "subset_acc": 0.1306,
-        "subset_hit": 0.0,
-        "full_acc": 0.0083,
-        "cka": 0.6451
+        "subset_acc": [
+          0.1306,
+          0.1275
+        ],
+        "subset_hit": [
+          0.0,
+          0.0
+        ],
+        "full_acc": [
+          0.0083,
+          0.0083
+        ],
+        "cka": [
+          0.6451,
+          0.651
+        ]
       },
       "unembed": {
-        "subset_acc": 0.1306,
-        "subset_hit": 0.0,
-        "full_acc": 0.0083,
-        "cka": 0.8664
+        "subset_acc": [
+          0.1306,
+          0.1344
+        ],
+        "subset_hit": [
+          0.0,
+          0.0
+        ],
+        "full_acc": [
+          0.0083,
+          0.0083
+        ],
+        "cka": [
+          0.8664,
+          0.8671
+        ]
       }
     },
     {
       "step": 64,
       "act": {
-        "subset_acc": 0.1206,
-        "subset_hit": 0.0,
-        "full_acc": 0.0,
-        "cka": 0.3817
+        "subset_acc": [
+          0.1206,
+          0.12
+        ],
+        "subset_hit": [
+          0.0,
+          0.0
+        ],
+        "full_acc": [
+          0.0,
+          0.0083
+        ],
+        "cka": [
+          0.3817,
+          0.3991
+        ]
       },
       "unembed": {
-        "subset_acc": 0.1263,
-        "subset_hit": 0.0,
-        "full_acc": 0.0083,
-        "cka": 0.8663
+        "subset_acc": [
+          0.1263,
+          0.1294
+        ],
+        "subset_hit": [
+          0.0,
+          0.0
+        ],
+        "full_acc": [
+          0.0083,
+          0.0083
+        ],
+        "cka": [
+          0.8663,
+          0.8671
+        ]
       }
     },
     {
       "step": 256,
       "act": {
-        "subset_acc": 0.5531,
-        "subset_hit": 0.19,
-        "full_acc": 0.05,
-        "cka": 0.8172
+        "subset_acc": [
+          0.5531,
+          0.5231
+        ],
+        "subset_hit": [
+          0.19,
+          0.105
+        ],
+        "full_acc": [
+          0.05,
+          0.1083
+        ],
+        "cka": [
+          0.8172,
+          0.8162
+        ]
       },
       "unembed": {
-        "subset_acc": 0.1606,
-        "subset_hit": 0.0,
-        "full_acc": 0.0167,
-        "cka": 0.8733
+        "subset_acc": [
+          0.1606,
+          0.1556
+        ],
+        "subset_hit": [
+          0.0,
+          0.0
+        ],
+        "full_acc": [
+          0.0167,
+          0.05
+        ],
+        "cka": [
+          0.8733,
+          0.8741
+        ]
       }
     },
     {
       "step": 512,
       "act": {
-        "subset_acc": 0.7944,
-        "subset_hit": 0.49,
-        "full_acc": 0.1917,
-        "cka": 0.893
+        "subset_acc": [
+          0.7944,
+          0.8219
+        ],
+        "subset_hit": [
+          0.49,
+          0.565
+        ],
+        "full_acc": [
+          0.1917,
+          0.275
+        ],
+        "cka": [
+          0.893,
+          0.8935
+        ]
       },
       "unembed": {
-        "subset_acc": 0.6244,
-        "subset_hit": 0.305,
-        "full_acc": 0.25,
-        "cka": 0.9147
+        "subset_acc": [
+          0.6244,
+          0.6231
+        ],
+        "subset_hit": [
+          0.305,
+          0.27
+        ],
+        "full_acc": [
+          0.25,
+          0.275
+        ],
+        "cka": [
+          0.9147,
+          0.9179
+        ]
       }
     },
     {
       "step": 1000,
       "act": {
-        "subset_acc": 0.9187,
-        "subset_hit": 0.77,
-        "full_acc": 0.4083,
-        "cka": 0.9241
+        "subset_acc": [
+          0.9187,
+          0.9431
+        ],
+        "subset_hit": [
+          0.77,
+          0.855
+        ],
+        "full_acc": [
+          0.4083,
+          0.375
+        ],
+        "cka": [
+          0.9241,
+          0.9313
+        ]
       },
       "unembed": {
-        "subset_acc": 0.965,
-        "subset_hit": 0.89,
-        "full_acc": 0.6583,
-        "cka": 0.9543
+        "subset_acc": [
+          0.965,
+          0.9425
+        ],
+        "subset_hit": [
+          0.89,
+          0.835
+        ],
+        "full_acc": [
+          0.6583,
+          0.6583
+        ],
+        "cka": [
+          0.9543,
+          0.9561
+        ]
       }
     },
     {
       "step": 2000,
       "act": {
-        "subset_acc": 0.9406,
-        "subset_hit": 0.85,
-        "full_acc": 0.3167,
-        "cka": 0.9433
+        "subset_acc": [
+          0.9406,
+          0.94
+        ],
+        "subset_hit": [
+          0.85,
+          0.82
+        ],
+        "full_acc": [
+          0.3167,
+          0.4583
+        ],
+        "cka": [
+          0.9433,
+          0.9454
+        ]
       },
       "unembed": {
-        "subset_acc": 0.9731,
-        "subset_hit": 0.91,
-        "full_acc": 0.85,
-        "cka": 0.9688
+        "subset_acc": [
+          0.9731,
+          0.9675
+        ],
+        "subset_hit": [
+          0.91,
+          0.91
+        ],
+        "full_acc": [
+          0.85,
+          0.7083
+        ],
+        "cka": [
+          0.9688,
+          0.97
+        ]
       }
     },
     {
       "step": 4000,
       "act": {
-        "subset_acc": 0.9419,
-        "subset_hit": 0.845,
-        "full_acc": 0.3083,
-        "cka": 0.9494
+        "subset_acc": [
+          0.9419,
+          0.9206
+        ],
+        "subset_hit": [
+          0.845,
+          0.79
+        ],
+        "full_acc": [
+          0.3083,
+          0.2833
+        ],
+        "cka": [
+          0.9494,
+          0.9521
+        ]
       },
       "unembed": {
-        "subset_acc": 0.9631,
-        "subset_hit": 0.895,
-        "full_acc": 0.7583,
-        "cka": 0.9746
+        "subset_acc": [
+          0.9631,
+          0.9656
+        ],
+        "subset_hit": [
+          0.895,
+          0.905
+        ],
+        "full_acc": [
+          0.7583,
+          0.6833
+        ],
+        "cka": [
+          0.9746,
+          0.976
+        ]
       }
     },
     {
       "step": 8000,
       "act": {
-        "subset_acc": 0.9106,
-        "subset_hit": 0.77,
-        "full_acc": 0.2167,
-        "cka": 0.9502
+        "subset_acc": [
+          0.9106,
+          0.8912
+        ],
+        "subset_hit": [
+          0.77,
+          0.73
+        ],
+        "full_acc": [
+          0.2167,
+          0.2083
+        ],
+        "cka": [
+          0.9502,
+          0.9486
+        ]
       },
       "unembed": {
-        "subset_acc": 0.975,
-        "subset_hit": 0.915,
-        "full_acc": 0.8,
-        "cka": 0.9759
+        "subset_acc": [
+          0.975,
+          0.9613
+        ],
+        "subset_hit": [
+          0.915,
+          0.885
+        ],
+        "full_acc": [
+          0.8,
+          0.7083
+        ],
+        "cka": [
+          0.9759,
+          0.9766
+        ]
       }
     },
     {
       "step": 16000,
       "act": {
-        "subset_acc": 0.8956,
-        "subset_hit": 0.72,
-        "full_acc": 0.2583,
-        "cka": 0.9497
+        "subset_acc": [
+          0.8956,
+          0.8988
+        ],
+        "subset_hit": [
+          0.72,
+          0.73
+        ],
+        "full_acc": [
+          0.2583,
+          0.2583
+        ],
+        "cka": [
+          0.9497,
+          0.9531
+        ]
       },
       "unembed": {
-        "subset_acc": 0.9569,
-        "subset_hit": 0.875,
-        "full_acc": 0.85,
-        "cka": 0.9763
+        "subset_acc": [
+          0.9569,
+          0.955
+        ],
+        "subset_hit": [
+          0.875,
+          0.87
+        ],
+        "full_acc": [
+          0.85,
+          0.75
+        ],
+        "cka": [
+          0.9763,
+          0.9767
+        ]
       }
     },
     {
       "step": 32000,
       "act": {
-        "subset_acc": 0.8912,
-        "subset_hit": 0.765,
-        "full_acc": 0.2417,
-        "cka": 0.9476
+        "subset_acc": [
+          0.8912,
+          0.9044
+        ],
+        "subset_hit": [
+          0.765,
+          0.73
+        ],
+        "full_acc": [
+          0.2417,
+          0.3
+        ],
+        "cka": [
+          0.9476,
+          0.9535
+        ]
       },
       "unembed": {
-        "subset_acc": 0.9544,
-        "subset_hit": 0.88,
-        "full_acc": 0.8167,
-        "cka": 0.9758
+        "subset_acc": [
+          0.9544,
+          0.9237
+        ],
+        "subset_hit": [
+          0.88,
+          0.81
+        ],
+        "full_acc": [
+          0.8167,
+          0.675
+        ],
+        "cka": [
+          0.9758,
+          0.9761
+        ]
       }
     },
     {
       "step": 64000,
       "act": {
-        "subset_acc": 0.8944,
-        "subset_hit": 0.75,
-        "full_acc": 0.3167,
-        "cka": 0.9503
+        "subset_acc": [
+          0.8944,
+          0.9119
+        ],
+        "subset_hit": [
+          0.75,
+          0.745
+        ],
+        "full_acc": [
+          0.3167,
+          0.2667
+        ],
+        "cka": [
+          0.9503,
+          0.9554
+        ]
       },
       "unembed": {
-        "subset_acc": 0.9425,
-        "subset_hit": 0.85,
-        "full_acc": 0.7583,
-        "cka": 0.9752
+        "subset_acc": [
+          0.9425,
+          0.9181
+        ],
+        "subset_hit": [
+          0.85,
+          0.81
+        ],
+        "full_acc": [
+          0.7583,
+          0.7583
+        ],
+        "cka": [
+          0.9752,
+          0.9762
+        ]
       }
     },
     {
       "step": 128000,
       "act": {
-        "subset_acc": 0.865,
-        "subset_hit": 0.705,
-        "full_acc": 0.2417,
-        "cka": 0.9502
+        "subset_acc": [
+          0.865,
+          0.8562
+        ],
+        "subset_hit": [
+          0.705,
+          0.615
+        ],
+        "full_acc": [
+          0.2417,
+          0.2083
+        ],
+        "cka": [
+          0.9502,
+          0.9418
+        ]
       },
       "unembed": {
-        "subset_acc": 0.8631,
-        "subset_hit": 0.685,
-        "full_acc": 0.275,
-        "cka": 0.9717
+        "subset_acc": [
+          0.8631,
+          0.9781
+        ],
+        "subset_hit": [
+          0.685,
+          0.935
+        ],
+        "full_acc": [
+          0.275,
+          0.7
+        ],
+        "cka": [
+          0.9717,
+          0.9758
+        ]
       }
     },
     {
       "step": 143000,
       "act": {
-        "subset_acc": 0.8756,
-        "subset_hit": 0.695,
-        "full_acc": 0.1583,
-        "cka": 0.951
+        "subset_acc": [
+          0.8756,
+          0.8781
+        ],
+        "subset_hit": [
+          0.695,
+          0.66
+        ],
+        "full_acc": [
+          0.1583,
+          0.2
+        ],
+        "cka": [
+          0.951,
+          0.9533
+        ]
       },
       "unembed": {
-        "subset_acc": 0.77,
-        "subset_hit": 0.535,
-        "full_acc": 0.1083,
-        "cka": 0.9693
+        "subset_acc": [
+          0.77,
+          0.9781
+        ],
+        "subset_hit": [
+          0.535,
+          0.93
+        ],
+        "full_acc": [
+          0.1083,
+          0.6
+        ],
+        "cka": [
+          0.9693,
+          0.9759
+        ]
       }
     }
   ]

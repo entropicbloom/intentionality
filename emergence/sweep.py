@@ -30,11 +30,16 @@ from emergence.matching import gram, cka, subset_match, profile_match
 OUT_DIR = os.path.join(os.path.dirname(__file__), "outputs")
 SWEEP_DIR = os.path.join(OUT_DIR, "sweep")
 
-# Two independently pretrained 160m runs (shared NeoX tokenizer + config).
+# Independently pretrained 160m runs (shared NeoX tokenizer + config), grouped
+# into disjoint cross-seed pairs. Each pair is one estimate of identifiability;
+# multiple pairs give a spread (error bars/bands) rather than a single point.
 SEEDS = {
     "seedA": "EleutherAI/pythia-160m-seed1",
     "seedB": "EleutherAI/pythia-160m-seed2",
+    "seedC": "EleutherAI/pythia-160m-seed3",
+    "seedD": "EleutherAI/pythia-160m-seed4",
 }
+PAIRS = [("seedA", "seedB"), ("seedC", "seedD")]
 
 # Available revisions: step0,1,2,4,...,512 (log2), then every 1000 to 143000.
 STEPS = [0, 8, 64, 256, 512, 1000, 2000, 4000, 8000, 16000, 32000, 64000,
@@ -123,28 +128,40 @@ def _load(seed, step, family):
 
 
 def run_curve():
+    """Aggregate identifiability across all cross-seed PAIRS. Each metric is
+    stored as a list (one value per pair) so plots can show mean + spread."""
     curve, meta = [], {}
     for step in STEPS:
         row = {"step": step}
         for family in FAMILIES:
-            pa, pb = npz_path("seedA", step, family), npz_path("seedB", step, family)
-            if not (os.path.exists(pa) and os.path.exists(pb)):
+            per_pair, ok = [], True
+            for a, b in PAIRS:
+                pa, pb = npz_path(a, step, family), npz_path(b, step, family)
+                if not (os.path.exists(pa) and os.path.exists(pb)):
+                    ok = False
+                    break
+                da, db = _load(a, step, family), _load(b, step, family)
+                g_a, g_b = gram(da["j"]), gram(db["j"])
+                rng = np.random.default_rng(0)
+                sub_acc, sub_hit = subset_match(g_a, g_b, rng, SUBSET_SIZE, N_SUBSETS)
+                full_acc, _ = profile_match(g_a, g_b)
+                per_pair.append((sub_acc, sub_hit, full_acc, cka(g_a, g_b)))
+                if family == "act" and not meta:
+                    meta = {"model": "pythia-160m", "layer_idx": int(da["layer_idx"]),
+                            "n_layers": int(da["n_layers"]), "n_tokens": int(len(da["words"])),
+                            "subset_size": SUBSET_SIZE}
+            if not ok:
                 continue
-            da, db = _load("seedA", step, family), _load("seedB", step, family)
-            g_a, g_b = gram(da["j"]), gram(db["j"])
-            rng = np.random.default_rng(0)
-            sub_acc, sub_hit = subset_match(g_a, g_b, rng, SUBSET_SIZE, N_SUBSETS)
-            full_acc, _ = profile_match(g_a, g_b)
-            row[family] = {"subset_acc": round(sub_acc, 4), "subset_hit": round(sub_hit, 4),
-                           "full_acc": round(full_acc, 4), "cka": round(cka(g_a, g_b), 4)}
-            if family == "act" and not meta:
-                meta = {"model": "pythia-160m", "layer_idx": int(da["layer_idx"]),
-                        "n_layers": int(da["n_layers"]), "n_tokens": int(len(da["words"])),
-                        "subset_size": SUBSET_SIZE}
+            row[family] = {"subset_acc": [round(p[0], 4) for p in per_pair],
+                           "subset_hit": [round(p[1], 4) for p in per_pair],
+                           "full_acc": [round(p[2], 4) for p in per_pair],
+                           "cka": [round(p[3], 4) for p in per_pair]}
         curve.append(row)
-        cells = "  ".join(f"{f}: sub={row[f]['subset_acc']:.2f}" for f in FAMILIES if f in row)
+        cells = "  ".join(f"{f}: sub={np.mean(row[f]['subset_acc']):.2f}"
+                          for f in FAMILIES if f in row)
         print(f"step {step:>6}  {cells}")
 
+    meta["pairs"] = [f"{a}|{b}" for a, b in PAIRS]
     out = os.path.join(OUT_DIR, "curve.json")
     with open(out, "w") as f:
         json.dump({"meta": meta, "curve": curve}, f, indent=2)

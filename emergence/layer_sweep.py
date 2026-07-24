@@ -21,7 +21,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from emergence.tokens import select_single_token_words
 from emergence.matching import gram, subset_match
-from emergence.sweep import (SEEDS, STEPS, SWEEP_DIR, OUT_DIR, TEMPLATES,
+from emergence.sweep import (SEEDS, PAIRS, STEPS, SWEEP_DIR, OUT_DIR, TEMPLATES,
                              ACT_BATCH, SUBSET_SIZE, N_SUBSETS, get_device)
 
 LAYERS = [1, 3, 5, 7, 9, 11]
@@ -77,26 +77,31 @@ def run_extract():
 
 
 def run_curve():
+    """Per-layer identifiability aggregated across all cross-seed PAIRS; each
+    layer's value is a list (one per pair) for mean + spread in the plots."""
     curve = []
     n_layers = None
     for step in STEPS:
-        pa, pb = npz_path("seedA", step), npz_path("seedB", step)
-        if not (os.path.exists(pa) and os.path.exists(pb)):
+        if not all(os.path.exists(npz_path(s, step)) for pair in PAIRS for s in pair):
             continue
-        da, db = np.load(pa, allow_pickle=True), np.load(pb, allow_pickle=True)
-        n_layers = int(da["n_layers"])
+        loaded = {s: np.load(npz_path(s, step), allow_pickle=True)
+                  for pair in PAIRS for s in pair}
+        n_layers = int(next(iter(loaded.values()))["n_layers"])
         row = {"step": step}
         for li, layer in enumerate(LAYERS):
-            g_a, g_b = gram(da["j"][li]), gram(db["j"][li])
-            rng = np.random.default_rng(0)
-            acc, _ = subset_match(g_a, g_b, rng, SUBSET_SIZE, N_SUBSETS)
-            row[f"L{layer}"] = round(acc, 4)
+            per_pair = []
+            for a, b in PAIRS:
+                g_a, g_b = gram(loaded[a]["j"][li]), gram(loaded[b]["j"][li])
+                rng = np.random.default_rng(0)
+                acc, _ = subset_match(g_a, g_b, rng, SUBSET_SIZE, N_SUBSETS)
+                per_pair.append(round(acc, 4))
+            row[f"L{layer}"] = per_pair
         curve.append(row)
-        cells = "  ".join(f"L{l}={row[f'L{l}']:.2f}" for l in LAYERS)
+        cells = "  ".join(f"L{l}={np.mean(row[f'L{l}']):.2f}" for l in LAYERS)
         print(f"step {step:>6}  {cells}")
 
     meta = {"model": "pythia-160m", "n_layers": n_layers, "layers": LAYERS,
-            "subset_size": SUBSET_SIZE}
+            "subset_size": SUBSET_SIZE, "pairs": [f"{a}|{b}" for a, b in PAIRS]}
     out = os.path.join(OUT_DIR, "layer_curve.json")
     with open(out, "w") as f:
         json.dump({"meta": meta, "curve": curve}, f, indent=2)

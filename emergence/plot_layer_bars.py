@@ -36,16 +36,26 @@ def main():
     cmap = plt.cm.Blues
     colors = [cmap(p) for p in np.linspace(0.45, 1.0, len(layers))]
     x = np.arange(len(layers))
+    n_pairs = len(by_step[SNAPSHOTS[0][0]][f"L{layers[0]}"])
 
     fig, axes = plt.subplots(1, 2, figsize=(9.2, 4.8), dpi=200, sharey=True)
     fig.patch.set_facecolor("white")
 
     for ax, (step, label, tag) in zip(axes, SNAPSHOTS):
         ax.set_facecolor("white")
-        vals = [by_step[step][f"L{l}"] for l in layers]
-        ax.bar(x, vals, width=0.72, color=colors, zorder=3)
-        for xi, v in zip(x, vals):
-            ax.text(xi, v + 0.02, f"{v:.2f}", ha="center", va="bottom",
+        per_layer = [by_step[step][f"L{l}"] for l in layers]          # list of per-pair lists
+        means = np.array([np.mean(v) for v in per_layer])
+        los = np.array([np.min(v) for v in per_layer])
+        his = np.array([np.max(v) for v in per_layer])
+        ax.bar(x, means, width=0.72, color=colors, zorder=3)
+        if n_pairs > 1:
+            ax.errorbar(x, means, yerr=[means - los, his - means], fmt="none",
+                        ecolor=INK, elinewidth=1.2, capsize=3, zorder=5)
+            for xi, v in zip(x, per_layer):  # individual pair estimates
+                ax.scatter([xi] * len(v), v, s=11, color=INK, alpha=0.5,
+                           linewidths=0, zorder=6)
+        for xi, m, top in zip(x, means, his):
+            ax.text(xi, top + 0.025, f"{m:.2f}", ha="center", va="bottom",
                     fontsize=8.5, color=INK)
 
         ax.axhline(chance, ls=(0, (4, 4)), lw=1.3, color=MUTED, zorder=2)
@@ -72,7 +82,9 @@ def main():
 
     fig.suptitle("How layers organize: deep-first at onset, mid-peaked at convergence",
                  fontsize=12, color=INK, x=0.02, ha="left", y=1.0)
-    subtitle = f"{meta['model']} · cross-seed activation identifiability · subset metric"
+    pair_note = (f"mean of {n_pairs} seed pairs (whiskers = range, dots = pairs)"
+                 if n_pairs > 1 else "cross-seed")
+    subtitle = f"{meta['model']} · activation identifiability · subset metric · {pair_note}"
     fig.text(0.02, 0.925, subtitle, fontsize=9.5, color=MUTED, ha="left")
 
     fig.tight_layout(rect=[0, 0, 1, 0.86])

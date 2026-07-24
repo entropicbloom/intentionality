@@ -11,6 +11,7 @@ crystallizes early in training, activations before the output interface".
 import json
 import os
 
+import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -30,8 +31,14 @@ def main():
 
     rows = [r for r in curve if "act" in r and "unembed" in r]
     steps = [r["step"] for r in rows]
-    acc = [r["act"]["subset_acc"] for r in rows]
-    une = [r["unembed"]["subset_acc"] for r in rows]
+
+    def stats(rs, fam):
+        arr = np.array([rs[fam]["subset_acc"] for rs in rs])  # [n_steps, n_pairs]
+        return arr.mean(1), arr.min(1), arr.max(1)
+
+    acc_m, acc_lo, acc_hi = stats(rows, "act")
+    une_m, une_lo, une_hi = stats(rows, "unembed")
+    n_pairs = len(rows[0]["act"]["subset_acc"])
     xs = [s if s > 0 else 0.5 for s in steps]  # step 0 -> sit on the log axis
 
     fig, ax = plt.subplots(figsize=(7.2, 4.4), dpi=200)
@@ -41,9 +48,12 @@ def main():
     ax.axhline(chance, ls=(0, (4, 4)), lw=1.4, color=MUTED, zorder=1)
     ax.text(xs[0], chance - 0.035, "chance", ha="left", va="top", fontsize=9, color=MUTED)
 
-    for ys, color in [(une, UNEMBED), (acc, ACT)]:
-        ax.plot(xs, ys, "-", lw=2.2, color=color, zorder=3)
-        ax.plot(xs, ys, "o", ms=6, color=color, markeredgecolor="white",
+    for (m, lo, hi), color in [((une_m, une_lo, une_hi), UNEMBED),
+                               ((acc_m, acc_lo, acc_hi), ACT)]:
+        if n_pairs > 1:
+            ax.fill_between(xs, lo, hi, color=color, alpha=0.16, lw=0, zorder=2)
+        ax.plot(xs, m, "-", lw=2.2, color=color, zorder=3)
+        ax.plot(xs, m, "o", ms=6, color=color, markeredgecolor="white",
                 markeredgewidth=1.2, zorder=4)
 
     handles = [plt.Line2D([], [], color=ACT, lw=2.2, marker="o", ms=6,
@@ -64,8 +74,9 @@ def main():
 
     ax.set_title("Identifiable geometry emerges early — activations before the output interface",
                  fontsize=11.5, color=INK, pad=24, loc="left")
+    pair_note = f"mean of {n_pairs} seed pairs (band = range)" if n_pairs > 1 else "cross-seed"
     subtitle = (f"{meta['model']} · activations at layer {meta['layer_idx']}/{meta['n_layers']} "
-                f"(≈⅔ depth) · {meta['n_tokens']} concept tokens · cross-seed")
+                f"(≈⅔ depth) · {meta['n_tokens']} concept tokens · {pair_note}")
     ax.text(0.0, 1.02, subtitle, transform=ax.transAxes, fontsize=9.5,
             color=MUTED, ha="left", va="bottom")
 

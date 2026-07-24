@@ -44,8 +44,9 @@ def main():
     ax.axhline(chance, ls=(0, (4, 4)), lw=1.4, color=MUTED, zorder=1)
     ax.text(xs[0], chance - 0.035, "chance", ha="left", va="top", fontsize=9, color=MUTED)
 
+    n_pairs = len(curve[0][f"L{layers[0]}"]) if curve else 1
     for li, layer in enumerate(layers):
-        ys = [r[f"L{layer}"] for r in curve]
+        ys = [np.mean(r[f"L{layer}"]) for r in curve]
         ax.plot(xs, ys, "-", lw=2.0, color=colors[li], zorder=3)
         ax.plot(xs, ys, "o", ms=4.5, color=colors[li], markeredgecolor="white",
                 markeredgewidth=0.8, zorder=4)
