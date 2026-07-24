@@ -28,10 +28,19 @@ Two direction families are compared:
 - **Staggered by family.** Activation identity crystallizes first (recoverable at
   step 256 while the unembedding is still at chance); the output interface catches
   up by step ~1000.
-- **CKA is largely blind to it.** The unembedding's CKA is ~0.87 at random init
-  and stays high across the entire window where identifiability goes from chance
-  to ceiling — aggregate similarity does not track when identity becomes
-  recoverable. (See `cka` in `outputs/curve.json`.)
+- **CKA is blind to it — the headline.** The standard aggregate
+  representational-similarity scalar (CKA) is high and nearly flat across the
+  entire window where exact identifiability climbs from chance to ceiling.
+
+![CKA vs identifiability](outputs/cka_vs_identifiability.png)
+
+  For the unembedding, CKA is **0.87 at random init** and still 0.87 at step 256
+  while token identity is at chance the whole time (shaded "blind zone") — it
+  only becomes recoverable from step 512. For activations, CKA is even
+  *non-monotonic* (dips to 0.39 at step 64) while identity sits at chance. Two
+  representations can be highly CKA-similar yet share zero recoverable identity:
+  exact permutation-recovery is a strictly stronger probe, and it sees an
+  emergence transition CKA misses entirely (`plot_cka.py`).
 
 Metric note: the plotted line is the robust **subset** metric — 200 random
 8-token sub-Grams matched exhaustively over all 8! permutations, chance = 1/8.
