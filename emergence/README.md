@@ -3,10 +3,10 @@
 When during pretraining does convergent representational geometry crystallize —
 and does standard similarity (CKA) see it?
 
-We take **independently seeded** pythia-160m runs (seed1–seed4, grouped into two
-disjoint cross-seed pairs) and, at each of ~14 published checkpoints
-(`step0` → `step143000`), ask a label-free question: can the identity of concept
-tokens be recovered from **relational structure alone**?
+We take **independently seeded** pythia-160m runs (seed1–seed4) and, at each of
+~14 published checkpoints (`step0` → `step143000`), ask a label-free question:
+can the identity of concept tokens be recovered from **relational structure
+alone**? Identifiability is averaged over all 6 cross-seed pairs.
 For each model we build the cosine-Gram matrix of a fixed 120-word concept set
 and match the two Grams across seeds — no labels, only the shape of the
 similarity structure (the method of `gram_matrix_decoder`).
@@ -58,14 +58,27 @@ The two regimes side by side (`plot_layer_bars.py`):
 
 At the onset (step 256) identifiability rises monotonically with depth; by the
 end of training the profile is an inverted-U peaked around layer 5. Whiskers show
-the range across the two seed pairs: the deep-first staircase is tight (robust),
+the range across the 6 seed pairs: the deep-first staircase is tight (robust),
 while the deepest layers carry the most spread at convergence — consistent with
 deep-layer late divergence across seeds.
 
-Caveats: one architecture (160m); two seed pairs (more pairs → tighter bands).
-The transition *sharpness* still rests on a coarse step grid — densify steps
-64–512 before making a phase-transition claim. The family/depth *ordering* now
-reproduces across both pairs.
+### Summary: the emergence wave
+
+![layer x step heatmap](outputs/emergence_heatmap.png)
+
+The whole pattern in one image — rows = layer, columns = step, color =
+identifiability. A dark chance plain (early steps), a diagonal emergence front at
+step 256→1000 (deep rows light up first), and a mid-depth ridge at convergence.
+The marginal line below is the mean across layers; its ±1 SD band is wide at the
+onset (layers disagree — deep-first) and narrow once every layer has organized.
+An exploratory 3D-surface version is in `outputs/emergence_surface3d.png`
+(`plot_surface3d.py`).
+
+Caveats: one architecture (160m); 6 seed pairs (all combinations of 4 seeds, so
+the pairs share seeds and the spread is a robustness range, not a formal CI). The
+transition *sharpness* still rests on a coarse step grid — densify steps 64–512
+before making a phase-transition claim. The family/depth *ordering* reproduces
+across all pairs.
 
 ## Run
 

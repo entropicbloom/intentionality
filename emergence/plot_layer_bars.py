@@ -51,9 +51,6 @@ def main():
         if n_pairs > 1:
             ax.errorbar(x, means, yerr=[means - los, his - means], fmt="none",
                         ecolor=INK, elinewidth=1.2, capsize=3, zorder=5)
-            for xi, v in zip(x, per_layer):  # individual pair estimates
-                ax.scatter([xi] * len(v), v, s=11, color=INK, alpha=0.5,
-                           linewidths=0, zorder=6)
         for xi, m, top in zip(x, means, his):
             ax.text(xi, top + 0.025, f"{m:.2f}", ha="center", va="bottom",
                     fontsize=8.5, color=INK)
@@ -82,7 +79,7 @@ def main():
 
     fig.suptitle("How layers organize: deep-first at onset, mid-peaked at convergence",
                  fontsize=12, color=INK, x=0.02, ha="left", y=1.0)
-    pair_note = (f"mean of {n_pairs} seed pairs (whiskers = range, dots = pairs)"
+    pair_note = (f"mean of {n_pairs} seed pairs (whiskers = range)"
                  if n_pairs > 1 else "cross-seed")
     subtitle = f"{meta['model']} · activation identifiability · subset metric · {pair_note}"
     fig.text(0.02, 0.925, subtitle, fontsize=9.5, color=MUTED, ha="left")

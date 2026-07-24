@@ -17,6 +17,7 @@ need no recompute. Each checkpoint is downloaded into the HF cache once.
 """
 
 import argparse
+import itertools
 import json
 import os
 
@@ -39,7 +40,10 @@ SEEDS = {
     "seedC": "EleutherAI/pythia-160m-seed3",
     "seedD": "EleutherAI/pythia-160m-seed4",
 }
-PAIRS = [("seedA", "seedB"), ("seedC", "seedD")]
+# All cross-seed pairs among the extracted seeds. With 4 seeds -> 6 pairs.
+# NB: these share seeds (not statistically independent), so treat the spread as
+# a robustness range, not a formal confidence interval.
+PAIRS = list(itertools.combinations(SEEDS.keys(), 2))
 
 # Available revisions: step0,1,2,4,...,512 (log2), then every 1000 to 143000.
 STEPS = [0, 8, 64, 256, 512, 1000, 2000, 4000, 8000, 16000, 32000, 64000,
