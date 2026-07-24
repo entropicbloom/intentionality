@@ -1,0 +1,3 @@
+# regenerable per-checkpoint vectors (keep derived curve.json + emergence.png)
+outputs/sweep/
+outputs/*.npz

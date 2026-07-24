@@ -1,0 +1,221 @@
+{
+  "meta": {
+    "model": "pythia-160m",
+    "layer_idx": 8,
+    "n_layers": 12,
+    "n_tokens": 120,
+    "subset_size": 8
+  },
+  "curve": [
+    {
+      "step": 0,
+      "act": {
+        "subset_acc": 0.1175,
+        "subset_hit": 0.0,
+        "full_acc": 0.0083,
+        "cka": 0.6455
+      },
+      "unembed": {
+        "subset_acc": 0.1306,
+        "subset_hit": 0.0,
+        "full_acc": 0.0083,
+        "cka": 0.8664
+      }
+    },
+    {
+      "step": 8,
+      "act": {
+        "subset_acc": 0.1306,
+        "subset_hit": 0.0,
+        "full_acc": 0.0083,
+        "cka": 0.6451
+      },
+      "unembed": {
+        "subset_acc": 0.1306,
+        "subset_hit": 0.0,
+        "full_acc": 0.0083,
+        "cka": 0.8664
+      }
+    },
+    {
+      "step": 64,
+      "act": {
+        "subset_acc": 0.1206,
+        "subset_hit": 0.0,
+        "full_acc": 0.0,
+        "cka": 0.3817
+      },
+      "unembed": {
+        "subset_acc": 0.1263,
+        "subset_hit": 0.0,
+        "full_acc": 0.0083,
+        "cka": 0.8663
+      }
+    },
+    {
+      "step": 256,
+      "act": {
+        "subset_acc": 0.5531,
+        "subset_hit": 0.19,
+        "full_acc": 0.05,
+        "cka": 0.8172
+      },
+      "unembed": {
+        "subset_acc": 0.1606,
+        "subset_hit": 0.0,
+        "full_acc": 0.0167,
+        "cka": 0.8733
+      }
+    },
+    {
+      "step": 512,
+      "act": {
+        "subset_acc": 0.7944,
+        "subset_hit": 0.49,
+        "full_acc": 0.1917,
+        "cka": 0.893
+      },
+      "unembed": {
+        "subset_acc": 0.6244,
+        "subset_hit": 0.305,
+        "full_acc": 0.25,
+        "cka": 0.9147
+      }
+    },
+    {
+      "step": 1000,
+      "act": {
+        "subset_acc": 0.9187,
+        "subset_hit": 0.77,
+        "full_acc": 0.4083,
+        "cka": 0.9241
+      },
+      "unembed": {
+        "subset_acc": 0.965,
+        "subset_hit": 0.89,
+        "full_acc": 0.6583,
+        "cka": 0.9543
+      }
+    },
+    {
+      "step": 2000,
+      "act": {
+        "subset_acc": 0.9406,
+        "subset_hit": 0.85,
+        "full_acc": 0.3167,
+        "cka": 0.9433
+      },
+      "unembed": {
+        "subset_acc": 0.9731,
+        "subset_hit": 0.91,
+        "full_acc": 0.85,
+        "cka": 0.9688
+      }
+    },
+    {
+      "step": 4000,
+      "act": {
+        "subset_acc": 0.9419,
+        "subset_hit": 0.845,
+        "full_acc": 0.3083,
+        "cka": 0.9494
+      },
+      "unembed": {
+        "subset_acc": 0.9631,
+        "subset_hit": 0.895,
+        "full_acc": 0.7583,
+        "cka": 0.9746
+      }
+    },
+    {
+      "step": 8000,
+      "act": {
+        "subset_acc": 0.9106,
+        "subset_hit": 0.77,
+        "full_acc": 0.2167,
+        "cka": 0.9502
+      },
+      "unembed": {
+        "subset_acc": 0.975,
+        "subset_hit": 0.915,
+        "full_acc": 0.8,
+        "cka": 0.9759
+      }
+    },
+    {
+      "step": 16000,
+      "act": {
+        "subset_acc": 0.8956,
+        "subset_hit": 0.72,
+        "full_acc": 0.2583,
+        "cka": 0.9497
+      },
+      "unembed": {
+        "subset_acc": 0.9569,
+        "subset_hit": 0.875,
+        "full_acc": 0.85,
+        "cka": 0.9763
+      }
+    },
+    {
+      "step": 32000,
+      "act": {
+        "subset_acc": 0.8912,
+        "subset_hit": 0.765,
+        "full_acc": 0.2417,
+        "cka": 0.9476
+      },
+      "unembed": {
+        "subset_acc": 0.9544,
+        "subset_hit": 0.88,
+        "full_acc": 0.8167,
+        "cka": 0.9758
+      }
+    },
+    {
+      "step": 64000,
+      "act": {
+        "subset_acc": 0.8944,
+        "subset_hit": 0.75,
+        "full_acc": 0.3167,
+        "cka": 0.9503
+      },
+      "unembed": {
+        "subset_acc": 0.9425,
+        "subset_hit": 0.85,
+        "full_acc": 0.7583,
+        "cka": 0.9752
+      }
+    },
+    {
+      "step": 128000,
+      "act": {
+        "subset_acc": 0.865,
+        "subset_hit": 0.705,
+        "full_acc": 0.2417,
+        "cka": 0.9502
+      },
+      "unembed": {
+        "subset_acc": 0.8631,
+        "subset_hit": 0.685,
+        "full_acc": 0.275,
+        "cka": 0.9717
+      }
+    },
+    {
+      "step": 143000,
+      "act": {
+        "subset_acc": 0.8756,
+        "subset_hit": 0.695,
+        "full_acc": 0.1583,
+        "cka": 0.951
+      },
+      "unembed": {
+        "subset_acc": 0.77,
+        "subset_hit": 0.535,
+        "full_acc": 0.1083,
+        "cka": 0.9693
+      }
+    }
+  ]
+}
