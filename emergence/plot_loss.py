@@ -68,8 +68,6 @@ def main():
               markeredgewidth=0.9, zorder=4, label="activations")
     ax_i.set_ylim(0, 1.02)
     ax_i.set_ylabel("identifiability", fontsize=10, color=INK)
-    ax_i.text(np.sqrt(w0 * w1), 0.95, "identity emerges", ha="center", va="top",
-              transform=ax_i.get_xaxis_transform(), fontsize=8.5, color=MUTED, style="italic")
     ax_i.text(xs[0], chance + 0.02, "chance", ha="left", va="bottom", fontsize=8, color=MUTED)
     ax_i.legend(loc="center right", frameon=True, fontsize=9,
                 labelcolor=INK).get_frame().set_edgecolor(MUTED)
@@ -92,10 +90,10 @@ def main():
         for t in ax.get_xticklabels() + ax.get_yticklabels():
             t.set_color(INK)
 
-    ax_i.set_title("Identifiable geometry emerges in the rapid-loss phase",
-                   fontsize=12, color=INK, pad=18, loc="left")
-    fig.text(0.125, 0.905, f"{ic['meta']['model']} · cross-seed · held-out loss over "
-             f"{lc['meta']['n_seeds']} seed models", fontsize=9.5, color=MUTED, ha="left")
+    fig.text(0.125, 0.975, "Identifiable geometry emerges in the rapid-loss phase",
+             fontsize=12.5, color=INK, ha="left", va="bottom")
+    fig.text(0.125, 0.925, f"{ic['meta']['model']} · cross-seed · held-out loss over "
+             f"{lc['meta']['n_seeds']} seed models", fontsize=9.5, color=MUTED, ha="left", va="bottom")
 
     out = os.path.join(OUT_DIR, "loss_vs_identity.png")
     fig.savefig(out, facecolor="white", bbox_inches="tight")
