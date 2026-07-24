@@ -1,15 +1,17 @@
-"""CKA is blind to when identity becomes recoverable.
+"""A high CKA does not imply recoverable identity.
 
 Two panels (activations, unembedding). Each overlays, over training step and on
 one shared 0-1 axis:
   - identifiability: label-free exact token recovery (subset-Gram matching)
   - CKA: the standard aggregate representational-similarity scalar
 
-Both are cross-seed, mean over seed pairs. The point: CKA is high and nearly
-flat across the whole window where identifiability climbs from chance to ceiling
-— aggregate similarity does not track when token identity actually becomes
-recoverable. The shaded "blind zone" marks steps where CKA is already high while
-identity is still at chance.
+Both are cross-seed, mean over seed pairs. The honest point is NOT that CKA is
+blind to the timing (normalized to its own range, CKA rises in the same window).
+It is that CKA's absolute scale is uninterpretable: it is already ~0.87
+(unembedding) or ~0.65 (activations) at random init (dotted reference line) and
+its whole span up to convergence is small/non-monotonic — so the same CKA value
+covers both unrecoverable and perfectly recoverable identity. Exact recovery,
+anchored at a known chance floor, separates what CKA compresses.
 
     python -m emergence.plot_cka
 """
@@ -47,16 +49,14 @@ def main():
         ax.set_facecolor("white")
         ident = np.array([np.mean(r[fam]["subset_acc"]) for r in rows])
         cka = np.array([np.mean(r[fam]["cka"]) for r in rows])
+        cka_init = float(cka[0])  # CKA of two independently random-init nets
 
-        # blind zone: from the left up to the transition (first step ident > 0.3)
-        k = int(np.argmax(ident > 0.3)) if (ident > 0.3).any() else len(ident)
-        if 0 < k < len(xs):
-            x_end = float(np.sqrt(xs[k - 1] * xs[k]))  # geo-midpoint on log axis
-            ax.axvspan(0.32, x_end, color=MUTED, alpha=0.12, lw=0, zorder=1)
-            ax.text(float(np.sqrt(0.32 * x_end)), 0.46, "CKA high,\nidentity\nat chance",
-                    ha="center", va="center", fontsize=8, color=MUTED, style="italic")
-
+        # reference lines: identity's chance floor, and CKA's random-init floor
         ax.axhline(chance, ls=(0, (4, 4)), lw=1.2, color=MUTED, zorder=2)
+        ax.axhline(cka_init, ls=(0, (1, 2)), lw=1.4, color=CKA, alpha=0.8, zorder=2)
+        ax.text(xs[0], cka_init + 0.02, f"init {cka_init:.2f}",
+                ha="left", va="bottom", fontsize=8, color=CKA)
+
         ax.plot(xs, cka, "-s", color=CKA, lw=2.0, ms=4.5, markeredgecolor="white",
                 markeredgewidth=0.8, zorder=3, label="CKA (aggregate similarity)")
         ax.plot(xs, ident, "-o", color=IDENT, lw=2.2, ms=5, markeredgecolor="white",
@@ -80,11 +80,11 @@ def main():
     axes[1].legend(loc="lower right", frameon=True, fontsize=9, borderpad=0.7,
                    labelcolor=INK).get_frame().set_edgecolor(MUTED)
 
-    fig.suptitle("CKA is blind to when token identity becomes recoverable",
+    fig.suptitle("A high CKA does not imply recoverable identity",
                  x=0.02, y=1.0, ha="left", fontsize=12.5, color=INK)
     pair_note = f"mean of {n_pairs} seed pairs" if n_pairs > 1 else "cross-seed"
-    fig.text(0.02, 0.925, f"{meta['model']} · {meta['n_tokens']} concept tokens · {pair_note}",
-             fontsize=9.5, color=MUTED, ha="left")
+    fig.text(0.02, 0.925, f"{meta['model']} · {meta['n_tokens']} concept tokens · {pair_note}"
+             " · dotted = CKA at random init", fontsize=9.5, color=MUTED, ha="left")
 
     fig.tight_layout(rect=[0, 0, 1, 0.9])
     out = os.path.join(OUT_DIR, "cka_vs_identifiability.png")

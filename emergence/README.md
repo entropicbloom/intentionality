@@ -28,19 +28,19 @@ Two direction families are compared:
 - **Staggered by family.** Activation identity crystallizes first (recoverable at
   step 256 while the unembedding is still at chance); the output interface catches
   up by step ~1000.
-- **CKA is blind to it — the headline.** The standard aggregate
-  representational-similarity scalar (CKA) is high and nearly flat across the
-  entire window where exact identifiability climbs from chance to ceiling.
+- **A high CKA does not imply recoverable identity — the methodological point.**
 
 ![CKA vs identifiability](outputs/cka_vs_identifiability.png)
 
-  For the unembedding, CKA is **0.87 at random init** and still 0.87 at step 256
-  while token identity is at chance the whole time (shaded "blind zone") — it
-  only becomes recoverable from step 512. For activations, CKA is even
-  *non-monotonic* (dips to 0.39 at step 64) while identity sits at chance. Two
-  representations can be highly CKA-similar yet share zero recoverable identity:
-  exact permutation-recovery is a strictly stronger probe, and it sees an
-  emergence transition CKA misses entirely (`plot_cka.py`).
+  CKA's absolute scale is uninterpretable: it is already **0.87** (unembedding)
+  or **0.65** (activations) between two *randomly initialized* networks (dotted
+  line), and even dips non-monotonically (activations, 0.39 at step 64). Its
+  whole span to convergence is small, so the same CKA value (~0.9) is consistent
+  with both unrecoverable and perfectly recoverable identity. Exact
+  permutation-recovery, anchored at a known chance floor (1/8), separates what
+  CKA compresses. (Honest caveat: normalized to its own null→ceiling range, CKA
+  *does* rise in the same window — the issue is scale/interpretability, not
+  timing, so this is not a "CKA is blind" claim.) See `plot_cka.py`.
 
 Metric note: the plotted line is the robust **subset** metric — 200 random
 8-token sub-Grams matched exhaustively over all 8! permutations, chance = 1/8.
@@ -82,6 +82,20 @@ The marginal line below is the mean across layers; its ±1 SD band is wide at th
 onset (layers disagree — deep-first) and narrow once every layer has organized.
 An exploratory 3D-surface version is in `outputs/emergence_surface3d.png`
 (`plot_surface3d.py`).
+
+### Does the transition mean anything? (training dynamics)
+
+![identity vs loss](outputs/loss_vs_identity.png)
+
+Held-out cross-entropy per checkpoint (mean over the 4 seed models,
+`loss_sweep.py` → `plot_loss.py`) gives an external reference axis. Identifiable
+geometry emerges in the **rapid-loss phase** (shaded) and saturates as loss
+enters its slow tail — tying the geometry milestone to the model's actual
+learning rather than an arbitrary step. Honest caveat: most of the raw CE drop
+(11 → ~7) happens *before* identity emerges; the transition coincides with the
+later CE 7 → 6 portion. This is a correlation, not yet a functional link — that
+needs the stitching test (does identifiability onset predict when a layer can be
+transplanted across seeds?).
 
 Caveats: one architecture (160m); 6 seed pairs (all combinations of 4 seeds, so
 the pairs share seeds and the spread is a robustness range, not a formal CI). The
