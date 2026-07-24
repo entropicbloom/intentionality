@@ -51,6 +51,13 @@ emergence by depth:
   middle layers (≈5–7) carry the most seed-invariant structure; the deepest and
   shallowest layers sit lower and drift more across seeds.
 
+The two regimes side by side (`plot_layer_bars.py`):
+
+![layer organization at onset vs end](outputs/layer_bars.png)
+
+At the onset (step 256) identifiability rises monotonically with depth; by the
+end of training the profile is an inverted-U peaked around layer 5.
+
 Caveats: one architecture (160m), one seed pair. The transition *sharpness* and
 the family ordering rest on a coarse step grid — densify steps 64–512 and add
 seed pairs before making a phase-transition or ordering claim.
