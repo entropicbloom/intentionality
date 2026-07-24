@@ -97,6 +97,29 @@ later CE 7 → 6 portion. This is a correlation, not yet a functional link — t
 needs the stitching test (does identifiability onset predict when a layer can be
 transplanted across seeds?).
 
+### Confound: the emergence window *is* the LR warmup
+
+![warmup overlay](outputs/warmup.png)
+
+Pythia-160m ramps the learning rate linearly over the first 1430 steps (1% of
+143000), then cosine-decays. Overlaying the schedule (`plot_warmup.py`) shows the
+identifiability curve and the LR ramp are essentially the **same shape**: identity
+rises as LR ramps (0.56 at 18% of peak, 0.92 at 70%) and saturates exactly as LR
+reaches peak at step 1430. So:
+
+- **Absolute step numbers are schedule-dependent — do not reify "step 256".**
+  The rise is paced by the warmup (≈ the onset of effective learning), not an
+  intrinsic phase transition at a fixed compute budget. This is the concrete
+  reason to avoid "phase transition" language.
+- **The internal structure is NOT a warmup artifact.** The LR is a single scalar
+  per step — identical for every layer and both families — so it cannot explain
+  activations-before-unembedding, the deep-first depth ordering, or the mid-peak.
+  Those differential findings are intrinsic; warmup only sets the shared clock.
+- **Implication:** raw step is a schedule-contaminated x-axis; a schedule-invariant
+  progress coordinate (loss, or cumulative LR) would be the honest one for
+  cross-run comparison. (Causal vs coincidental can't be settled without a
+  different-warmup run, which Pythia doesn't provide.)
+
 ### Functional test: stitching — INCONCLUSIVE (kept as an honest negative)
 
 ![stitching](outputs/stitch.png)
