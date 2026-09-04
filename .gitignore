@@ -8,4 +8,5 @@ decoder/logs/
 decoder/lightning_logs/
 decoder/wandb/
 decoder/decoder_models/
-.claude/settings.local.json
+.claude/settings.local.json.venv/
+microns_ambiguity/data/
