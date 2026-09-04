@@ -77,7 +77,8 @@ def fig_class_grams(geo, keys, fname):
 def fig_decoder(dec, fname):
     subs = ["struct_in", "struct_in_adp", "struct_in_rewired", "func_iv", "func_is", "soma"]
     fig, axes = plt.subplots(1, 4, figsize=(13, 3.8))
-    for ax, con, metric, chance in zip(axes, ["ori", "rf", "layer", "area"], ["acc", "r2", "acc", "acc"], [1 / 8, 0, 1 / 3, 1 / 3]):
+    # chance for accuracy = majority-class rate (classes are unbalanced)
+    for ax, con, metric, chance in zip(axes, ["ori", "rf", "layer", "area"], ["acc", "r2", "acc", "acc"], [0.255, 0, 0.487, 0.688]):
         for i, s in enumerate(subs):
             vals = [v[metric] for k, v in dec.items() if k.startswith(f"{s}|{con}|full|")]
             if not vals: continue
@@ -90,7 +91,7 @@ def fig_decoder(dec, fname):
         ax.set_xticks(range(len(subs))); ax.set_xticklabels([SUB_LABEL[s] for s in subs], fontsize=7, rotation=35, ha="right")
         ax.set_title(f"{CON_LABEL[con]}: {'accuracy' if metric == 'acc' else 'R²'}", fontsize=10)
         ax.set_ylim(min(0, ax.get_ylim()[0]), 1.05)
-    fig.suptitle("Learned relational decoder, hidden population labels (solid tick: target-only ablation; dashed: shuffled labels)", fontsize=9)
+    fig.suptitle("Learned relational decoder, 48-neuron populations, hidden labels (solid tick: target-only ablation; dashed: shuffled labels; dotted: majority class)", fontsize=9)
     fig.tight_layout(); fig.savefig(OUT / fname, dpi=150); plt.close(fig)
 
 

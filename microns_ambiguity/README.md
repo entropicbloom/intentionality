@@ -232,7 +232,39 @@ relational structure, and it is broken by anisotropy, not by more relations.
 
 ### 4. Learned decoder with hidden population labels
 
-DECODER_PLACEHOLDER
+![decoder](outputs/decoder.png)
+
+| substrate | orientation acc (K=8) | RF R² | layer acc | area acc |
+|---|---|---|---|---|
+| synaptic | 0.26 | 0.00 | 0.52 | 0.58 |
+| proximity | 0.26 | **0.10** | 0.57 | **0.80** |
+| rewired | 0.26 | 0.00 | 0.52 | 0.58 |
+| functional, in vivo | **0.31** (0.33 at n=128; target-only 0.28) | 0.01 (0.01 at n=128) | 0.48 | 0.68 |
+| functional, digital twin | 0.26 (0.27 at n=128) | 0.01 | 0.50 | 0.73 |
+| soma distance | 0.26 | 0.04 | 0.50 | 0.68 |
+| majority class / shuffled labels | 0.25 / 0.25–0.27 | 0 / 0.00 | 0.49 | 0.69 |
+
+Mean over 2 seeds (orientation, RF) or 1 seed; 48-neuron populations, 24k
+training populations × 10 epochs; n=128 for the functional substrates
+(a 256-neuron sweep was killed by the OS for memory and is not reported).
+
+**This protocol fails in cortex.**  With population labels hidden and only 48
+(or 128) neurons per population, the decoder stays at the class-prior baseline
+for every substrate and content except a small orientation gain from in-vivo
+covariance (0.31–0.33 vs 0.25, of which the target-only ablation keeps 0.28)
+and a small RF gain from proximity relations (R² 0.10).  Class-level matching
+on the same Grams is perfect.  The difference is signal-to-noise: pairwise
+signal correlations are 0.03–0.06 even for neurons with overlapping RFs, so a
+48-neuron Gram is a noisy sample in which the target's row cannot be
+anchored to anyone else's unknown content, whereas the class-Gram pools
+10⁵–10⁶ pairs.  The paper's decoder had 784-neuron populations with strong,
+low-noise weight similarities.  Going to 128 neurons did not change the
+picture; whether 10³-neuron populations would is the obvious next test and
+needs more memory than this run had.  The honest reading: in cortex the
+content is in the relational structure, but recovering it *per neuron without
+any labelled anchor* needs far more relational context than the paper's
+networks did.
+
 
 ### 5. Reference-free recovery
 
@@ -288,7 +320,15 @@ out the content-bearing subspace.
    fixes content up to the automorphism group of the relational structure, and
    content is absolutely fixed only where the structure is asymmetric.
 
-4. **Reference-free recovery does not come for free.**  The dominant axes of
+4. **Per-neuron recovery without an anchor is the open problem.**  Both the
+   reference-free embedding and the hidden-label decoder are weak here: the
+   dominant axes of cortical relational structure are cortical space, pairwise
+   relations are noisy, and a small population cannot bootstrap its own frame.
+   The class-level result says the content *is* in the relations; the
+   per-neuron results say that extracting it intrinsically needs either a
+   labelled reference or a population large enough to embed itself.
+
+5. **Reference-free recovery does not come for free.**  The dominant axes of
    cortical relational structure are cortical space, not visual space or
    orientation.  Whatever fixes content intrinsically has to do so from a
    non-dominant subspace, which is a real constraint for any intrinsic
@@ -308,7 +348,8 @@ out the content-bearing subspace.
   create orientation- or RF-specific class structure.
 * The class-level protocol is the paper's; it hides class *identities* but
   keeps class *membership* (which neurons belong together).  Protocol 2 (the
-  learned decoder) removes that too and is correspondingly weaker.
+  learned decoder) removes that too and fails at 48–128 neurons; larger
+  populations were not feasible on this machine.
 * ARS from the permutation posterior assumes iid Gaussian entry noise on the
   class-Gram; τ is calibrated from the split-half distance of the correct
   labelling.  It agrees with the Fano bound where both are informative.
