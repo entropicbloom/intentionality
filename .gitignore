@@ -11,3 +11,7 @@ decoder/decoder_models/
 .claude/settings.local.json
 .venv/
 microns_ambiguity/data/
+__pycache__/
+# stray working-tree files from sibling branches (tracked there, not here)
+emergence/
+jspace_gram/
