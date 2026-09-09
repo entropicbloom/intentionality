@@ -273,40 +273,40 @@ influence model selection):
 | orientation, 8 classes | 0.368 ± 0.007 | 0.406 ± 0.010 | 0.41 / 0.49 | 0.255 (majority class) |
 | RF (x, y), R² | 0.200 ± 0.003 | 0.341 ± 0.005 | 0.32 / 0.67 | 0 |
 | RF distance from centre, R² | 0.241 (1 seed) | 0.351 ± 0.001 | – | 0 |
-| best single run (7.2M) | – | 0.420 / 0.449 | | |
+| 17M model, 3 seeds (GPU, below) | 0.380 / 0.234 | 0.420 / 0.480 | | |
 
-**GPU runs (one L40S, 8 hours).**  Larger models, 512-neuron populations,
-batch 64, 5,000 populations per epoch, best epoch restored from a checkpoint,
-selection metric averaged over 4 population covers of the 20 % selection
-slice.  The label-free relation augmentation that helps on Allen (below) was
-also tried: recomputing each training population's Gram from a random half
-of the feature dimensions, and zeroing 20 % of Gram entries.
+**GPU runs (one L40S, two sessions, ~14 hours).**  Larger models,
+512-neuron populations, batch 64, 5,000 populations per epoch, best epoch
+restored from a checkpoint, selection metric averaged over 4 population
+covers of the 20 % selection slice.  Three seeds for the 17M configuration
+(width 512, 8 layers), single runs otherwise.
 
-| content, substrate | 2.2M (laptop, 3 seeds) | 17M | 57M | augmented 17M | labelled reference |
+| content, substrate | 2.2M (3 seeds) | **17M (3 seeds)** | 57M | 17M, Gram from a random subset of the feature dimensions | labelled reference |
 |---|---|---|---|---|---|
-| orientation, twin | 0.406 ± 0.010 | 0.421 | (queued, not run) | 0.399 (half the PCs), 0.409 (Gram dropout) | 0.49 |
-| orientation, in vivo | 0.368 ± 0.007 | **0.388** | – | 0.374 (half the stimulus bins) | 0.41 |
-| RF (x, y), twin | 0.341 ± 0.005 | 0.466 / 0.487 (2 seeds; 0.476 / 0.495 averaged) | **0.507** (0.512 averaged) | 0.061 (half the PCs) | 0.67 |
-| RF (x, y), in vivo | 0.200 ± 0.003 | (plain run cut by budget) | – | **0.247** (half the stimulus bins) | 0.32 |
+| orientation, twin | 0.406 ± 0.010 | **0.420 ± 0.003** | 0.418 | 0.399 (half the PCs); 0.409 with 20 % Gram dropout | 0.49 |
+| orientation, in vivo | 0.368 ± 0.007 | **0.380 ± 0.006** | – | 0.374 (half the 120 stimulus bins) | 0.41 |
+| RF (x, y), twin | 0.341 ± 0.005 | **0.480 ± 0.010** (0.489 ± 0.009 averaged) | **0.507** (0.512 averaged) | 0.061 (half the PCs) | 0.67 |
+| RF (x, y), in vivo | 0.200 ± 0.003 | **0.234 ± 0.007** | – | **0.262** (75 % of the bins); 0.247 (50 %) | 0.32 |
 
-Capacity is still the lever: twin RF goes 0.34 → 0.47 → 0.51 from 2.2M to
-57M parameters, and the 17M model lifts in-vivo orientation to within two
-points of the labelled linear reference.  Every large run memorises the
-training neurons (final training loss 0.001–0.06) and is selected at epoch
-4–17, so all of the gain comes from early stopping on a better model, not
-from longer training.  Augmentation does not help MICrONS: subsampling the
-512 twin principal components destroys the Gram (PCs are not exchangeable
-conditions), and halving the 120 in-vivo stimulus bins costs 1–2 points on
-orientation.  The exception is in-vivo RF, where the augmented 17M model
-reaches 0.247 against 0.200; the un-augmented 17M comparison was cut when the
-budget ran out, so how much of that is capacity and how much augmentation is
-open.  Seed spread at 17M is about 2 points (twin RF 0.466 vs 0.487).
+Capacity pays on RF and not on orientation: twin RF goes 0.34 → 0.48 → 0.51
+from 2.2M to 57M parameters and in-vivo RF 0.20 → 0.23, while orientation is
+flat from 7M to 57M on the twin (0.420 / 0.420 / 0.418) and gains one point
+in vivo.  The difference tracks the number of labels (11,326 RF against 5,287
+orientation): every large run memorises the training neurons (final training
+loss 0.001–0.06) and is selected at epoch 4–17, so the gain is early stopping
+on a better model, not longer training.  Relation augmentation is
+substrate-specific: subsampling the 512 twin principal components destroys
+the Gram (PCs are not exchangeable conditions), halving the 120 in-vivo
+stimulus bins costs a point on orientation, and keeping 75 % of the bins is
+the best in-vivo RF run (0.262, one seed; three seeds of the plain 17M give
+0.234 ± 0.007).  Population size stays saturated at 512.
 
 The *labelled-reference ceiling* is a ridge readout from each validation
 neuron's correlations to all ~6,000 labelled training neurons — the same
 correlations, plus a fully labelled anchor set.  In vivo, the label-free
-decoder reaches 90 % of that ceiling for orientation and 63 % for RF; on
-twin correlations 83 % and 51 % (67 % with the 7.2M model).  Orientation's
+decoder reaches 90 % of that ceiling for orientation and 63 % for RF at 2.2M
+parameters (93 % and 73 % at 17M); on twin correlations 83 % and 51 % (86 %
+and 72 % at 17M, 76 % for RF at 57M).  Orientation's
 ceiling is itself capped by label noise: in-vivo and digital-twin preferred
 orientations agree on only 70 % of neurons at 8 classes.
 
@@ -454,105 +454,115 @@ so the condition means are the substrate below.
 | class-level, pooled reference → held-out mouse | 0.192 | 0.258 | 0.173 (shuffle) |
 | same, modulo D6 | 0.515 | 0.631 | 0.5 |
 | labelled ridge, leave-one-mouse-out | 0.236 | 0.346 | 0.198 (majority) |
-| label-free decoder, populations within one held-out mouse (`cross`) | 0.168 | 0.180 (0.244 averaged) | 0.19 |
-| label-free decoder, `pooledcross`, 128 neurons, 12 epochs, first protocol, 3 mouse splits | 0.205 | 0.229 ± 0.020 (0.245 ± 0.005 averaged) | 0.19 |
-| same, fixed selection (best-epoch checkpoint, metric averaged over 4 covers), 30 epochs, 3 seeds on one split | | 0.269–0.281 | |
-| same, 256 neurons, 3 seeds | | 0.286–0.294 | |
-| GPU: 256 neurons, 17M params, 60 epochs | | 0.288 (0.303 averaged) | |
-| GPU: 256 neurons, 85M params | | 0.300 (0.296) | |
-| GPU: 512 neurons, 85M params, 100 epochs | | 0.310 (0.305) | |
-| **GPU: 256 neurons, 17M params, Gram from a random half of the 40 conditions** | | **0.310 (0.306)**, selected at epoch 35 of 60 | |
-| label-free decoder, `pooledwithin` (test neurons from the training animals, mixed populations), 128 / 256 neurons | | 0.277 (0.307 averaged) / 0.281 (0.288) | |
+| label-free decoder, first protocol (128 neurons, 12 epochs, noisy selection), `pooledcross`, 3 splits | 0.205 | 0.229 ± 0.020 | 0.19 |
 
 The null for the decoder rows is the training-set majority class applied to the
-test mice (0.187–0.188 over the three splits); chance is 0.167.  Every grating
-number is above its movie counterpart, and the pooled-cross decoder is a
-label-free orientation readout across animals: trained on 24 mice, selected on
-6, it assigns orientation to neurons of 9 unseen mice at 0.31 against 0.19,
-three quarters of the labelled linear reference's excess over baseline.
+test mice (0.187–0.188 over the three splits); chance is 0.167.  With the
+grating relations the label-free decoder is above the baseline in exactly the
+two cells with mixed populations (next table).
 
-What moved the number, in order.  (i) *Model selection*: the first protocol
-selected on single-population accuracy of 5 mice and stopped runs at epoch
-0–5; restoring the best-epoch weights and averaging the selection metric over
-4 population covers moved 0.25 → 0.28 at no other change.  (ii) *Population
-256 instead of 128*: +1–2 points; 512 and 1024 add nothing (0.283, 0.291 with
-the 17M model).  (iii) *Capacity*: 2M → 17M → 85M gives 0.27 → 0.29 → 0.30
-without augmentation, selected at epoch 13–16 of 60 with training loss near
-0.25, i.e. the model memorises the ~6,700 training neurons.  (iv) *Label-free
-augmentation*: recomputing each training population's Gram from a random
-subset of the 40 conditions (test Grams use all 40).  With the 2M model 75 %
-of conditions helps (0.272 → 0.292), 50 % hurts (0.247) and 30 % breaks it
-(0.214); with the 17M model 50 % gives the best run, 0.310, selected at epoch
-35 instead of 13.  The augmentation works only with capacity: the small
-model cannot fit the noisier training Grams, the large one can and stops
-memorising.  Gram-entry dropout (20 %) gives +1 point alone and nothing on
-top of subsampling.  Dropout 0.2 instead of 0.1 does nothing.  (v) Averaging
-each neuron's prediction over 32 sampled populations: +0–1.5 points, and it
-stabilises the score across seeds (spread ±0.005 instead of ±0.02).
+**The decoder 2 × 2 (grating relations, split × population).**  Standard
+configuration unless noted: 256 neurons per population, width 256, 4 layers
+(2M parameters), 30 epochs, best epoch restored, selection metric averaged
+over 4 population covers.  Single-animal cells use 128 neurons (a mouse has
+~280 cells).  "Averaged" = each neuron's prediction averaged over 32 sampled
+populations.
 
-The `pooledwithin` row is the control for the population axis: with the same
-mixed populations but test neurons from the *training* animals, the score is
-0.277 (0.307 averaged) at 128 neurons and 0.281 (0.288) at 256, the same as
-with held-out animals.  Orientation
-transfer to new brains costs nothing; the whole difference between the
-`cross` and `pooledcross` rows is single-animal versus mixed populations,
-not generalisation.
+| orientation, accuracy on labelled test cells | single-animal populations | mixed populations |
+|---|---|---|
+| test neurons from the training animals | `within` 0.210 (0.205 averaged) | `pooledwithin` 0.281 (0.288); 128 neurons 0.277 (0.307) |
+| test neurons from 9 held-out animals | `cross` 0.199 / 0.197 / 0.187 on splits 0 / 1 / 2 | `pooledcross` **0.293 ± 0.012** (3 seeds, split 0; ensemble 0.296) / **0.236** / **0.264** on splits 0 / 1 / 2; mean over splits 0.26 |
+| baseline (training majority class on the test cells) | 0.19–0.20 | 0.19–0.20 |
 
-What the two regimes measure differs, and the difference is the finding.  In
-`cross` all 128 neurons come from one animal, so the Gram is a within-circuit
-correlation matrix and the decoder must transfer across animals' internal
-matrices; that stays at the baseline, for movies and for gratings.  In
-`pooledcross` most Gram entries relate a neuron in one mouse to a neuron in
-another, which exist only because all mice saw the same conditions, and they
-measure how similar two tuning profiles are.  The decoder still never sees the
-condition indices, only correlations, so the absolute frame (which class is
-0°) must come from the population's relational structure, as in MICrONS.  So
-in the Allen data: a neuron's orientation is readable, without labels, from
-where it sits in a correlation geometry that spans animals, and that geometry
-is shared enough across mice to transfer; it is *not* readable from its
-relations inside its own network alone.  For RF position (next paragraph) both
-readings transfer.
+The `pooledcross` row is the pre-chosen headline configuration for the paper
+(17M parameters, Gram recomputed from a random half of the 40 conditions for
+training populations); the 2M standard configuration on split 0 gives the same
+(0.286–0.294 over 3 seeds, ensemble 0.303), and the mean over the three mouse
+splits, 0.26 against 0.19, is the number to report.  Test mice differ: split 0
+is the easy set for every configuration (first-protocol runs gave 0.25 / 0.20
+/ 0.23 on the same three splits).
 
-**Receptive-field position is present and crosses animals.**  Correlation
-falls with RF distance within a mouse (0.127 at < 5° to 0.068 beyond 40°) and
-across mice (0.049 to 0.011): two neurons in different animals covary when
-they look at the same part of the screen.
+The population axis is the whole result.  Single-animal populations are at the
+baseline whether the animal was seen in training (`within`) or not (`cross`);
+mixed populations work whether the animal was seen (`pooledwithin`) or not
+(`pooledcross`), at the same level.  Transfer to new brains costs nothing.  In
+a single-animal population the Gram is a within-circuit correlation matrix; in
+a mixed population most entries relate a neuron in one mouse to a neuron in
+another, and they exist only because all mice saw the same 40 conditions: they
+measure how similar two tuning profiles are.  The decoder never sees the
+condition indices, so the absolute frame (which class is 0°) still has to come
+from the population's relational structure, as in MICrONS.  So in this
+dataset a neuron's orientation is readable without labels from where it sits
+in a correlation geometry that spans animals, and that geometry is shared
+enough to transfer; it is *not* readable from its relations inside its own
+network.
 
-| test (session C, absolute screen coordinates) | R² |
-|---|---|
-| labelled ridge, random halves | 0.27 |
-| labelled ridge, leave-one-mouse-out (place a held-out mouse's neurons) | 0.20 |
-| label-free decoder, `pooledcross` (held-out mice, mixed populations), 128 neurons | 0.11 (0.20 averaged over 32 populations) |
-| same, 256 neurons; GPU 256 neurons 2M / 17M / augmented / 512 / 1024 neurons | 0.18 (**0.23** averaged); 0.22 / 0.21 / 0.22 / 0.21 / 0.09 |
-| **label-free decoder, `cross` (held-out mice, single-animal populations)**, 128 neurons, 2M | **0.273** (0.267 averaged); 0.281 with 85 % condition subsampling; **0.286** with 800-population epochs and lr 5e-4 (peak at epoch 1) |
-| label-free decoder, `pooledwithin` (training mice, mixed populations), 128 neurons | 0.155 (0.165 averaged); trains on half as many RF labels |
-| same, 17M | 0.176 |
-| relative RF (within the mouse's own patch), any method | ≈ 0 |
+**What was tried on a GPU (one L40S, ~14 hours over two sessions) and what
+it changed** (split 0, seed 0, 256 neurons, `pooledcross`, 60 epochs unless
+noted; single runs, seed spread ±0.012):
 
-The cross-animal decoder recovers *where on the screen* a held-out mouse's
-neurons look, above the labelled cross-animal reference (0.20), using only
-the correlations among neurons of held-out animals.  For RF the two
-population regimes rank the other way round from orientation: single-animal
-populations (`cross`, 0.27–0.28) beat mixed ones (`pooledcross`, 0.22), so
-the within-circuit relation is the better carrier of screen position while
-the between-animal relation is the only carrier of orientation.  The `cross`
-RF runs peak at epoch 0 (about 80 gradient steps) and decay to 0.10 by epoch
-40 as the training loss falls from 0.9 to 0.15: the content is learned
-immediately and then the ~800 RF-labelled training cells are memorised.
-Capacity hurts here (17M: 0.18) and neither augmentation nor larger mixed
-populations help (1024 neurons: 0.09).  With 800-population epochs and a
-lower learning rate the peak is resolved at epoch 1 (about 50 steps): 0.286
-plain, 0.278 with mild augmentation, 0.260 with strong augmentation.  The
-same fine schedule does not help mixed populations (0.15 vs 0.22).  What no method
-recovers is the layout *within* a mouse: with ~45 RF-labelled cells per mouse
-the internal retinotopic map is not estimable here, so the per-mouse grid
-class test is at its null and relative-RF readouts are at zero.
+| lever | values | accuracy |
+|---|---|---|
+| model selection | single-population metric on 5 mice → best-epoch checkpoint, metric averaged over 4 covers of 6 mice | 0.25 → 0.28 (128 neurons, 30 epochs) |
+| population size (17M) | 256 / 512 / 1024 | 0.288 / 0.283 / 0.291 |
+| parameters, plain | 2M / 17M / 57M; 57M at 512 neurons, 100 epochs | 0.272 / 0.288 / 0.300; 0.310 |
+| conditions kept per training Gram, 2M | 100 / 75 / 50 / 30 % | 0.272 / 0.292 / 0.247 / 0.214 |
+| conditions kept, 17M | 100 / 85 / 75 (half the populations) / 50 % | 0.288 / 0.319 / 0.293 / 0.310 |
+| conditions kept, 57M | 50 % | 0.260 |
+| Gram-entry dropout 20 % | 2M; 17M with 50 % conditions | 0.284; 0.279 |
+| dropout 0.2 (17M) | | 0.293 |
+| averaging over 32 populations | | +0.00–0.015; seed spread ±0.005 instead of ±0.012 |
+| 3-seed ensemble | 17M + 50 %; 2M | 0.296; 0.303 |
+
+Every plain run memorises the ~6,700 training neurons (training loss ≈ 0.25
+by epoch 60) and is selected at epoch 6–16; the condition-subsampling
+augmentation delays that (selected at epoch 18–35) and helps only with
+capacity: the 2M model cannot fit the noisier training Grams, the 17M can.
+Nothing stacks: the largest model with augmentation is worse than either
+alone.  Population size is flat from 256 up.  The honest summary is that the
+Allen orientation readout sits at 0.26–0.30 for any reasonable configuration
+and the sweep mapped what does not move it.
+
+**Receptive-field position: what crosses animals is each mouse's screen
+position, not the retinotopic layout within the mouse.**  Correlation falls
+with RF distance within a mouse (0.127 at < 5° to 0.068 beyond 40°) and across
+mice (0.049 to 0.011).  Labelled ridge readouts of absolute screen
+coordinates: R² 0.27 on random halves, 0.20 leave-one-mouse-out.
+
+| RF, R² on absolute screen coordinates (session C, movie relations) | single-animal populations | mixed populations |
+|---|---|---|
+| test neurons from the training animals | `within` 0.239 (128 neurons) | `pooledwithin` 0.155 (128 neurons) |
+| test neurons from 9 held-out animals, splits 0 / 1 / 2 | `cross` **0.270 ± 0.012** (3 seeds) / **−0.10** / **−0.46** | `pooledcross` **0.21** / **0.04** / **−0.21** |
+
+Absolute R² is split-dependent in both regimes: one set of test mice gives
+0.2–0.3, one ≈ 0, one negative, and the mean over splits is ≈ 0.  The `cross`
+runs on split 0 peak within ~50 gradient steps and decay as the ~800
+RF-labelled training cells are memorised; capacity (17M: 0.18), augmentation
+and larger mixed populations (1024 neurons: 0.09) all hurt.  Decomposing the
+saved predictions of every held-out-animal run into a per-mouse mean and a
+within-mouse remainder explains the swings:
+
+| held-out-animal RF, pooled over 3 splits (27 mouse-level predictions, 1,259 cells) | single-animal | mixed |
+|---|---|---|
+| correlation of predicted and true *per-mouse mean* position, x / y | 0.36 / 0.40 (permutation p 0.03 / 0.02) | 0.36 / **0.71** (p 0.03 / < 0.0001) |
+| correlation within mouse (both centred per mouse), x / y | 0.07 / 0.06 | −0.01 / 0.11 |
+
+The decoder recovers, from correlations alone, roughly where on the screen
+each held-out animal's imaged population looks (a population-level property,
+best carried by mixed populations whose between-animal correlations anchor
+screen position), and it does not recover which neuron sits where within
+that population.  R² on absolute coordinates is then dominated by whether the
+between-mouse spread of a particular test set is reproduced at the right
+scale, which is why it is positive on one split and negative on another; the
+mouse-level correlation is the stable statistic.  This agrees with the
+per-mouse class-level grid test being at its null and with every relative-RF
+readout being at zero: with 23–112 RF-labelled cells per mouse the internal
+retinotopic map is not estimable here.
 
 All held-out-animal regimes select the model on held-out *mice* (25 % of the
 training mice), never on test mice; `pooledwithin` selects on a 25 % slice of
-the training neurons.  The `within` cell (training animals, single-animal
-populations) failed under the new selection code (the per-mouse selection
-slices are smaller than a population) and is not reported.
+the training neurons; `within` selects on 25 % of the mice, held out of both
+halves.
 
 ## Caveats
 

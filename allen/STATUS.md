@@ -14,11 +14,11 @@ Headline: pooled-cross label-free decoder 0.229 +- 0.020 (0.245 +- 0.005 average
 populations) on 9 held-out mice vs 0.19 baseline; labelled LOMO ceiling 0.35; within-mouse
 (`cross`) regime stays at baseline.  Sweeps: `allen/sweep_dg.sh`, `allen/sweep_dg2.sh`.
 
-## GPU session (2026-09-09, RunPod L40S, 8 h, $9.5)
+## GPU sessions (2026-09-09/10, RunPod L40S, ~14 h, ~$13; pod terminated, balance $6.76 left)
 Code and data were copied to the pod; results merged back into `allen/outputs/decoder.json`,
 `microns_ambiguity/outputs/decoder2.json`, `allen/outputs/preds/`, logs in `allen/outputs/gpu_logs/`.
 Sweep scripts: `allen/sweep_gpu*.sh`, `microns_ambiguity/sweeps/sweep_gpu*.sh` (paths are pod paths).
-Headline: Allen pooled-cross orientation 0.310 (17M + 50 % condition subsampling; 85M plain also 0.310);
+Headline: Allen pooled-cross orientation 0.310 (17M + 50 % condition subsampling; 57M plain also 0.310);
 Allen cross RF 0.27-0.28 (single-animal populations beat mixed 0.22); MICrONS twin RF 0.507 (57M),
 in-vivo ori 0.388 (17M), in-vivo RF 0.247 (17M augmented).  Details in README §4 and Allen section.
 Lessons: (1) launch pod jobs with `nohup setsid ... &` inside a subshell; queue loops launched from
@@ -27,12 +27,19 @@ line contains the pattern (it kills the session).  (3) two big runs share 44 GB:
 models, `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.  (4) budget: $1.09/h burned faster than
 planned because both streams ran; check balance every hour.
 
-## Runs cut by the budget (queue them first on the next GPU session)
-- Allen: `allen/sweep_gpu8.sh` (fine-grained-epoch RF, `cross` and `pooledcross`, with augmentation);
-  seeds 1,2 and splits 1,2 of the best config (`g10_d512L8_cf50_*` in `allen/sweep_gpu5.sh`); 85M + cf50.
-- MICrONS: plain 17M in-vivo RF (comparison for the augmented 0.247), 57M twin orientation, 17M twin RF seed 2.
-- Fix the `within` regime: per-mouse selection slices < n; select on a slice of whole mice or on
-  pooled populations of the selection slice.
+## Consolidated conclusions (2026-09-10, after the second GPU session)
+- Orientation: mixed-population cells work (pooledwithin 0.28, pooledcross 0.29/0.24/0.26 over 3 splits,
+  baseline 0.19); single-animal cells at baseline on every split, seen or unseen animal.  Headline
+  config (17M + 50 % condition subsampling) = 2M standard config within noise; ensemble 0.30 on split 0.
+- RF: absolute R2 is split-dependent (cross 0.27 / -0.10 / -0.46; pooledcross 0.21 / 0.04 / -0.21).
+  Decomposition of saved predictions: per-mouse mean screen position is recovered (r 0.36-0.71 over 27
+  mouse-level predictions, permutation p <= 0.03), within-mouse layout is not (r ~ 0.1).  Report the
+  mouse-level correlation, not R2.  The earlier "RF crosses animals at R2 0.23" was split 0 only.
+- MICrONS: capacity pays on RF (twin 0.48 +- 0.01 at 17M, 0.51 at 57M; in vivo 0.225 plain, 0.262 with
+  75 % bin subsampling) and not on orientation (0.42 at 7M/17M/57M twin; in vivo 0.38 at 17M).
+  Every large run memorises; gains come from early stopping on a bigger model.  Seeds: `g12_*`.
+- Levers that do nothing: population size past 256 (Allen) / 512 (MICrONS), dropout, Gram dropout,
+  partial augmentation, augmentation on PCA features (destructive), stacking augmentation on 57M.
 
 ## Possible next steps
 - Ensembles over seeds on a shared split (predictions saved in allen/outputs/preds; `python -m allen.ensemble tag1 tag2`).

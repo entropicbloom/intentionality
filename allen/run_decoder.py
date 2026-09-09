@@ -65,7 +65,12 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
     else:                                    # "within" / "pooledwithin": test neurons from the training animals
         test_mice = []
         idx = np.flatnonzero(keep); perm = rng.permutation(idx); tr, va = perm[: len(idx) // 2], perm[len(idx) // 2:]
-        ks = int(len(tr) * sel_frac); sel, tr = tr[:ks], tr[ks:]          # selection slice of training neurons
+        if regime == "within":               # single-animal populations: select on whole held-out mice (per-mouse slices would be < n)
+            perm_m = rng.permutation(mice); ks = max(1, int(len(mice) * sel_frac)); sel_mice = perm_m[:ks]
+            sel = np.flatnonzero(keep & np.isin(ds.mouse, sel_mice))
+            tr = tr[~np.isin(ds.mouse[tr], sel_mice)]; va = va[~np.isin(ds.mouse[va], sel_mice)]
+        else:
+            ks = int(len(tr) * sel_frac); sel, tr = tr[:ks], tr[ks:]      # selection slice of training neurons
     pools_tr = [np.intersect1d(tr, np.flatnonzero(ds.mouse == m)) for m in mice]
     pools_va = [np.intersect1d(va, np.flatnonzero(ds.mouse == m)) for m in mice]
     print(f"[{tag}] regime={regime} train neurons={len(tr)} val neurons={len(va)} mice={len(mice)}", flush=True)
