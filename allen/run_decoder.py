@@ -35,7 +35,12 @@ class MouseSampler(d2.Sampler):
         return idx, G
 
 
-def main(tag, regime="cross", n=128, test_frac=0.3, movie="both", ori_source="sg", content="ori", session="A", **kw):
+def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", ori_source="sg", content="ori", session="A", **kw):
+    """regimes: within      - neuron halves inside each mouse, populations within a mouse
+                cross       - train / test mice disjoint, populations within a mouse
+                pooledcross - train / test mice disjoint, populations mix neurons across mice
+                              (cross-mouse relations can anchor absolute screen position)
+    model selection uses held-out *mice* from the training set (sel_frac)."""
     ds = Allen(movie=movie, ori_source=ori_source, session=session)
     if content == "ori":
         y = ds.ori_class.copy(); y[~ds.ori_ok] = -1; task = "class"
@@ -49,17 +54,22 @@ def main(tag, regime="cross", n=128, test_frac=0.3, movie="both", ori_source="sg
     keep = np.ones(ds.n, bool)
     rng = np.random.default_rng(kw.get("seed", 0))
     mice = np.array(ds.mice)
-    if regime == "cross":
-        test_mice = rng.choice(mice, max(1, int(len(mice) * test_frac)), replace=False)
+    sel = None
+    if regime in ("cross", "pooledcross"):
+        perm_m = rng.permutation(mice); k = max(1, int(len(mice) * test_frac)); test_mice = perm_m[:k]
+        ks = max(1, int((len(mice) - k) * sel_frac)); sel_mice = perm_m[k:k + ks]
         tr = np.flatnonzero(keep & ~np.isin(ds.mouse, test_mice)); va = np.flatnonzero(keep & np.isin(ds.mouse, test_mice))
+        sel = np.flatnonzero(keep & np.isin(ds.mouse, sel_mice))
     else:
+        test_mice = []
         idx = np.flatnonzero(keep); perm = rng.permutation(idx); tr, va = perm[: len(idx) // 2], perm[len(idx) // 2:]
     pools_tr = [np.intersect1d(tr, np.flatnonzero(ds.mouse == m)) for m in mice]
     pools_va = [np.intersect1d(va, np.flatnonzero(ds.mouse == m)) for m in mice]
     print(f"[{tag}] regime={regime} train neurons={len(tr)} val neurons={len(va)} mice={len(mice)}", flush=True)
+    kw.pop("early_stop", None)
+    orig = d2.Sampler
     if regime in ("cross", "within"):
         # monkey-patch samplers so populations stay within a mouse
-        orig = d2.Sampler
         class S(orig):
             def __init__(self, Fn, pool, n_, rng_, mean, std):
                 # restrict whatever pool train() hands us (train / validation / selection) to within-mouse populations
@@ -70,10 +80,10 @@ def main(tag, regime="cross", n=128, test_frac=0.3, movie="both", ori_source="sg
                 return self._ms.batch(B)
         d2.Sampler = S
     try:
-        m = d2.train(ds.R, y, task, tr, va, n=n, **kw)
+        m = d2.train(ds.R, y, task, tr, va, n=n, sel_idx=sel, **kw)
     finally:
         if regime in ("cross", "within"): d2.Sampler = orig
-    m.update(regime=regime, movie=movie, content=content, session=session, n_train=int(len(tr)), n_val=int(len(va)), test_mice=[str(x) for x in (test_mice if regime == "cross" else [])])
+    m.update(regime=regime, movie=movie, content=content, session=session, n_train=int(len(tr)), n_val=int(len(va)), test_mice=[str(x) for x in test_mice])
     os.makedirs(OUT, exist_ok=True); p = os.path.join(OUT, "decoder.json"); d = json.load(open(p)) if os.path.exists(p) else {}
     d[tag] = m; json.dump(d, open(p, "w"))
     key = "acc" if task == "class" else "r2"
@@ -83,5 +93,5 @@ def main(tag, regime="cross", n=128, test_frac=0.3, movie="both", ori_source="sg
 if __name__ == "__main__":
     tag, regime = sys.argv[1], sys.argv[2]; kw = {}
     for a in sys.argv[3:]:
-        k, v = a.split("="); kw[k] = v if k in ("device", "movie", "ori_source", "content", "session") else (float(v) if k in ("lr", "early_stop", "dropout", "test_frac") else (bool(int(v)) if k == "rel_bias" else int(v)))
+        k, v = a.split("="); kw[k] = v if k in ("device", "movie", "ori_source", "content", "session") else (float(v) if k in ("lr", "early_stop", "dropout", "test_frac", "sel_frac") else (bool(int(v)) if k == "rel_bias" else int(v)))
     main(tag, regime, **kw)

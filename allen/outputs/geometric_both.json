@@ -1,0 +1,1 @@
+{"within": {}, "cross": {"mice": [], "acc": [], "acc_mod": [], "mean_acc": NaN, "mean_acc_mod": NaN}, "pooled": {}, "summary": {"within_mean": NaN, "cross_mean": NaN, "cross_mod_mean": NaN, "pooled_mean": NaN, "pooled_mod_mean": NaN, "pooled_null_mean": NaN, "chance": 0.125, "K": 8, "movie": "both"}}

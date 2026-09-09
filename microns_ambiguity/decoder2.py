@@ -95,14 +95,15 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
     the validation neurons never influence model selection."""
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
-    sel_idx = None
-    if early_stop > 0:
+    if sel_idx is not None:                     # caller-provided selection set (e.g. held-out mice)
+        sel_idx = np.asarray(sel_idx); train_idx = np.setdiff1d(np.asarray(train_idx), sel_idx)
+    elif early_stop > 0:
         train_idx = rng.permutation(np.asarray(train_idx)); k = int(len(train_idx) * early_stop)
         sel_idx, train_idx = train_idx[:k], train_idx[k:]
     Fn = torch.as_tensor(normalize_features(F), device=device)

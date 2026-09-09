@@ -357,27 +357,59 @@ out the content-bearing subspace.
 
 Open, and needed before this is a paper: a second animal for the class-level
 symmetry result (within one animal, two halves share every statistic; the
-claim that "45°" has a relational signature needs a cross-animal reference);
-in-vivo per-pair noise, which caps everything in vivo; and seeds on the
-larger-model runs.
+claim that "45°" has a relational signature needs a cross-animal reference —
+the Allen data below could not supply it because orientation is nearly absent
+from natural-movie correlations there); in-vivo per-pair noise, which caps
+everything in vivo; and seeds on the larger-model runs.
 
-## In progress: Allen Brain Observatory (cross-animal)
+## Allen Brain Observatory: a second dataset, 33 mice
 
-Visual Coding 2P, 36 VISp excitatory containers (33 mice), session A
-(drifting gratings, natural movies one and three, shared across mice) and
-session C (locally sparse noise → receptive fields, natural movies one and
-two).  Orientation labels from static gratings (6 classes) via the cell table.
-Preliminary, all 36 session-A mice: natural-movie correlations carry almost no
-orientation here — a fully labelled ridge readout reaches 0.236 against a
-0.198 majority rate, the same-vs-orthogonal correlation difference is 0.005
-(MICrONS in vivo: 0.09), and the class-level test is at chance within and
-across mice.  Receptive-field structure, by contrast, is strong and crosses
-animals: correlation falls from 0.137 to 0.093 with RF distance within a mouse
-and from 0.060 to 0.013 across mice (session C, 17 mice so far), and a
-leave-one-mouse-out labelled readout places a held-out mouse's neurons on the
-screen at R² 0.11.  The cross-animal decoder runs on RF are queued.  Whether
-orientation is recoverable from *some* stimulus-driven relational structure in
-this dataset (gratings rather than movies) is the next question.
+Visual Coding 2P (allensdk), VISp excitatory containers with ≥ 150
+orientation-labelled cells: 36 containers, 33 mice, 9,281 cells (session A)
+and 8,367 cells (session C).  Relations: signal correlations of trial-averaged
+dF/F to natural movies that are identical across all mice (session A: movies
+one + three, 4,500 bins; session C: one + two, 1,800 bins).  Contents:
+preferred orientation from static gratings (6 classes, cell table), receptive
+field centre from locally sparse noise (session C; 1,504 cells with a
+significant RF, 23–112 per mouse).  Code in `allen/`.
+
+**Orientation is nearly absent from natural-movie correlations in this
+dataset.**  Same-orientation pairs correlate 0.005 more than orthogonal pairs
+(MICrONS in vivo: 0.09); a fully labelled ridge readout reaches 0.236 against
+a 0.198 majority rate; the class-level test is at chance within and across
+mice (33 mice, K = 6); the label-free decoder is at the majority rate in every
+regime (within-mouse 0.171, cross-mouse 0.168, pooled cross-mouse 0.205).
+Removing shared population fluctuations (mean or top principal components) and
+coarser temporal binning do not change this.  Static- and drifting-grating
+orientations of the same cells agree within 15° for only 45–67 %, so labels
+are part of it, but the ceiling says the correlations themselves carry little.
+The relational signature of orientation that MICrONS shows is therefore not a
+generic property of natural-movie covariance; it may depend on the stimulus
+set, the deconvolved responses, or the twin-cleaned labels there.
+
+**Receptive-field position is present and crosses animals.**  Correlation
+falls with RF distance within a mouse (0.127 at < 5° to 0.068 beyond 40°) and
+across mice (0.049 to 0.011): two neurons in different animals covary when
+they look at the same part of the screen.
+
+| test (session C, absolute screen coordinates) | R² |
+|---|---|
+| labelled ridge, random halves | 0.27 |
+| labelled ridge, leave-one-mouse-out (place a held-out mouse's neurons) | 0.20 |
+| **label-free decoder, trained on 23 mice, tested on 10 held-out mice, populations mixing test mice**, 128 neurons | 0.11 (0.20 averaged over 32 populations) |
+| same, 256 neurons | 0.18 (**0.23** averaged) |
+| relative RF (within the mouse's own patch), any method | ≈ 0 |
+
+The cross-animal decoder recovers *where on the screen* a held-out mouse's
+neurons look, at or above the labelled cross-animal ceiling, using only the
+correlations among neurons of held-out animals — the anchor is that
+neurons of different mice covary by shared screen location.  What no method
+recovers is the layout *within* a mouse: with ~45 RF-labelled cells per mouse
+the internal retinotopic map is not estimable here, so the per-mouse grid
+class test is at its null and relative-RF readouts are at zero.
+
+Both regimes selected the model on held-out *mice* (20 % of the training
+mice), never on test mice.
 
 ## Caveats
 
