@@ -32,7 +32,26 @@ def trial_average(dff, table, n_frames):
 
 
 SESSIONS = {"A": ("three_session_A", [("natural_movie_one", 900), ("natural_movie_three", 3600)]),
-            "C": (("three_session_C", "three_session_C2"), [("natural_movie_one", 900), ("natural_movie_two", 900)])}
+            "C": (("three_session_C", "three_session_C2"), [("natural_movie_one", 900), ("natural_movie_two", 900)]),
+            # drifting gratings (session A): condition-averaged responses, 8 directions x 5 temporal frequencies
+            "DG": ("three_session_A", None)}
+
+
+def grating_responses(dff, table):
+    """mean dF/F per (direction, temporal frequency) condition over trials, minus the
+    blank-sweep mean -> (cells, 40); also the per-condition time course (cells, 40, 60)
+    at 30 Hz over the 2 s presentation."""
+    t = table[(table.blank_sweep == 0) & table.orientation.notna()]
+    dirs, tfs = sorted(t.orientation.unique()), sorted(t.temporal_frequency.unique())
+    blank = table[table.blank_sweep == 1]
+    b = np.mean([dff[:, s:e].mean(1) for s, e in zip(blank.start.values, blank.end.values)], 0) if len(blank) else 0
+    mean = np.zeros((dff.shape[0], len(dirs), len(tfs)), np.float32); course = np.zeros((dff.shape[0], len(dirs), len(tfs), 60), np.float32)
+    for i, d in enumerate(dirs):
+        for j, f in enumerate(tfs):
+            tt = t[(t.orientation == d) & (t.temporal_frequency == f)]
+            segs = [dff[:, s:s + 60] for s, e in zip(tt.start.values, tt.end.values) if s + 60 <= dff.shape[1]]
+            course[:, i, j] = np.mean(segs, 0); mean[:, i, j] = np.mean([sg.mean(1) for sg in segs], 0) - b
+    return mean.reshape(dff.shape[0], -1), course.reshape(dff.shape[0], -1), np.array(dirs), np.array(tfs)
 
 
 def main(max_containers=None, session="A"):
@@ -64,8 +83,11 @@ def main(max_containers=None, session="A"):
                 if os.path.exists(nwb): os.remove(nwb)
                 if attempt == 1: raise
         ids = np.array(ds.get_cell_specimen_ids()); ts, dff = ds.get_dff_traces()
-        r1 = trial_average(dff, ds.get_stimulus_table(movies[0][0]), movies[0][1])
-        r3 = trial_average(dff, ds.get_stimulus_table(movies[1][0]), movies[1][1])
+        if session == "DG":
+            r1, r3, dirs, tfs = grating_responses(dff, ds.get_stimulus_table("drifting_gratings"))
+        else:
+            r1 = trial_average(dff, ds.get_stimulus_table(movies[0][0]), movies[0][1])
+            r3 = trial_average(dff, ds.get_stimulus_table(movies[1][0]), movies[1][1])
         lab = cells.set_index("cell_specimen_id").reindex(ids)
         cells.to_csv(os.path.join(ADATA, "cell_specimens.csv"), index=False)
         np.savez(out, cell_ids=ids, r_nm1=r1, r_nm3=r3,

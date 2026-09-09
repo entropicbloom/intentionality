@@ -24,8 +24,8 @@ def z(M):
     return (M - M.mean()) / (M.std() + 1e-9)
 
 
-def main(min_per_class=8, n_rep=20, movie="both", ori_source="sg"):
-    ds = Allen(movie=movie, ori_source=ori_source); print(ds.summary(), flush=True)
+def main(min_per_class=8, n_rep=20, movie="both", ori_source="sg", session="A"):
+    ds = Allen(movie=movie, ori_source=ori_source, session=session); print({k: v for k, v in ds.summary().items() if "per_mouse" not in k}, flush=True)
     K = ds.K; G = cosine_gram(zscore_rows(ds.R)); lab = ds.ori_class; group = dihedral_group(K); P = all_perms(K)
     rng = np.random.default_rng(0)
     ok_m = {}
@@ -70,8 +70,8 @@ def main(min_per_class=8, n_rep=20, movie="both", ori_source="sg"):
                           pooled_mod_mean=float(np.mean([v["acc_mod"] for v in res["pooled"].values()])),
                           pooled_null_mean=float(np.mean([v["null_acc"] for v in res["pooled"].values()])), chance=1 / K, K=K, movie=movie)
     print(json.dumps(res["summary"], indent=1))
-    os.makedirs(OUT, exist_ok=True); json.dump(res, open(os.path.join(OUT, f"geometric_{movie}_{ori_source}.json"), "w"))
+    os.makedirs(OUT, exist_ok=True); json.dump(res, open(os.path.join(OUT, f"geometric_{session}_{movie}_{ori_source}.json"), "w"))
 
 
 if __name__ == "__main__":
-    main(movie=sys.argv[1] if len(sys.argv) > 1 else "both", ori_source=sys.argv[2] if len(sys.argv) > 2 else "sg")
+    main(movie=sys.argv[1] if len(sys.argv) > 1 else "both", ori_source=sys.argv[2] if len(sys.argv) > 2 else "sg", session=sys.argv[3] if len(sys.argv) > 3 else "A")

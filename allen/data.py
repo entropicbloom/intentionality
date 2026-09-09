@@ -30,6 +30,7 @@ class Allen:
         R, ids, mouse, cre, depth, exp = [], [], [], [], [], []
         for f in files:
             z = np.load(os.path.join(cache, f), allow_pickle=True)
+            # for session "DG": r_nm1 = condition means (40), r_nm3 = condition time courses (40 x 60)
             r = {"nm1": z["r_nm1"], "nm3": z["r_nm3"], "both": np.concatenate([z["r_nm1"], z["r_nm3"]], 1)}[movie].astype(np.float64)
             r = r - r.mean(1, keepdims=True)
             if demean:
