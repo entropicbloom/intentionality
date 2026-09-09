@@ -31,8 +31,7 @@ class MouseSampler(d2.Sampler):
         import torch
         idx = np.stack([self.rng.choice(self.pools[self.rng.choice(len(self.pools), p=self.w)], self.n, replace=False) for _ in range(B)])
         it = torch.as_tensor(idx, device=self.Fn.device); X = self.Fn[it]
-        G = torch.bmm(X, X.transpose(1, 2)); G = (G - self.mean) / self.std; G.diagonal(dim1=1, dim2=2).zero_()
-        return idx, G
+        return idx, d2.gram_from_features(X, self.mean, self.std)
 
 
 def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", ori_source="sg", content="ori", session="A", **kw):
@@ -52,7 +51,7 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
         y = ds.rf_dist.copy(); task = "reg"
     # every neuron is a token; only labelled neurons are supervised / scored
     keep = np.ones(ds.n, bool)
-    rng = np.random.default_rng(kw.get("seed", 0))
+    rng = np.random.default_rng(kw.pop("split_seed", kw.get("seed", 0)))   # split_seed: mouse split; seed: init/sampling
     mice = np.array(ds.mice)
     sel = None
     if regime in ("cross", "pooledcross"):
@@ -80,9 +79,13 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
                 return self._ms.batch(B)
         d2.Sampler = S
     try:
-        m = d2.train(ds.R, y, task, tr, va, n=n, sel_idx=sel, **kw)
+        m = d2.train(ds.R, y, task, tr, va, n=n, sel_idx=sel, return_preds=True, cover_groups=(ds.mouse if regime in ('cross', 'within') else None), **kw)
     finally:
         if regime in ("cross", "within"): d2.Sampler = orig
+    pr = m.pop("preds", None)
+    if pr is not None:                       # per-neuron averaged predictions, for cross-model ensembles
+        os.makedirs(os.path.join(OUT, "preds"), exist_ok=True)
+        np.savez(os.path.join(OUT, "preds", tag + ".npz"), idx=pr["idx"], P=pr["P"], y=y[pr["idx"]] if task == "class" else y[pr["idx"]])
     m.update(regime=regime, movie=movie, content=content, session=session, n_train=int(len(tr)), n_val=int(len(va)), test_mice=[str(x) for x in test_mice])
     os.makedirs(OUT, exist_ok=True); p = os.path.join(OUT, "decoder.json"); d = json.load(open(p)) if os.path.exists(p) else {}
     d[tag] = m; json.dump(d, open(p, "w"))
@@ -93,5 +96,5 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
 if __name__ == "__main__":
     tag, regime = sys.argv[1], sys.argv[2]; kw = {}
     for a in sys.argv[3:]:
-        k, v = a.split("="); kw[k] = v if k in ("device", "movie", "ori_source", "content", "session") else (float(v) if k in ("lr", "early_stop", "dropout", "test_frac", "sel_frac") else (bool(int(v)) if k == "rel_bias" else int(v)))
+        k, v = a.split("="); kw[k] = v if k in ("device", "movie", "ori_source", "content", "session") else (float(v) if k in ("lr", "early_stop", "dropout", "test_frac", "sel_frac", "cond_frac", "gram_drop") else (bool(int(v)) if k == "rel_bias" else int(v)))
     main(tag, regime, **kw)

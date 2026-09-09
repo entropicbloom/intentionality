@@ -46,7 +46,7 @@ if __name__ == "__main__":
     tag, sub, con = sys.argv[1:4]
     kw = {}
     for a in sys.argv[4:]:
-        k, v = a.split("="); kw[k] = v if k == "device" else (bool(int(v)) if k in ("rel_bias", "row_proj") else (float(v) if k in ("lr", "early_stop", "dropout") else int(v)))
+        k, v = a.split("="); kw[k] = v if k == "device" else (bool(int(v)) if k in ("rel_bias", "row_proj") else (float(v) if k in ("lr", "early_stop", "dropout", "cond_frac", "gram_drop") else int(v)))
     pca = kw.pop("pca", 0)
     if pca: kw["pca"] = 1
     main(tag, sub, con, **kw)

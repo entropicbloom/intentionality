@@ -72,6 +72,31 @@ class RelDecoder(nn.Module):
         return self.head(x)                                 # (B, n, out)
 
 
+# label-free augmentation of the relations, applied to TRAINING populations only
+# (train() switches it on around its gradient steps and off for every evaluation):
+#   cond_frac < 1: each population's Gram is recomputed from a random subset of the
+#                  feature dimensions (stimulus conditions / time bins), rows re-standardised;
+#   gram_drop > 0: random Gram entries are zeroed (zero = the mean correlation).
+AUG = dict(cond_frac=1.0, gram_drop=0.0, active=False)
+
+
+def gram_from_features(X, mean, std, rng=None):
+    """X: (B, n, d) row-normalised features -> standardised Gram (B, n, n), diagonal zeroed."""
+    if AUG["active"] and AUG["cond_frac"] < 1:
+        B, n, d = X.shape; k = max(2, int(round(d * AUG["cond_frac"])))
+        keep = torch.zeros(B, 1, d, device=X.device)
+        cols = torch.rand(B, d, device=X.device).argsort(1)[:, :k]
+        keep.scatter_(2, cols.unsqueeze(1), 1.0)
+        X = X * keep; X = X - X.sum(-1, keepdim=True) / k * keep
+        X = X / X.norm(dim=-1, keepdim=True).clamp_min(1e-8)
+    G = torch.bmm(X, X.transpose(1, 2))
+    G = (G - mean) / std
+    if AUG["active"] and AUG["gram_drop"] > 0:
+        G = G * (torch.rand_like(G) >= AUG["gram_drop"])
+    G.diagonal(dim1=1, dim2=2).zero_()
+    return G
+
+
 class Sampler:
     """Populations of n neurons from a pool; Gram computed from normalized features."""
     def __init__(self, Fn: torch.Tensor, pool, n, rng, mean, std):
@@ -81,10 +106,7 @@ class Sampler:
         idx = np.stack([self.rng.choice(self.pool, self.n, replace=False) for _ in range(B)])
         it = torch.as_tensor(idx, device=self.Fn.device)
         X = self.Fn[it]                                     # (B, n, d)
-        G = torch.bmm(X, X.transpose(1, 2))
-        G = (G - self.mean) / self.std
-        G.diagonal(dim1=1, dim2=2).zero_()
-        return idx, G
+        return idx, gram_from_features(X, self.mean, self.std)
 
 
 def normalize_features(F):
@@ -95,12 +117,18 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
-    the validation neurons never influence model selection."""
+    the validation neurons never influence model selection.
+    sel_reps>1: selection metric averaged over sel_reps population covers (less noisy).
+    The model state at the best selection epoch is restored before test-time averaging.
+    return_preds: also return per-neuron averaged logits (max avg_reps) for the validation set.
+    cover_groups: (N,) group id per neuron; if given, the averaged evaluation forms its
+    populations within a group (e.g. within a mouse), matching a group-restricted Sampler."""
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
+    AUG.update(cond_frac=cond_frac, gram_drop=gram_drop, active=False)
     if sel_idx is not None:                     # caller-provided selection set (e.g. held-out mice)
         sel_idx = np.asarray(sel_idx); train_idx = np.setdiff1d(np.asarray(train_idx), sel_idx)
     elif early_stop > 0:
@@ -139,7 +167,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
         """reps>1: cover the pool `reps` times with disjoint populations and
         average each neuron's prediction (logits / standardized values)."""
         sampler = sampler or va; pool_idx = val_idx if pool_idx is None else pool_idx
-        model.eval(); N = len(y); S = np.zeros((N, out_dim), np.float32); C = np.zeros(N)
+        AUG["active"] = False; model.eval(); N = len(y); S = np.zeros((N, out_dim), np.float32); C = np.zeros(N)
         with torch.no_grad():
             if reps == 1:
                 for _ in range(max(1, val_pops // batch)):
@@ -147,18 +175,21 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
                     np.add.at(S, idx.reshape(-1), out.reshape(-1, out_dim)); np.add.at(C, idx.reshape(-1), 1)
             else:
                 pool = np.asarray(pool_idx); r = np.random.default_rng(seed + 7)
+                subpools = [pool] if cover_groups is None else [pool[cover_groups[pool] == g] for g in np.unique(cover_groups[pool])]
+                subpools = [p for p in subpools if len(p) >= n]
                 for _ in range(reps):
-                    perm = r.permutation(pool); perm = perm[: (len(perm) // n) * n].reshape(-1, n)
+                    perm = np.concatenate([r.permutation(p)[: (len(p) // n) * n].reshape(-1, n) for p in subpools])
+                    perm = perm[r.permutation(len(perm))]
                     for b in range(0, len(perm), batch):
                         idx = perm[b:b + batch]; it = torch.as_tensor(idx, device=device); X = Fn[it]
-                        G = torch.bmm(X, X.transpose(1, 2)); G = (G - mean) / std; G.diagonal(dim1=1, dim2=2).zero_()
-                        out = model(G).cpu().numpy()
+                        out = model(gram_from_features(X, mean, std)).cpu().numpy()
                         np.add.at(S, idx.reshape(-1), out.reshape(-1, out_dim)); np.add.at(C, idx.reshape(-1), 1)
         model.train()
         if score_only is not None:
             keep = np.zeros(N, bool); keep[np.asarray(score_only)] = True; C = C * keep
         C = C * labelled                           # score labelled neurons only
         T = np.flatnonzero(C); P = S[T] / C[T, None]
+        preds = dict(idx=T, P=P)
         if task == "class":
             pred, true = P.argmax(1), y[T]
             # accuracy modulo the dihedral relabelings of a circular K-class content:
@@ -167,36 +198,43 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             for k in range(K):
                 for sgn in (1, -1):
                     best = max(best, float(((sgn * pred + k) % K == true).mean()))
-            return dict(acc=float((pred == true).mean()), acc_modD=best)
+            return dict(acc=float((pred == true).mean()), acc_modD=best, preds=preds)
         Y = (y[T] - mu) / sd; r2 = 1 - ((P - Y) ** 2).sum(0) / ((Y - Y.mean(0)) ** 2).sum(0)
-        return dict(r2=float(r2.mean()), r2_dims=r2.tolist())
+        return dict(r2=float(r2.mean()), r2_dims=r2.tolist(), preds=preds)
 
-    hist, t0 = [], time.time()
+    hist, t0, best_state = [], time.time(), None
     for ep in range(epochs):
         tot = 0.0
+        AUG["active"] = True
         for _ in range(pops_per_epoch // batch):
             idx, G = tr.batch(batch)
             out = model(G).reshape(-1, out_dim); it = torch.as_tensor(idx.reshape(-1), device=device)
             loss = loss_fn(out, yt[it]) if task == "class" else loss_fn(out, yt[it], it)
             opt.zero_grad(); loss.backward(); torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0); opt.step(); sched.step()
             tot += loss.item()
+        AUG["active"] = False
         if str(device) == "mps":
             torch.mps.empty_cache()          # the MPS caching allocator otherwise grows across epochs
-        m = evaluate(); m["loss"] = tot / (pops_per_epoch // batch); m["t"] = time.time() - t0
+        m = evaluate(); m.pop("preds", None); m["loss"] = tot / (pops_per_epoch // batch); m["t"] = time.time() - t0
         if se is not None:
-            ms = evaluate(sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = ms.get("acc", ms.get("r2"))
+            ms = evaluate(reps=sel_reps, sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = ms.get("acc", ms.get("r2"))
+            if best_state is None or m["sel"] > max(h["sel"] for h in hist):
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         hist.append(m)
         if verbose:
             print(f"    ep{ep} loss={m['loss']:.3f} " + " ".join(f"{k}={v:.3f}" for k, v in m.items() if k in ("acc", "r2", "sel")) + f" ({m['t']:.0f}s)", flush=True)
-    final = dict(hist[-1])
+    final = dict(hist[-1]); final.pop("preds", None)
     if se is not None:                       # early stopping: report the epoch best on the selection set
         key = "acc" if task == "class" else "r2"
         b = int(np.argmax([h["sel"] for h in hist])); final.update({key: hist[b][key], "best_epoch": b, "sel_metric": hist[b]["sel"]})
         final["val_at_last_epoch"] = hist[-1][key]
-    for reps in (8, 32):
+        model.load_state_dict(best_state)      # test-time averaging uses the selected model
+    for reps in avg_reps:
         m = evaluate(reps); final[f"acc_avg{reps}" if task == "class" else f"r2_avg{reps}"] = m.get("acc", m.get("r2"))
+        if return_preds and reps == max(avg_reps):
+            final["preds"] = m["preds"]
     if verbose:
         print("    test-time averaging: " + " ".join(f"{k}={v:.3f}" for k, v in final.items() if "avg" in k), flush=True)
-    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj,
+    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, cond_frac=cond_frac, gram_drop=gram_drop,
                                          params=nparam, pops_per_epoch=pops_per_epoch, epochs=epochs, batch=batch)
     return final

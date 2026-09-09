@@ -15,6 +15,11 @@ populations) on 9 held-out mice vs 0.19 baseline; labelled LOMO ceiling 0.35; wi
 (`cross`) regime stays at baseline.  Sweeps: `allen/sweep_dg.sh`, `allen/sweep_dg2.sh`.
 
 ## Possible next steps
+- Labelled reference ("ceiling") is not settled: ridge is one linear labelled model and the decoder
+  beat it on RF.  Open checks (deferred, user wants label-free decoding first): ridge accuracy vs
+  OSI gate and vs same-session (drifting-grating) labels to separate label noise from substrate
+  noise; nonlinear labelled readouts (kNN, MLP, labelled-token transformer); zero the Gram
+  diagonal in the ridge fit.  Call it "labelled reference" in the paper, not ceiling.
 - Decoder: average populations across scans in MICrONS (targets the session effect).
 - Allen: seeds for the 256-neuron / 30-epoch / 7.2M runs; larger selection set (sel_frac) so
   512-neuron runs do not early-stop at epoch 2.
