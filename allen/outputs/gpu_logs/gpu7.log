@@ -1,0 +1,138 @@
+[g7_ori_within_n128] regime=within train neurons=3480 val neurons=4641 mice=33
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/intentionality/allen/run_decoder.py", line 104, in <module>
+    main(tag, regime, **kw)
+  File "/workspace/intentionality/allen/run_decoder.py", line 86, in main
+    m = d2.train(ds.R, y, task, tr, va, n=n, sel_idx=sel, return_preds=True, cover_groups=(ds.mouse if regime in ('cross', 'within') else None), **kw)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/microns_ambiguity/decoder2.py", line 167, in train
+    se = Sampler(Fn, pool, n, np.random.default_rng(seed + 200), mean, std)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/allen/run_decoder.py", line 80, in __init__
+    self._ms = MouseSampler(Fn, pools, n_, rng_, mean, std); self.Fn, self.n, self.rng, self.mean, self.std = Fn, n_, rng_, mean, std
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/allen/run_decoder.py", line 28, in __init__
+    self.pool = np.concatenate(self.pools)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: need at least one array to concatenate
+[g7_ori_pooledwithin_n128] regime=pooledwithin train neurons=3480 val neurons=4641 mice=33
+    ep0 loss=1.818 acc=0.189 sel=0.209 (2s)
+    ep1 loss=1.781 acc=0.195 sel=0.188 (4s)
+    ep2 loss=1.777 acc=0.230 sel=0.241 (6s)
+    ep3 loss=1.762 acc=0.217 sel=0.247 (7s)
+    ep4 loss=1.753 acc=0.245 sel=0.267 (9s)
+    ep5 loss=1.745 acc=0.250 sel=0.277 (11s)
+    ep6 loss=1.734 acc=0.245 sel=0.274 (13s)
+    ep7 loss=1.729 acc=0.262 sel=0.271 (15s)
+    ep8 loss=1.721 acc=0.267 sel=0.281 (17s)
+    ep9 loss=1.712 acc=0.265 sel=0.284 (18s)
+    ep10 loss=1.703 acc=0.279 sel=0.278 (20s)
+    ep11 loss=1.696 acc=0.282 sel=0.288 (22s)
+    ep12 loss=1.689 acc=0.279 sel=0.314 (24s)
+    ep13 loss=1.677 acc=0.289 sel=0.303 (26s)
+    ep14 loss=1.667 acc=0.268 sel=0.286 (27s)
+    ep15 loss=1.660 acc=0.287 sel=0.311 (29s)
+    ep16 loss=1.651 acc=0.284 sel=0.310 (31s)
+    ep17 loss=1.643 acc=0.287 sel=0.293 (33s)
+    ep18 loss=1.633 acc=0.289 sel=0.311 (35s)
+    ep19 loss=1.625 acc=0.284 sel=0.301 (36s)
+    ep20 loss=1.614 acc=0.284 sel=0.300 (38s)
+    ep21 loss=1.605 acc=0.291 sel=0.307 (40s)
+    ep22 loss=1.593 acc=0.282 sel=0.288 (42s)
+    ep23 loss=1.586 acc=0.278 sel=0.290 (43s)
+    ep24 loss=1.583 acc=0.289 sel=0.306 (45s)
+    ep25 loss=1.575 acc=0.285 sel=0.314 (47s)
+    ep26 loss=1.570 acc=0.277 sel=0.317 (49s)
+    ep27 loss=1.568 acc=0.281 sel=0.307 (51s)
+    ep28 loss=1.565 acc=0.292 sel=0.306 (52s)
+    ep29 loss=1.565 acc=0.286 sel=0.308 (54s)
+    test-time averaging: acc_avg8=0.297 acc_avg32=0.307
+  -> g7_ori_pooledwithin_n128: acc=0.277 avg32=0.307 best_epoch=26
+[g7_ori_pooledwithin_n256] regime=pooledwithin train neurons=3480 val neurons=4641 mice=33
+    ep0 loss=1.810 acc=0.197 sel=0.197 (5s)
+    ep1 loss=1.777 acc=0.223 sel=0.235 (9s)
+    ep2 loss=1.765 acc=0.245 sel=0.253 (13s)
+    ep3 loss=1.747 acc=0.256 sel=0.264 (18s)
+    ep4 loss=1.744 acc=0.242 sel=0.263 (22s)
+    ep5 loss=1.720 acc=0.260 sel=0.283 (27s)
+    ep6 loss=1.698 acc=0.281 sel=0.298 (31s)
+    ep7 loss=1.686 acc=0.284 sel=0.275 (35s)
+    ep8 loss=1.655 acc=0.293 sel=0.293 (40s)
+    ep9 loss=1.631 acc=0.294 sel=0.280 (44s)
+    ep10 loss=1.597 acc=0.294 sel=0.271 (48s)
+    ep11 loss=1.562 acc=0.287 sel=0.268 (52s)
+    ep12 loss=1.520 acc=0.276 sel=0.273 (57s)
+    ep13 loss=1.471 acc=0.291 sel=0.286 (61s)
+    ep14 loss=1.416 acc=0.287 sel=0.291 (65s)
+    ep15 loss=1.348 acc=0.287 sel=0.271 (70s)
+    ep16 loss=1.282 acc=0.297 sel=0.281 (74s)
+    ep17 loss=1.204 acc=0.288 sel=0.275 (78s)
+    ep18 loss=1.127 acc=0.280 sel=0.281 (83s)
+    ep19 loss=1.057 acc=0.281 sel=0.261 (87s)
+    ep20 loss=0.994 acc=0.280 sel=0.265 (91s)
+    ep21 loss=0.930 acc=0.278 sel=0.273 (96s)
+    ep22 loss=0.885 acc=0.279 sel=0.265 (100s)
+    ep23 loss=0.839 acc=0.271 sel=0.270 (104s)
+    ep24 loss=0.815 acc=0.279 sel=0.270 (109s)
+    ep25 loss=0.788 acc=0.284 sel=0.270 (113s)
+    ep26 loss=0.772 acc=0.280 sel=0.271 (117s)
+    ep27 loss=0.759 acc=0.273 sel=0.273 (122s)
+    ep28 loss=0.752 acc=0.284 sel=0.268 (126s)
+    ep29 loss=0.750 acc=0.288 sel=0.268 (130s)
+    test-time averaging: acc_avg8=0.291 acc_avg32=0.288
+  -> g7_ori_pooledwithin_n256: acc=0.281 avg32=0.288 best_epoch=6
+[g7_rf_within_n128] regime=within train neurons=3138 val neurons=4184 mice=33
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/intentionality/allen/run_decoder.py", line 104, in <module>
+    main(tag, regime, **kw)
+  File "/workspace/intentionality/allen/run_decoder.py", line 86, in main
+    m = d2.train(ds.R, y, task, tr, va, n=n, sel_idx=sel, return_preds=True, cover_groups=(ds.mouse if regime in ('cross', 'within') else None), **kw)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/microns_ambiguity/decoder2.py", line 167, in train
+    se = Sampler(Fn, pool, n, np.random.default_rng(seed + 200), mean, std)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/allen/run_decoder.py", line 80, in __init__
+    self._ms = MouseSampler(Fn, pools, n_, rng_, mean, std); self.Fn, self.n, self.rng, self.mean, self.std = Fn, n_, rng_, mean, std
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/allen/run_decoder.py", line 28, in __init__
+    self.pool = np.concatenate(self.pools)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: need at least one array to concatenate
+[g7_rf_pooledwithin_n128] regime=pooledwithin train neurons=3138 val neurons=4184 mice=33
+    ep0 loss=0.987 r2=0.082 sel=0.144 (3s)
+    ep1 loss=0.905 r2=0.093 sel=0.134 (5s)
+    ep2 loss=0.895 r2=0.093 sel=0.155 (8s)
+    ep3 loss=0.885 r2=0.091 sel=0.184 (10s)
+    ep4 loss=0.872 r2=0.109 sel=0.179 (13s)
+    ep5 loss=0.874 r2=0.122 sel=0.199 (15s)
+    ep6 loss=0.873 r2=0.116 sel=0.200 (18s)
+    ep7 loss=0.864 r2=0.131 sel=0.218 (20s)
+    ep8 loss=0.852 r2=0.125 sel=0.240 (23s)
+    ep9 loss=0.853 r2=0.132 sel=0.232 (25s)
+    ep10 loss=0.856 r2=0.121 sel=0.211 (28s)
+    ep11 loss=0.850 r2=0.134 sel=0.225 (30s)
+    ep12 loss=0.845 r2=0.136 sel=0.227 (33s)
+    ep13 loss=0.843 r2=0.137 sel=0.221 (35s)
+    ep14 loss=0.836 r2=0.141 sel=0.241 (38s)
+    ep15 loss=0.837 r2=0.144 sel=0.238 (40s)
+    ep16 loss=0.828 r2=0.142 sel=0.243 (43s)
+    ep17 loss=0.824 r2=0.143 sel=0.257 (45s)
+    ep18 loss=0.824 r2=0.156 sel=0.235 (48s)
+    ep19 loss=0.821 r2=0.139 sel=0.253 (50s)
+    ep20 loss=0.817 r2=0.146 sel=0.250 (53s)
+    ep21 loss=0.814 r2=0.157 sel=0.256 (55s)
+    ep22 loss=0.816 r2=0.149 sel=0.236 (58s)
+    ep23 loss=0.803 r2=0.153 sel=0.245 (60s)
+    ep24 loss=0.806 r2=0.146 sel=0.244 (63s)
+    ep25 loss=0.806 r2=0.149 sel=0.254 (65s)
+    ep26 loss=0.796 r2=0.155 sel=0.260 (67s)
+    ep27 loss=0.801 r2=0.156 sel=0.256 (70s)
+    ep28 loss=0.799 r2=0.155 sel=0.256 (72s)
+    ep29 loss=0.798 r2=0.148 sel=0.256 (75s)
+    test-time averaging: r2_avg8=0.159 r2_avg32=0.165
+  -> g7_rf_pooledwithin_n128: r2=0.155 avg32=0.165 best_epoch=26
+SWEEP_GPU7_DONE

@@ -77,7 +77,7 @@ class RelDecoder(nn.Module):
 #   cond_frac < 1: each population's Gram is recomputed from a random subset of the
 #                  feature dimensions (stimulus conditions / time bins), rows re-standardised;
 #   gram_drop > 0: random Gram entries are zeroed (zero = the mean correlation).
-AUG = dict(cond_frac=1.0, gram_drop=0.0, active=False)
+AUG = dict(cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, active=False)   # aug_prob: fraction of training populations augmented
 
 
 def gram_from_features(X, mean, std, rng=None):
@@ -87,6 +87,9 @@ def gram_from_features(X, mean, std, rng=None):
         keep = torch.zeros(B, 1, d, device=X.device)
         cols = torch.rand(B, d, device=X.device).argsort(1)[:, :k]
         keep.scatter_(2, cols.unsqueeze(1), 1.0)
+        if AUG["aug_prob"] < 1:                                   # un-augmented populations keep every condition
+            full = (torch.rand(B, 1, 1, device=X.device) >= AUG["aug_prob"]).float()
+            keep = torch.maximum(keep, full); k = keep.sum(-1, keepdim=True)
         X = X * keep; X = X - X.sum(-1, keepdim=True) / k * keep
         X = X / X.norm(dim=-1, keepdim=True).clamp_min(1e-8)
     G = torch.bmm(X, X.transpose(1, 2))
@@ -117,7 +120,7 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
@@ -128,7 +131,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     cover_groups: (N,) group id per neuron; if given, the averaged evaluation forms its
     populations within a group (e.g. within a mouse), matching a group-restricted Sampler."""
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
-    AUG.update(cond_frac=cond_frac, gram_drop=gram_drop, active=False)
+    AUG.update(cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob, active=False)
     if sel_idx is not None:                     # caller-provided selection set (e.g. held-out mice)
         sel_idx = np.asarray(sel_idx); train_idx = np.setdiff1d(np.asarray(train_idx), sel_idx)
     elif early_stop > 0:
@@ -235,6 +238,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             final["preds"] = m["preds"]
     if verbose:
         print("    test-time averaging: " + " ".join(f"{k}={v:.3f}" for k, v in final.items() if "avg" in k), flush=True)
-    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, cond_frac=cond_frac, gram_drop=gram_drop,
+    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
+                 heads=heads, dropout=dropout, lr=lr, seed=seed, early_stop=early_stop, sel_reps=sel_reps, n_sel=(int(len(sel_idx)) if sel_idx is not None else 0),
                                          params=nparam, pops_per_epoch=pops_per_epoch, epochs=epochs, batch=batch)
     return final

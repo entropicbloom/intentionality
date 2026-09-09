@@ -39,7 +39,10 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
                 cross       - train / test mice disjoint, populations within a mouse
                 pooledcross - train / test mice disjoint, populations mix neurons across mice
                               (cross-mouse relations can anchor absolute screen position)
-    model selection uses held-out *mice* from the training set (sel_frac)."""
+    model selection uses held-out *mice* from the training set (sel_frac).
+    Regimes (split x population): within = training animals, single-animal populations;
+    pooledwithin = training animals, mixed populations; cross = held-out animals,
+    single-animal populations; pooledcross = held-out animals, mixed populations."""
     ds = Allen(movie=movie, ori_source=ori_source, session=session)
     if content == "ori":
         y = ds.ori_class.copy(); y[~ds.ori_ok] = -1; task = "class"
@@ -51,7 +54,7 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
         y = ds.rf_dist.copy(); task = "reg"
     # every neuron is a token; only labelled neurons are supervised / scored
     keep = np.ones(ds.n, bool)
-    rng = np.random.default_rng(kw.pop("split_seed", kw.get("seed", 0)))   # split_seed: mouse split; seed: init/sampling
+    split_seed = kw.pop("split_seed", kw.get("seed", 0)); rng = np.random.default_rng(split_seed)   # split_seed: mouse split; seed: init/sampling
     mice = np.array(ds.mice)
     sel = None
     if regime in ("cross", "pooledcross"):
@@ -59,9 +62,10 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
         ks = max(1, int((len(mice) - k) * sel_frac)); sel_mice = perm_m[k:k + ks]
         tr = np.flatnonzero(keep & ~np.isin(ds.mouse, test_mice)); va = np.flatnonzero(keep & np.isin(ds.mouse, test_mice))
         sel = np.flatnonzero(keep & np.isin(ds.mouse, sel_mice))
-    else:
+    else:                                    # "within" / "pooledwithin": test neurons from the training animals
         test_mice = []
         idx = np.flatnonzero(keep); perm = rng.permutation(idx); tr, va = perm[: len(idx) // 2], perm[len(idx) // 2:]
+        ks = int(len(tr) * sel_frac); sel, tr = tr[:ks], tr[ks:]          # selection slice of training neurons
     pools_tr = [np.intersect1d(tr, np.flatnonzero(ds.mouse == m)) for m in mice]
     pools_va = [np.intersect1d(va, np.flatnonzero(ds.mouse == m)) for m in mice]
     print(f"[{tag}] regime={regime} train neurons={len(tr)} val neurons={len(va)} mice={len(mice)}", flush=True)
@@ -86,7 +90,7 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
     if pr is not None:                       # per-neuron averaged predictions, for cross-model ensembles
         os.makedirs(os.path.join(OUT, "preds"), exist_ok=True)
         np.savez(os.path.join(OUT, "preds", tag + ".npz"), idx=pr["idx"], P=pr["P"], y=y[pr["idx"]] if task == "class" else y[pr["idx"]])
-    m.update(regime=regime, movie=movie, content=content, session=session, n_train=int(len(tr)), n_val=int(len(va)), test_mice=[str(x) for x in test_mice])
+    m.update(split_seed=int(split_seed), test_frac=test_frac, sel_frac=sel_frac, ori_source=ori_source, regime=regime, movie=movie, content=content, session=session, n_train=int(len(tr)), n_val=int(len(va)), test_mice=[str(x) for x in test_mice])
     os.makedirs(OUT, exist_ok=True); p = os.path.join(OUT, "decoder.json"); d = json.load(open(p)) if os.path.exists(p) else {}
     d[tag] = m; json.dump(d, open(p, "w"))
     key = "acc" if task == "class" else "r2"
@@ -96,5 +100,5 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
 if __name__ == "__main__":
     tag, regime = sys.argv[1], sys.argv[2]; kw = {}
     for a in sys.argv[3:]:
-        k, v = a.split("="); kw[k] = v if k in ("device", "movie", "ori_source", "content", "session") else (float(v) if k in ("lr", "early_stop", "dropout", "test_frac", "sel_frac", "cond_frac", "gram_drop") else (bool(int(v)) if k == "rel_bias" else int(v)))
+        k, v = a.split("="); kw[k] = v if k in ("device", "movie", "ori_source", "content", "session") else (float(v) if k in ("lr", "early_stop", "dropout", "test_frac", "sel_frac", "cond_frac", "gram_drop", "aug_prob") else (bool(int(v)) if k == "rel_bias" else int(v)))
     main(tag, regime, **kw)

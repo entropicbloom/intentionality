@@ -1,0 +1,4 @@
+[g10_d512L8_cf50_s1] regime=pooledcross train neurons=6706 val neurons=2575 mice=33
+    ep0 loss=1.804 acc=0.199 sel=0.191 (17s)
+    ep1 loss=1.784 acc=0.249 sel=0.215 (33s)
+    ep2 loss=1.784 acc=0.232 sel=0.185 (50s)
