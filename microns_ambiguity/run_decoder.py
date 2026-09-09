@@ -57,7 +57,9 @@ def main(substrates, contents, variants=("full",), seeds=DEC_SEEDS, pop=DEC_POP,
                     if variant == "shuffled":
                         yy[keep] = np.random.default_rng(seed + 7).permutation(y[keep])
                     t0 = time.time(); print(f"[{key}] n={len(keep)}", flush=True)
-                    m = train_decoder(G, yy, task, tr, va, seed=seed, n=pop, target_only=(variant == "target_only"), **kw)
+                    m = train_decoder(G, yy, task, tr, va, seed=seed, n=pop, target_only=(variant == "target_only"),
+                                      standardize=(variant == "scaled"), dense=(variant == "dense"),
+                                      anchored=(variant == "anchored"), **kw)
                     m.update(n=int(len(keep)), K=K, task=task, pop=pop, seconds=time.time() - t0)
                     m["ars"] = ars_fano(m["acc"], K) if task == "class" else ars_gaussian(m["r2"])
                     results[key] = m

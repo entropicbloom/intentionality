@@ -1,0 +1,41 @@
+<title>Cortex Ambiguity Report</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--paper:#f5f6f8;--ink:#1b2230;--muted:#5c6878;--rule:#d6dbe3;--tint:#e9edf3;--accent:#1f618d;--warm:#b8412f;--code:#eef1f5;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#14181e;--ink:#e6e9ee;--muted:#9aa5b4;--rule:#2c333d;--tint:#1c222b;--accent:#6fa9d8;--warm:#e07a66;--code:#1b2129;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#14181e;--ink:#e6e9ee;--muted:#9aa5b4;--rule:#2c333d;--tint:#1c222b;--accent:#6fa9d8;--warm:#e07a66;--code:#1b2129;color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.55;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding:40px 24px 80px}
+header{border-bottom:1px solid var(--rule);padding-bottom:20px;margin-bottom:28px}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:"IBM Plex Serif",Georgia,serif;font-weight:600;font-size:clamp(28px,4vw,40px);line-height:1.15;margin:8px 0 10px;text-wrap:balance;max-width:24ch}
+header p{max-width:68ch;color:var(--muted);margin:0}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:0 0 36px}
+.keys div{background:var(--tint);padding:14px 16px}
+.keys b{display:block;font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--accent)}
+.keys b.warm{color:var(--warm)}
+.keys span{font-size:13px;color:var(--muted)}
+article{max-width:68ch}
+article h2{font-family:"IBM Plex Serif",Georgia,serif;font-weight:600;font-size:26px;margin:44px 0 12px;text-wrap:balance}
+article h3{font-family:"IBM Plex Serif",Georgia,serif;font-weight:500;font-size:20px;margin:32px 0 10px;text-wrap:balance}
+article p,article li{max-width:68ch}
+article code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:var(--code);padding:1px 4px;border-radius:3px}
+article a{color:var(--accent)}
+figure{margin:20px 0;width:min(1100px,calc(100vw - 48px))}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--rule);background:#fff}
+.tw{overflow-x:auto;margin:16px 0;width:min(1100px,calc(100vw - 48px))}
+table{border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+th,td{padding:6px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:12.5px;letter-spacing:.03em;text-transform:uppercase}
+td:not(:first-child),th:not(:first-child){font-family:"IBM Plex Mono",monospace;font-size:13px}
+strong{font-weight:600}
+</style><div class="wrap"><header><div class="eyebrow">MICrONS mm³ · one mouse · 12,894 coregistered neurons · Allen Brain Observatory cross-animal in progress</div>
+<h1>Does relational structure fix what a cortical neuron represents?</h1>
+<p>The paper's relational-decoding protocols applied to real visual cortex: synaptic, proximity, functional and spatial relations × orientation, receptive-field position and anatomy.</p></header>
+<div class="keys">
+<div><b>1.00</b><span>orientation classes recovered from functional relations at the class level, labels hidden (H(I|R,C) ≈ 0 bits)</span></div>
+<div><b>0.41 / 0.49</b><span>per-neuron orientation from a 512-neuron correlation matrix, no labels, no reference / labelled ceiling</span></div>
+<div><b>R² 0.45 / 0.67</b><span>per-neuron receptive-field position, same decoder / labelled ceiling</span></div>
+<div><b class="warm">0.29 vs 0.05</b><span>small decoder: RF distance vs absolute (x, y) — the frame needs capacity to find</span></div>
+<div><b>1.00 → 0.11</b><span>absolute orientation after projecting out anisotropy; still 1.00 modulo D₈</span></div>
+</div>

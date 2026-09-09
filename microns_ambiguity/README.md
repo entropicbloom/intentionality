@@ -1,12 +1,13 @@
 # Representational ambiguity in mouse visual cortex (MICrONS)
 
 Does the relational structure of a real cortical population fix what its
-neurons represent?  This is the biological test the paper
-(`entropicbloom.github.io/consciousness`) leaves as future work: take neurons
-whose content is known (receptive-field position, preferred orientation), hide
-the labels, and ask whether the content can be recovered from the *relations*
-among neurons alone — first from synaptic connectivity, then from functional
-covariation — with the same protocols used on MNIST networks.
+neurons represent, and up to which symmetries?  This applies the
+relational-decoding framework of arXiv:2512.11000 (§4.4 there names the
+biological test) to cortex: take neurons whose content is known
+(receptive-field position, preferred orientation), hide the labels, and ask
+whether the content can be recovered from the *relations* among neurons alone —
+from synaptic connectivity and from functional covariation — first at the class
+level with a labelled reference, then per neuron with no reference at all.
 
 ## Data
 
@@ -82,13 +83,18 @@ splits.  Additions to the paper's protocol:
   measures content-specific signal beyond "some particular set of neurons".
 
 **P2 — learned decoder with hidden population labels (paper §2.1.4).**  A
-population of 48 neurons is sampled; its 48 × 48 Gram is fed row-wise, as
-tokens without positional encoding, to a 2-layer / 4-head transformer that
-predicts the content of token 0.  Training populations come from one half of
-the neurons, validation populations from the other, so the decoder must learn
-population-geometry regularities that transfer to unseen neurons.  Ablation
-`target_only` removes every relation not involving the target (the paper's
-local-vs-global control); `shuffled` trains on permuted labels.
+population of *n* neurons is sampled; its *n × n* Gram is fed row-wise, as
+tokens without positional encoding, to a transformer that predicts each
+token's content.  Training populations come from one half of the neurons,
+validation populations from the other, so the decoder must learn
+population-geometry regularities that transfer to unseen neurons.  The first
+version (`decoder.py`: 48 neurons, token-0 supervision) and its iteration
+(`decoder2.py`: on-the-fly Grams, dense supervision, optional relational
+attention bias, early stopping on a held-out slice of the training neurons)
+are both reported in §4.  Ablation `target_only` removes every relation not
+involving the target (the paper's local-vs-global control); `shuffled` trains
+on permuted labels; `anchored` (diagnostic only) gives the other tokens their
+true labels.
 
 **P3 — reference-free recovery.**  Kernel PCA of the test population's own
 Gram; content is read out from the top-2 axes up to rotation/reflection/scale
@@ -118,6 +124,9 @@ anisotropy rather than by the difference structure.
     python -m microns_ambiguity.transfer
     python -m microns_ambiguity.symmetry
     python -m microns_ambiguity.plots && python -m microns_ambiguity.summarize
+    # per-neuron decoder iteration (see data/sweep*.sh for the exact runs)
+    python -m microns_ambiguity.run_decoder2 <tag> func_is rf n=512 dim=256 layers=4 rel_bias=1 device=mps batch=8 epochs=20 pops_per_epoch=4000 early_stop=0.15 pca=1
+    python -m microns_ambiguity.plot_decoder2 && python -m microns_ambiguity.summarize_decoder2
 
 
 ## Results
@@ -230,41 +239,72 @@ spatial signature but not its absolute frame.  This is the empirical version
 of the automorphism argument: residual ambiguity = the symmetry group of the
 relational structure, and it is broken by anisotropy, not by more relations.
 
-### 4. Learned decoder with hidden population labels
+### 4. Per-neuron decoding with no labels and no reference
 
-![decoder](outputs/decoder.png)
+The paper's transformer decoder, applied to sampled populations: a population
+of *n* neurons is presented as its *n × n* correlation matrix, rows as tokens,
+and the decoder predicts each token's content.  Training populations come from
+one half of the neurons, validation populations from the other; nothing but
+the correlation matrix enters the input.  The first version (48 neurons,
+0.3M parameters, one supervised token per population) was at the class-prior
+baseline for everything except a small orientation gain.  Iterating on it:
 
-| substrate | orientation acc (K=8) | RF R² | layer acc | area acc |
+![decoder scaling](outputs/decoder2_scaling.png)
+
+| change | orientation (twin) | RF (x, y) (twin) | note |
+|---|---|---|---|
+| original: 48 neurons, 0.3M, token-0 supervision | 0.305 (in vivo) | 0.007 | class prior 0.255 / R² 0 |
+| standardized inputs | 0.303 | 0.012 | no effect |
+| all tokens supervised (dense) | 0.325 | 0.015 | small gain, no extra compute |
+| on-the-fly Grams, 128–1024 neurons, 0.3M | 0.34–0.36 | 0.02–0.07 | size helps RF slowly, orientation saturates |
+| relational attention bias | = | = | no effect |
+| test-time averaging over 32 populations | +0.00–0.01 | +0.00–0.01 | predictions already consistent |
+| **2.2M parameters** (width 256, 4 layers), 512 neurons | **0.416** | **0.279** | the largest single gain; RF from 0.07 |
+| 7.2M parameters | 0.420 | 0.449 (20 epochs, early-stopped) | RF still improving with capacity |
+| 20 epochs × 4000 populations | 0.426 peak → 0.367 end | 0.437 | orientation memorises the ~2,600 training neurons; RF does not |
+| frame-free target (distance from RF centre), 0.3M | – | 0.288 vs 0.046 for (x, y) | the small model recovers relative position, not the frame |
+
+**Headline numbers** (512 neurons, 2.2M parameters, early-stopped on a
+held-out 20 % of the *training* neurons, 3 seeds; the validation neurons never
+influence model selection):
+
+| content | in vivo | twin | labelled-reference ceiling (in vivo / twin) | baseline |
 |---|---|---|---|---|
-| synaptic | 0.26 | 0.00 | 0.52 | 0.58 |
-| proximity | 0.26 | **0.10** | 0.57 | **0.80** |
-| rewired | 0.26 | 0.00 | 0.52 | 0.58 |
-| functional, in vivo | **0.31** (0.33 at n=128; target-only 0.28) | 0.01 (0.01 at n=128) | 0.48 | 0.68 |
-| functional, digital twin | 0.26 (0.27 at n=128) | 0.01 | 0.50 | 0.73 |
-| soma distance | 0.26 | 0.04 | 0.50 | 0.68 |
-| majority class / shuffled labels | 0.25 / 0.25–0.27 | 0 / 0.00 | 0.49 | 0.69 |
+| orientation, 8 classes | 0.368 ± 0.007 | 0.406 ± 0.010 | 0.41 / 0.49 | 0.255 (majority class) |
+| RF (x, y), R² | 0.200 ± 0.003 | 0.341 ± 0.005 | 0.32 / 0.67 | 0 |
+| RF distance from centre, R² | 0.241 (1 seed) | 0.351 ± 0.001 | – | 0 |
+| best single run (7.2M) | – | 0.420 / 0.449 | | |
 
-Mean over 2 seeds (orientation, RF) or 1 seed; 48-neuron populations, 24k
-training populations × 10 epochs; n=128 for the functional substrates
-(a 256-neuron sweep was killed by the OS for memory and is not reported).
+The *labelled-reference ceiling* is a ridge readout from each validation
+neuron's correlations to all ~6,000 labelled training neurons — the same
+correlations, plus a fully labelled anchor set.  In vivo, the label-free
+decoder reaches 90 % of that ceiling for orientation and 63 % for RF; on
+twin correlations 83 % and 51 % (67 % with the 7.2M model).  Orientation's
+ceiling is itself capped by label noise: in-vivo and digital-twin preferred
+orientations agree on only 70 % of neurons at 8 classes.
 
-**This protocol fails in cortex.**  With population labels hidden and only 48
-(or 128) neurons per population, the decoder stays at the class-prior baseline
-for every substrate and content except a small orientation gain from in-vivo
-covariance (0.31–0.33 vs 0.25, of which the target-only ablation keeps 0.28)
-and a small RF gain from proximity relations (R² 0.10).  Class-level matching
-on the same Grams is perfect.  The difference is signal-to-noise: pairwise
-signal correlations are 0.03–0.06 even for neurons with overlapping RFs, so a
-48-neuron Gram is a noisy sample in which the target's row cannot be
-anchored to anyone else's unknown content, whereas the class-Gram pools
-10⁵–10⁶ pairs.  The paper's decoder had 784-neuron populations with strong,
-low-noise weight similarities.  Going to 128 neurons did not change the
-picture; whether 10³-neuron populations would is the obvious next test and
-needs more memory than this run had.  The honest reading: in cortex the
-content is in the relational structure, but recovering it *per neuron without
-any labelled anchor* needs far more relational context than the paper's
-networks did.
+**What limited the first version, in order.**  (i) Capacity: the 0.3M model
+could not find the anisotropy that fixes the absolute RF frame — it recovered
+distance from centre at R² 0.29 while (x, y) stayed at 0.05; the 2.2M model
+recovers (x, y) at 0.28–0.34 and its predictions are in the true frame
+(orientation accuracy modulo D₈ equals plain accuracy for every run).
+(ii) Data quality: twin correlations have ~6× less per-pair noise than 120-bin
+in-vivo correlations, and the labelled ceilings show the same gap
+independently of any decoder (RF 0.32 vs 0.67).  (iii) Population size: real
+but saturating by 512 neurons for both contents once capacity is adequate.
+(iv) Regularisation: orientation (5,287 labelled neurons) memorises within a
+few epochs and needs early stopping; RF (11,326) does not; dropout 0.25 hurt.
 
+![overfitting](outputs/decoder2_overfit.png)
+
+**Reading.**  A decoder that sees only the correlation matrix of ~500 cortical
+neurons, with no labels and no reference population, assigns orientation
+preference at most of what a fully labelled readout achieves and places
+receptive fields on the screen at R² 0.34–0.45.  Recovery follows the symmetry
+structure of the relations: frame-free content first, absolute content once
+the model is large enough to use the weak anisotropies.  This is the per-neuron
+form of the class-level result in §1–3, and it matches the MNIST
+input-neuron subset curve (R² rising from 0.23 at 4 neurons to 0.84 at 784).
 
 ### 5. Reference-free recovery
 
@@ -293,46 +333,51 @@ wide margin here, the opposite of the MNIST input layer, and the "up to
 automorphism" reading needs a labelled reference or a learned decoder to pick
 out the content-bearing subspace.
 
-## What this says for the paper
+## What this says
 
-1. **A biological population passes the paper's test — for functional
-   relational structure.**  Orientation and RF position are unambiguously
-   specified (H(I|R,C) = 0 bits) by signal correlations among 12,894 neurons
-   in one mouse, with the same permutation-matching protocol used for dropout
-   MNIST networks, and the class-level geometry transfers across substrates
-   as the MNIST geometry transferred across architectures.
+1. **Relational structure fixes content in a real cortical population.**
+   At the class level, orientation and RF classes are recovered exactly from
+   signal correlations with identities hidden (H(I|R,C) ≈ 0 bits); per neuron,
+   with no labels and no reference, a decoder recovers orientation at 83–90 %
+   of the labelled ceiling and RF position at R² 0.34–0.45.
 
-2. **Structural connectivity is a weaker and more confounded carrier.**  In a
-   1 mm³ volume the relational structure of synapses is dominated by where
-   neurons are.  RF position is identifiable from synaptic relations, mostly
-   through cortical location, partly through wiring specificity (rewired
-   null); orientation is not identifiable at all in absolute terms, and only
-   modulo D₈ once the difference structure is denoised.  The paper's
-   "structural connectivity is a stable proxy for functional" (Limitation 3)
-   does not hold in cortex at this scale.
+2. **Content is fixed up to the automorphism group of the relational
+   structure, and anisotropy is what breaks it.**  A Δori-only class-Gram
+   identifies orientation only modulo rotation/reflection; the cardinal bias
+   fixes the frame.  The per-neuron decoder shows the same thing dynamically:
+   small models recover frame-free RF distance long before absolute position.
 
-3. **Ambiguity has a symmetry structure.**  The Fano-bound ARS hides it; the
-   posterior over relabelings and the accuracy-modulo-group make it explicit.
-   For a circular quality space the difference rule leaves a dihedral
-   ambiguity, and what resolves it in cortex is anisotropy of the
-   representation (cardinal bias), not richer relations.  This is a concrete,
-   testable refinement of the "relational structure fixes content" claim: it
-   fixes content up to the automorphism group of the relational structure, and
-   content is absolutely fixed only where the structure is asymmetric.
+3. **Synaptic relations, at connectome scale, carry RF at the map level and
+   orientation only as a difference structure.**  Not a proxy for functional
+   relations in this volume.
 
-4. **Per-neuron recovery without an anchor is the open problem.**  Both the
-   reference-free embedding and the hidden-label decoder are weak here: the
-   dominant axes of cortical relational structure are cortical space, pairwise
-   relations are noisy, and a small population cannot bootstrap its own frame.
-   The class-level result says the content *is* in the relations; the
-   per-neuron results say that extracting it intrinsically needs either a
-   labelled reference or a population large enough to embed itself.
+4. **What limits per-neuron recovery is capacity and per-pair noise, not the
+   idea.**  The gap to the labelled ceiling closed by a factor of ~10 across
+   the iteration; the remaining gap is largest where per-pair noise is largest.
 
-5. **Reference-free recovery does not come for free.**  The dominant axes of
-   cortical relational structure are cortical space, not visual space or
-   orientation.  Whatever fixes content intrinsically has to do so from a
-   non-dominant subspace, which is a real constraint for any intrinsic
-   (decoder-free) reading of the framework.
+Open, and needed before this is a paper: a second animal for the class-level
+symmetry result (within one animal, two halves share every statistic; the
+claim that "45°" has a relational signature needs a cross-animal reference);
+in-vivo per-pair noise, which caps everything in vivo; and seeds on the
+larger-model runs.
+
+## In progress: Allen Brain Observatory (cross-animal)
+
+Visual Coding 2P, 36 VISp excitatory containers (33 mice), session A
+(drifting gratings, natural movies one and three, shared across mice) and
+session C (locally sparse noise → receptive fields, natural movies one and
+two).  Orientation labels from static gratings (6 classes) via the cell table.
+Preliminary, all 36 session-A mice: natural-movie correlations carry almost no
+orientation here — a fully labelled ridge readout reaches 0.236 against a
+0.198 majority rate, the same-vs-orthogonal correlation difference is 0.005
+(MICrONS in vivo: 0.09), and the class-level test is at chance within and
+across mice.  Receptive-field structure, by contrast, is strong and crosses
+animals: correlation falls from 0.137 to 0.093 with RF distance within a mouse
+and from 0.060 to 0.013 across mice (session C, 17 mice so far), and a
+leave-one-mouse-out labelled readout places a held-out mouse's neurons on the
+screen at R² 0.11.  The cross-animal decoder runs on RF are queued.  Whether
+orientation is recoverable from *some* stimulus-driven relational structure in
+this dataset (gratings rather than movies) is the next question.
 
 ## Caveats
 
@@ -347,9 +392,14 @@ out the content-bearing subspace.
   session effect that the stratified splits do not remove but that cannot
   create orientation- or RF-specific class structure.
 * The class-level protocol is the paper's; it hides class *identities* but
-  keeps class *membership* (which neurons belong together).  Protocol 2 (the
-  learned decoder) removes that too and fails at 48–128 neurons; larger
-  populations were not feasible on this machine.
+  keeps class *membership* (which neurons belong together).  The per-neuron
+  decoder (§4) removes that too.
+* Twin correlations come from a model fitted to the same recordings; the
+  in-vivo results are the claim about cortex and the twin results show what
+  cleaner data would give.  Single seeds for the 7.2M-parameter runs; early
+  stopping for the 1024-neuron and 7.2M orientation runs used a selection slice
+  smaller than one population and is therefore contaminated by training
+  neurons (last-epoch values are reported alongside).
 * ARS from the permutation posterior assumes iid Gaussian entry noise on the
   class-Gram; τ is calibrated from the split-half distance of the correct
   labelling.  It agrees with the Fano bound where both are informative.

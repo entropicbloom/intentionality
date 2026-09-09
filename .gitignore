@@ -15,3 +15,5 @@ __pycache__/
 # stray working-tree files from sibling branches (tracked there, not here)
 emergence/
 jspace_gram/
+.venv-allen/
+allen_data/
