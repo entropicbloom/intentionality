@@ -358,8 +358,9 @@ out the content-bearing subspace.
 Open, and needed before this is a paper: a second animal for the class-level
 symmetry result (within one animal, two halves share every statistic; the
 claim that "45°" has a relational signature needs a cross-animal reference —
-the Allen data below could not supply it because orientation is nearly absent
-from natural-movie correlations there); in-vivo per-pair noise, which caps
+the Allen data below supply a partial one: orientation crosses animals
+there through shared-stimulus grating correlations, not through natural-movie
+or within-circuit ones); in-vivo per-pair noise, which caps
 everything in vivo; and seeds on the larger-model runs.
 
 ## Allen Brain Observatory: a second dataset, 33 mice
@@ -386,6 +387,59 @@ are part of it, but the ceiling says the correlations themselves carry little.
 The relational signature of orientation that MICrONS shows is therefore not a
 generic property of natural-movie covariance; it may depend on the stimulus
 set, the deconvolved responses, or the twin-cleaned labels there.
+
+**With grating relations, orientation does cross animals, but only through
+between-animal correlations.**  Session A also contains drifting gratings (8
+directions × 5 temporal frequencies, identical across mice).  Building the
+relations from the 40 blank-subtracted condition means instead of the movies
+(labels unchanged: static gratings from session B, so labels and relations use
+different stimuli) puts orientation back into the substrate: same-orientation
+pairs correlate 0.05 more than orthogonal pairs within a mouse and 0.044 more
+across mice; a labelled ridge readout reaches 0.35 within and 0.35 ± 0.06
+leave-one-mouse-out (majority 0.20).  Using the 40 × 60 condition time courses
+instead gives the same ridge ceiling but four times weaker pair correlations,
+so the condition means are the substrate below.
+
+| orientation, K = 6, 33 mice | movie relations | grating relations | null |
+|---|---|---|---|
+| class-level, within-mouse split-half | 0.167 | 0.206 | 0.167 |
+| class-level, one mouse → another | 0.164 | 0.181 | 0.167 |
+| class-level, pooled reference → held-out mouse | 0.192 | 0.258 | 0.173 (shuffle) |
+| same, modulo D6 | 0.515 | 0.631 | 0.5 |
+| labelled ridge, leave-one-mouse-out | 0.236 | 0.346 | 0.198 (majority) |
+| label-free decoder, populations within one held-out mouse (`cross`) | 0.168 | 0.180 (0.244 averaged) | 0.19 |
+| **label-free decoder, populations mixing held-out mice (`pooledcross`)**, 128 neurons, 3 mouse splits | 0.205 | **0.229 ± 0.020 (0.245 ± 0.005 averaged)** | 0.19 |
+| same, 256 neurons | | 0.250 (0.261) | |
+| same, 30 epochs | | 0.259 (0.269) | |
+| same, 7.2 M params | | 0.266 (0.255) | |
+
+The null for the decoder rows is the training-set majority class applied to the
+test mice (0.187–0.188 over the three splits); chance is 0.167.  Every grating
+number is above its movie counterpart, and the pooled-cross decoder is the
+first label-free orientation readout across animals in this dataset: trained
+on 24 mice, selected on 5, it assigns orientation to neurons of 9 unseen mice
+at 0.23–0.27 against 0.19, recovering roughly a third of the labelled
+ceiling's excess.  Averaging each neuron's prediction over 32 sampled
+populations does help here (128-neuron Gram rows are noisy; in MICrONS at 512
+neurons it did nothing) and makes the result stable across splits.  512-neuron
+populations were worse (0.197): with ~170 labelled cells per mouse a
+512-neuron population spans many mice and model selection on 5 mice became
+unreliable (stopped at epoch 2).
+
+What the two regimes measure differs, and the difference is the finding.  In
+`cross` all 128 neurons come from one animal, so the Gram is a within-circuit
+correlation matrix and the decoder must transfer across animals' internal
+matrices; that stays at the baseline, for movies and for gratings.  In
+`pooledcross` most Gram entries relate a neuron in one mouse to a neuron in
+another, which exist only because all mice saw the same conditions, and they
+measure how similar two tuning profiles are.  The decoder still never sees the
+condition indices, only correlations, so the absolute frame (which class is
+0°) must come from the population's relational structure, as in MICrONS.  So
+in the Allen data: a neuron's orientation is readable, without labels, from
+where it sits in a correlation geometry that spans animals, and that geometry
+is shared enough across mice to transfer; it is *not* readable from its
+relations inside its own network alone.  For RF position (next paragraph) both
+readings transfer.
 
 **Receptive-field position is present and crosses animals.**  Correlation
 falls with RF distance within a mouse (0.127 at < 5° to 0.068 beyond 40°) and

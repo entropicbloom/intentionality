@@ -6,25 +6,19 @@
 - Orientation from natural-movie correlations: negative (README "Allen" section)
 - Cross-animal RF placement: positive, R² 0.23 pooled-cross 256 neurons (`allen/outputs/decoder.json`)
 
-## In flight: grating-substrate test
-Question: is orientation recoverable across animals when relations are built from
-drifting-grating responses (session A, 8 dir x 5 TF, shared across mice) instead of movies?
-Labels stay from static gratings (session B, cell table) so labels and relations use
-different stimuli.
+## Done: grating-substrate test (2026-09-09)
+Relations from drifting-grating condition means (session A, 40 conditions), labels from
+static gratings (session B).  Results in README "Allen" section, `allen/outputs/dg_diagnostics.json`,
+`allen/outputs/geometric_DG_nm1_sg.json`, `allen/outputs/decoder.json` (tags `dg_*`).
+Headline: pooled-cross label-free decoder 0.229 +- 0.020 (0.245 +- 0.005 averaged over 32
+populations) on 9 held-out mice vs 0.19 baseline; labelled LOMO ceiling 0.35; within-mouse
+(`cross`) regime stays at baseline.  Sweeps: `allen/sweep_dg.sh`, `allen/sweep_dg2.sh`.
 
-1. `allen/fetch.py - DG` re-downloads session A and caches `allen_data/cache_DG/<exp>.npz`
-   with r_nm1 = condition means (cells x 40) and r_nm3 = condition time courses (cells x 2400).
-   Log: `allen_data/fetch_DG.log` (ends with `doneDG`).
-2. When done, run in `.venv`:
-   - `python -m allen.run_dg`                      -> outputs/dg_diagnostics.json (signal + ridge ceilings)
-   - `python -m allen.run_geometric nm1 sg DG`      -> class-level within / cross / pooled matching
-   - `python -m allen.run_decoder dg_ori_cross cross content=ori session=DG movie=nm1 n=128 dim=256 layers=4 rel_bias=1 epochs=12 pops_per_epoch=2500 batch=16 device=mps`
-   - same with `regime=pooledcross`, and with `movie=both`
-   Use `export PYTORCH_MPS_LOW_WATERMARK_RATIO=0.35 PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.45` for MPS runs.
-3. Interpret: if class-level cross-mouse accuracy > chance (1/6) and the decoder beats the
-   majority rate (~0.20) on held-out mice, the symmetry / per-neuron orientation result
-   replicates across animals and the paper is journal-ready; else the paper is
-   "RF crosses animals, orientation is dataset-dependent". Add to README, commit, push.
+## Possible next steps
+- Decoder: average populations across scans in MICrONS (targets the session effect).
+- Allen: seeds for the 256-neuron / 30-epoch / 7.2M runs; larger selection set (sel_frac) so
+  512-neuron runs do not early-stop at epoch 2.
+- Paper: write up.  Structure agreed: lead with cortex, method re-introduced, no consciousness framing.
 
 ## Caveats to carry
 - Machine has ~2.5 GB free RAM (a Virtualization process holds 2.3 GB); keep MPS batch <= 16, n <= 512.
