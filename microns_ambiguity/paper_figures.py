@@ -160,8 +160,6 @@ def fig_pipeline():
     arr(13.2, YT, 13.8, YT, col=TR, lw=1.1)
     axd.add_patch(FancyBboxPatch((13.85, YT - 0.55), 1.55, 1.1, boxstyle="round,pad=0.03,rounding_size=0.18", fc="white", ec=TR, lw=1.1))
     axd.text(14.62, YT + 0.2, "loss", fontsize=7, ha="center", va="center", weight="bold", color=TR); axd.text(14.62, YT - 0.2, "vs. labels of the\nlabelled neurons in it", fontsize=5.4, ha="center", va="center", color="#444")
-    axd.text(14.62, YT + 0.95, "labels enter here only", fontsize=6.0, ha="center", va="bottom", color=TR)
-    axd.add_patch(FancyArrowPatch((15.4, YT), (13.2, YT + 0.62), arrowstyle="-|>", mutation_scale=8, color=TR, lw=0.9, ls=(0, (3, 2)), connectionstyle="arc3,rad=0.45")); axd.text(14.3, YT + 1.05, "", fontsize=5)
     axd.text(16.1, YT, "gradient updates\nthe decoder;\nthousands of samples\nper epoch", fontsize=5.6, ha="left", va="center", color="#444")
     # test path: predictions are only scored
     arr(13.2, YS, 13.8, YS, col=TE, lw=1.1)
