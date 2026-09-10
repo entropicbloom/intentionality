@@ -45,6 +45,17 @@ planned because both streams ran; check balance every hour.
 Splits 1 and 2 for the training-animal cells (`g13_*`): within ori 0.216 / 0.217, pooledwithin ori 0.283 / 0.283,
 within RF 0.359 / 0.364, pooledwithin RF 0.123 / 0.157.  Every 2x2 cell now has three splits.  Balance $6.61.
 
+## Related work notes (for the paper)
+- Oizumi, Lim & Kanai, "Principal Bundle Geometry of Qualia: Understanding the Quality of Consciousness from Symmetry",
+  PNAS Nexus 5(9) pgag261 (2026), https://academic.oup.com/pnasnexus/article/5/9/pgag261/8788187 .  Theory only:
+  equivariant encoders split the state space into a group-inherited, universal part ("qualia attributes") and a
+  learnable, individual part ("signatures"); proposes Gromov-Wasserstein alignment / TDA for cross-subject tests.
+  Use: theoretical framing for the symmetry result (circulant part = group-fixed structure identical up to
+  relabelling; the anisotropy = what pins the frame).  Their objects are similarity structures over stimuli across
+  subjects; ours are correlation structures over neurons, decoded per neuron and tested across animals.  One paragraph.
+- Oizumi group's unsupervised Gromov-Wasserstein alignment of similarity structures across individuals (e.g. Kawakita
+  et al.): the continuous relaxation of our exhaustive permutation matching in the class-level test; cite in methods.
+
 ## Possible next steps
 - Ensembles over seeds on a shared split (predictions saved in allen/outputs/preds; `python -m allen.ensemble tag1 tag2`).
 - Labelled reference ("ceiling") is not settled: ridge is one linear labelled model and the decoder
