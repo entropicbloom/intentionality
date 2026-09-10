@@ -113,48 +113,45 @@ def fig2():
 
 # ---------------------------------------------------------------- Fig 3: regime schematic
 def fig_regimes():
-    from matplotlib.patches import FancyBboxPatch, Ellipse
+    from matplotlib.patches import FancyBboxPatch
     rng = np.random.default_rng(5)
     fig, axes = plt.subplots(2, 2, figsize=(7.8, 5.2))
     TR, TE, MUTED = "#1f5f8b", "#e8a33d", "#8a939c"
     MX = [0.3, 2.75, 5.2, 7.65]; W = 2.2; Y0, Y1 = 1.2, 4.9            # four mice per panel
+    ROWS = [1.75, 2.5, 3.6, 4.35]                                       # two test rows (lower), two training rows (upper), with a gap
     cells = [((0, 0), "within", "training animals · single-animal populations", "train"),
              ((0, 1), "pooledwithin", "training animals · mixed populations", "train"),
              ((1, 0), "cross", "held-out animals · single-animal populations", "heldout"),
              ((1, 1), "pooledcross", "held-out animals · mixed populations", "heldout")]
     for (r, c), name, desc, split in cells:
-        ax = axes[r, c]; ax.set_xlim(0, 10.2); ax.set_ylim(0.1, 6.4); ax.axis("off")
+        ax = axes[r, c]; ax.set_xlim(0, 10.2); ax.set_ylim(0.1, 6.4); ax.axis("off"); P = {}
         for mi, x0 in enumerate(MX):
             ax.add_patch(FancyBboxPatch((x0, Y0), W, Y1 - Y0, boxstyle="round,pad=0.04,rounding_size=0.3", fc="#f2f4f3", ec=MUTED, lw=1))
             ax.text(x0 + W / 2, Y1 + 0.18, f"mouse {mi + 1}", ha="center", fontsize=6.8, color="#555")
-            gx, gy = np.meshgrid(np.linspace(x0 + 0.4, x0 + W - 0.4, 3), np.linspace(Y0 + 0.4, Y1 - 0.4, 5))
-            xy = np.c_[gx.ravel(), gy.ravel()] + rng.uniform(-0.13, 0.13, (15, 2))
-            if split == "train":
-                is_test = xy[:, 1] < (Y0 + Y1) / 2                    # each mouse halved: lower half test, upper half training
-            else:
-                is_test = np.full(15, mi >= 2)                        # mice 3 and 4 held out entirely
+            gx, gy = np.meshgrid(np.linspace(x0 + 0.45, x0 + W - 0.45, 3), ROWS)
+            xy = np.c_[gx.ravel(), gy.ravel()] + rng.uniform(-0.07, 0.07, (12, 2))
+            is_test = (xy[:, 1] < 3.05) if split == "train" else np.full(12, mi >= 2)
+            P[mi] = (xy, is_test)
             ax.scatter(xy[~is_test, 0], xy[~is_test, 1], s=15, c=TR, ec="none", zorder=3)
             ax.scatter(xy[is_test, 0], xy[is_test, 1], s=15, fc="white", ec=TE, lw=1.1, zorder=3)
-        def loop(x_from, x_to, y_from, y_to, col, lab, lab_y, lab_x=None):
-            cx, cy = (x_from + x_to) / 2, (y_from + y_to) / 2
-            ax.add_patch(Ellipse((cx, cy), (x_to - x_from) * 1.06, (y_to - y_from) * 1.25, fill=False, ec=col, lw=1.4, ls=(0, (4, 2)), zorder=4))
-            ax.text(cx if lab_x is None else lab_x, lab_y, lab, ha="center", fontsize=6.8, color=col)
-        ymid = (Y0 + Y1) / 2; up, lo = (ymid + 0.15, Y1 - 0.25), (Y0 + 0.25, ymid - 0.15)
+        def loop(pts, col, lab, lab_y):
+            pts = np.concatenate(pts); pad = 0.22
+            x0, y0 = pts.min(0) - pad; x1, y1 = pts.max(0) + pad
+            ax.add_patch(FancyBboxPatch((x0, y0), x1 - x0, y1 - y0, boxstyle="round,pad=0.02,rounding_size=0.35", fill=False, ec=col, lw=1.4, ls=(0, (4, 2)), zorder=4))
+            ax.text((x0 + x1) / 2, lab_y, lab, ha="center", fontsize=6.8, color=col)
+        tr = lambda m: P[m][0][~P[m][1]]; te = lambda m: P[m][0][P[m][1]]
         if name == "within":
-            loop(MX[0] + 0.2, MX[0] + W - 0.2, *up, TR, "training population", 0.75)
-            loop(MX[0] + 0.2, MX[0] + W - 0.2, *lo, TE, "test population", 0.4)
+            loop([tr(0)], TR, "training population", 0.75); loop([te(0)], TE, "test population", 0.4)
         elif name == "pooledwithin":
-            loop(MX[0] + 0.2, MX[3] + W - 0.2, *up, TR, "training population (all mice, training neurons)", 0.75)
-            loop(MX[0] + 0.2, MX[3] + W - 0.2, *lo, TE, "test population (all mice, test neurons)", 0.4)
+            loop([tr(m) for m in range(4)], TR, "training population (all mice, training neurons)", 0.75)
+            loop([te(m) for m in range(4)], TE, "test population (all mice, test neurons)", 0.4)
         elif name == "cross":
-            loop(MX[0] + 0.2, MX[0] + W - 0.2, Y0 + 0.25, Y1 - 0.25, TR, "training population", 0.6)
-            loop(MX[2] + 0.2, MX[2] + W - 0.2, Y0 + 0.25, Y1 - 0.25, TE, "test population", 0.6)
+            loop([tr(0)], TR, "training population", 0.6); loop([te(2)], TE, "test population", 0.6)
         else:
-            loop(MX[0] + 0.2, MX[1] + W - 0.2, Y0 + 0.25, Y1 - 0.25, TR, "training population (training mice)", 0.6)
-            loop(MX[2] + 0.2, MX[3] + W - 0.2, Y0 + 0.25, Y1 - 0.25, TE, "test population (held-out mice)", 0.6)
+            loop([tr(0), tr(1)], TR, "training population (training mice)", 0.6); loop([te(2), te(3)], TE, "test population (held-out mice)", 0.6)
         ax.text(5.1, 6.35, f"`{name}`", ha="center", fontsize=9, family="monospace", weight="bold", va="top")
         ax.text(5.1, 5.85, desc, ha="center", fontsize=7.5, color="#444", va="top")
-    fig.text(0.5, 0.005, "filled = training neurons (labels are targets)   ·   hollow = test neurons (scored; never used for training or model selection)   ·   dashed loop = one sampled population, the unit the Gram is computed on", ha="center", fontsize=6.8, color="#444")
+    fig.text(0.5, 0.005, "filled = training neurons (labels are targets)   ·   hollow = test neurons (scored; never used for training or model selection)   ·   dashed box = one sampled population, the unit the Gram is computed on", ha="center", fontsize=6.8, color="#444")
     fig.suptitle("Fig. 3  Allen decoder regimes: where the test neurons come from × what one population contains", fontsize=9)
     save(fig, "fig3_regimes", "The four Allen decoder regimes",
          "Two independent choices define a run. The split (rows) decides where test neurons come from: each animal's cells halved into training and test neurons "
