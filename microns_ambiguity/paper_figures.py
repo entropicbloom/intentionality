@@ -206,9 +206,9 @@ def fig2():
         ax.bar(i - w / 2, s["acc_raw"], w, color=C["iv" if sub == "func_iv" else "twin"], label="raw class-Gram" if i == 0 else None)
         ax.bar(i + w / 2, s["acc_circulant"], w, color=C["iv" if sub == "func_iv" else "twin"], alpha=0.4, label="circulant projection" if i == 0 else None)
         ax.plot([i - w / 2, i + w / 2], [s["acc_mod_raw"], s["acc_mod_circulant"]], "k.", ms=7, label="modulo D8" if i == 0 else None)
-        ax.text(i, 1.06, f"circulant var. {s['frac_var_circulant']:.2f}", ha="center", fontsize=7)
+        ax.text(i, 1.12, f"circulant var. {s['frac_var_circulant']:.2f}", ha="center", fontsize=7)
     ax.axhline(1 / 8, color=C["base"], lw=1); ax.text(1.4, 1 / 8 + 0.02, "chance", fontsize=7, color="#666")
-    ax.set_xticks([0, 1]); ax.set_xticklabels(["in vivo", "digital twin"]); ax.set_ylim(0, 1.15); ax.set_ylabel("class matching accuracy"); ax.legend(loc="center right", fontsize=7)
+    ax.set_xticks([0, 1]); ax.set_xticklabels(["in vivo", "digital twin"]); ax.set_ylim(0, 1.24); ax.set_ylabel("class matching accuracy"); ax.legend(loc="center right", fontsize=7, bbox_to_anchor=(1.0, 0.55))
     ax.set_title("matching over all 8! relabellings", fontsize=9)
     fig.suptitle("Fig. 3  What fixes the absolute orientation frame: the non-circulant part of the class relations", fontsize=9)
     save(fig, "fig3_symmetry", "Symmetry: the anisotropy fixes the frame",
@@ -354,7 +354,7 @@ def figA1():
     ax.plot(xs, ys, "o-", color=C["mix"], label="plain, 256 neurons")
     ax.plot([2.2, 17, 57], [A["g2_n256_d256L4_cf50"]["acc"], A["g2_n256_d512L8_cf50"]["acc"], A["g10_d768L12_cf50"]["acc"]], "s--", color=C["mix"], mfc="white", label="Gram from 50 % of conditions")
     ax.errorbar([17], [np.mean([A[t]["acc"] for t in ["g2_n256_d512L8_cf50", "g10_d512L8_cf50_s1", "g10_d512L8_cf50_s2"]])], yerr=[np.std([A[t]["acc"] for t in ["g2_n256_d512L8_cf50", "g10_d512L8_cf50_s1", "g10_d512L8_cf50_s2"]])], fmt="none", ecolor="k", capsize=3)
-    baseline(ax); ax.set_xscale("log"); ax.set_xticks([2.2, 17, 57]); ax.set_xticklabels(["2.2", "17", "57"]); ax.minorticks_off(); ax.set_xlabel("decoder parameters (M)"); ax.set_ylabel("accuracy"); ax.set_title("Allen orientation, held-out mice (split 0)"); ax.legend(fontsize=7); ax.set_ylim(0.15, 0.35)
+    baseline(ax); ax.set_xscale("log"); ax.set_xticks([2.2, 17, 57]); ax.set_xticklabels(["2.2", "17", "57"]); ax.minorticks_off(); ax.set_xlabel("decoder parameters (M)"); ax.set_ylabel("accuracy"); ax.set_title("Allen orientation, held-out mice (split 0)"); ax.legend(fontsize=7, loc="upper left"); ax.set_ylim(0.15, 0.36)
     fig.suptitle("Fig. A1  Capacity: RF keeps gaining with model size, orientation does not (label counts 11,326 vs 5,287 in MICrONS; 5,529 in Allen)", fontsize=9)
     save(fig, "figA1_scaling_params", "Appendix: scaling with decoder size",
          "Test metric versus number of decoder parameters at fixed population size (512 neurons MICrONS, 256 Allen). Error bars: s.d. over 3 seeds where run. "
@@ -394,14 +394,14 @@ def figA3():
     ax.plot([1.0, 0.85, 0.5], [A["g1_n256_d512L8_e60"]["acc"], A["g5_d512L8_cf85"]["acc"], A["g2_n256_d512L8_cf50"]["acc"]], "o-", color=C["mix"], label="17M")
     ax.plot([1.0, 0.5], [A["g1_n256_d768L12_e60"]["acc"], A["g10_d768L12_cf50"]["acc"]], "o-", color="#1b6b60", label="57M")
     ax.plot([1.0, 1.0], [A["g2_n256_d256L4_gd20"]["acc"], A["g1_n256_d512L8_e60_do2"]["acc"]], "x", color="k", label="Gram dropout 20 % (2M) / dropout 0.2 (17M)")
-    ax.invert_xaxis(); ax.set_xlabel("fraction of the 40 conditions kept"); ax.set_ylabel("accuracy, held-out mice (split 0)"); ax.set_title("Allen orientation"); ax.legend(fontsize=6.5); baseline(ax)
+    ax.invert_xaxis(); ax.set_xlabel("fraction of the 40 conditions kept"); ax.set_ylabel("accuracy, held-out mice (split 0)"); ax.set_title("Allen orientation"); ax.legend(fontsize=6.5, loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=2); baseline(ax)
     ax = axes[1]
     ax.errorbar([1.0], [np.mean([M[t]["r2"] for t in ["g9_iv_rf_n512_d512L8", "g12_iv_rf_s1", "g12_iv_rf_s2"]])], yerr=[np.std([M[t]["r2"] for t in ["g9_iv_rf_n512_d512L8", "g12_iv_rf_s1", "g12_iv_rf_s2"]])], fmt="o", color=C["iv"], capsize=2)
     ax.plot([1.0, 0.75, 0.5], [np.mean([M[t]["r2"] for t in ["g9_iv_rf_n512_d512L8", "g12_iv_rf_s1", "g12_iv_rf_s2"]]), M["g9_iv_rf_n512_d512L8_cf75"]["r2"], M["g3_iv_rf_n512_d512L8_cf50"]["r2"]], "o-", color=C["iv"], label="in vivo RF, 17M (120 stimulus bins)")
     ax.plot([1.0, 0.5], [M["g3_iv_ori_n512_d512L8"]["acc"], M["g3_iv_ori_n512_d512L8_cf50"]["acc"]], "s--", color=C["iv"], mfc="white", label="in vivo orientation, 17M")
     ax.plot([1.0, 0.5], [M["g3_is_rf_n512_d512L8"]["r2"], M["g3_is_rf_n512_d512L8_cf50"]["r2"]], "s--", color=C["twin"], mfc="white", label="twin RF, 17M (512 PCs)")
     ax.plot([1.0, 0.5], [M["g3_is_ori_n512_d512L8"]["acc"], M["g3_is_ori_n512_d512L8_cf50"]["acc"]], "o-", color=C["twin"], label="twin orientation, 17M")
-    ax.invert_xaxis(); ax.set_xlabel("fraction of feature dimensions kept"); ax.set_ylabel("accuracy / R²"); ax.set_title("MICrONS"); ax.legend(fontsize=6.5)
+    ax.invert_xaxis(); ax.set_xlabel("fraction of feature dimensions kept"); ax.set_ylabel("accuracy / R²"); ax.set_title("MICrONS"); ax.legend(fontsize=6.5, loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=2)
     fig.suptitle("Fig. A3  Label-free relation augmentation: each training population's Gram from a random subset of stimulus conditions", fontsize=9)
     save(fig, "figA3_augmentation", "Appendix: relation augmentation",
          "Training populations get a Gram computed from a random subset of the response dimensions (rows re-standardised); test Grams use all dimensions. "
@@ -417,10 +417,12 @@ def figA4():
         h = src[tag]["history"]; ep = np.arange(len(h))
         ax.plot(ep, [x[key] for x in h], "-", color=C["mix"] if src is A else C["twin"], label="test metric")
         ax.plot(ep, [x["sel"] for x in h], ":", color="k", lw=1, label="selection set")
-        b = src[tag]["best_epoch"]; ax.axvline(b, color="#999", lw=0.8); ax.text(b + 0.5, ax.get_ylim()[0] + 0.01, f"selected\nepoch {b}", fontsize=6.5, color="#666")
+        b = src[tag]["best_epoch"]; ax.axvline(b, color="#999", lw=0.8); lo_, hi_ = ax.get_ylim(); top = h[b][key] < (lo_ + hi_) / 2
+        ax.text(b + 0.8, hi_ if top else lo_ + 0.02 * (hi_ - lo_), f"selected\nepoch {b}", fontsize=6.5, color="#666", va="top" if top else "bottom")
         ax2 = ax.twinx(); ax2.plot(ep, [x["loss"] for x in h], "-", color="#c44", lw=1, alpha=0.7); ax2.set_ylabel("training loss", color="#c44", fontsize=7); ax2.tick_params(axis="y", labelsize=7, colors="#c44"); ax2.spines["right"].set_visible(True)
         ax.set_xlabel("epoch"); ax.set_ylabel({"acc": "accuracy", "r2": "R²"}[key]); ax.set_title(ttl, fontsize=8.5)
-        if ax is axes[0]: ax.legend(fontsize=7, loc="lower right")
+        if ax is axes[0]: h1, l1 = ax.get_legend_handles_labels(); h1.append(ax2.get_lines()[0]); l1.append("training loss")
+    fig.legend(h1, l1, loc="upper center", bbox_to_anchor=(0.5, 0.0), ncol=3, fontsize=7)
     fig.suptitle("Fig. A4  Every large run memorises its training neurons; the reported score is the epoch chosen on a held-out selection set", fontsize=9)
     save(fig, "figA4_training_dynamics", "Appendix: training dynamics and early stopping",
          "Test metric (solid), selection-set metric (dotted; held-out mice on Allen, a held-out 20 % of training neurons on MICrONS) and training loss (red, right axis) "
@@ -435,7 +437,7 @@ def figA5():
     groups = {"first protocol\n128 n, 12 ep": ["dg_ori_pooledcross_nm1", "dg_pc_s1", "dg_pc_s2"], "17M + 50 %\n256 n, 60 ep": ["g2_n256_d512L8_cf50", "g10_d512L8_cf50_sp1", "g10_d512L8_cf50_sp2"]}
     for gi, (g, tags) in enumerate(groups.items()):
         for si, t in enumerate(tags): ax.bar(gi + (si - 1) * 0.25, A[t]["acc"], 0.22, color=C[f"s{si}"], label=f"split {si}" if gi == 0 else None)
-    baseline(ax); ax.set_xticks([0, 1]); ax.set_xticklabels(list(groups.keys()), fontsize=8); ax.set_ylabel("accuracy, held-out mice"); ax.set_ylim(0.15, 0.34); ax.legend(fontsize=7, loc="upper left", ncol=3); ax.set_title("Allen orientation, `pooledcross`, by mouse split", fontsize=8.5)
+    baseline(ax); ax.set_xticks([0, 1]); ax.set_xticklabels(list(groups.keys()), fontsize=8); ax.set_ylabel("accuracy, held-out mice"); ax.set_ylim(0.15, 0.37); ax.legend(fontsize=7, loc="upper left", ncol=3); ax.set_title("Allen orientation, `pooledcross`, by mouse split", fontsize=8.5)
     ax = axes[1]
     G = json.load(open(os.path.join(ROOT, "allen", "outputs", "geometric_DG_nm1_sg.json")))["summary"]; Gm = json.load(open(os.path.join(ROOT, "allen", "outputs", "geometric_both_sg.json")))["summary"]
     labs = ["within-mouse\nsplit-half", "one mouse →\nanother", "pooled reference →\nheld-out mouse"]
