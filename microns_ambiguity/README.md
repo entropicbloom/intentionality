@@ -470,7 +470,7 @@ populations.
 
 | orientation, accuracy on labelled test cells | single-animal populations | mixed populations |
 |---|---|---|
-| test neurons from the training animals | `within` 0.210 (0.205 averaged) | `pooledwithin` 0.281 (0.288); 128 neurons 0.277 (0.307) |
+| test neurons from the training animals, 3 neuron splits | `within` 0.210 / 0.216 / 0.217 | `pooledwithin` 0.281 / 0.283 / 0.283 (128 neurons on split 0: 0.277) |
 | test neurons from 9 held-out animals | `cross` 0.199 / 0.197 / 0.187 on splits 0 / 1 / 2 | `pooledcross` **0.293 ± 0.012** (3 seeds, split 0; ensemble 0.296) / **0.236** / **0.264** on splits 0 / 1 / 2; mean over splits 0.26 |
 | baseline (training majority class on the test cells) | 0.19–0.20 | 0.19–0.20 |
 
@@ -531,7 +531,7 @@ coordinates: R² 0.27 on random halves, 0.20 leave-one-mouse-out.
 
 | RF, R² on absolute screen coordinates (session C, movie relations) | single-animal populations | mixed populations |
 |---|---|---|
-| test neurons from the training animals | `within` 0.239 (128 neurons) | `pooledwithin` 0.155 (128 neurons) |
+| test neurons from the training animals, 3 neuron splits (128 neurons) | `within` 0.239 / 0.359 / 0.364 | `pooledwithin` 0.155 / 0.123 / 0.157 |
 | test neurons from 9 held-out animals, splits 0 / 1 / 2 | `cross` **0.270 ± 0.012** (3 seeds) / **−0.10** / **−0.46** | `pooledcross` **0.21** / **0.04** / **−0.21** |
 
 Absolute R² is split-dependent in both regimes: one set of test mice gives

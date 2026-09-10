@@ -41,6 +41,10 @@ planned because both streams ran; check balance every hour.
 - Levers that do nothing: population size past 256 (Allen) / 512 (MICrONS), dropout, Gram dropout,
   partial augmentation, augmentation on PCA features (destructive), stacking augmentation on 57M.
 
+## Third GPU session (2026-09-10, RTX 4090, 15 min, $0.15)
+Splits 1 and 2 for the training-animal cells (`g13_*`): within ori 0.216 / 0.217, pooledwithin ori 0.283 / 0.283,
+within RF 0.359 / 0.364, pooledwithin RF 0.123 / 0.157.  Every 2x2 cell now has three splits.  Balance $6.61.
+
 ## Possible next steps
 - Ensembles over seeds on a shared split (predictions saved in allen/outputs/preds; `python -m allen.ensemble tag1 tag2`).
 - Labelled reference ("ceiling") is not settled: ridge is one linear labelled model and the decoder
