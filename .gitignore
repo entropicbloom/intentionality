@@ -20,3 +20,4 @@ allen_data/
 microns_ambiguity/outputs/report.html
 .env
 allen/outputs/preds/
+microns_ambiguity/outputs/paper/figures.html
