@@ -130,12 +130,20 @@ def fig_pipeline():
     axp = fig.add_axes(rect(6.5, 1.9, 2.4, 2.4)); axp.imshow(Gp, cmap="RdBu_r", vmin=-0.5, vmax=0.5, aspect="auto"); axp.set_xticks([]); axp.set_yticks([])
     axp.add_patch(Rectangle((-0.5, 8.5), 40, 1, fill=False, ec=INK, lw=1.4)); axp.set_title("population Gram (512 × 512, 40 shown)", fontsize=6.5, pad=2)
     axd.text(7.7, 1.45, "one row = one neuron's token", fontsize=6.3, ha="center", color="#444")
-    axd.add_patch(FancyArrowPatch((9.1, 3.1), (10.1, 3.1), arrowstyle="-|>", mutation_scale=9, color=MUTED, lw=1))
-    for k in range(4):
-        axd.add_patch(FancyBboxPatch((10.2 + k * 0.1, 2.15 + k * 0.12), 2.6, 1.8, boxstyle="round,pad=0.03,rounding_size=0.2", fc="white", ec="#8a939c", lw=0.9, zorder=2 + k))
-    axd.text(11.8, 3.45, "transformer", fontsize=7.5, ha="center", va="center", weight="bold", color=INK, zorder=9); axd.text(11.8, 2.95, "rows as tokens,\nattention over the population", fontsize=6.2, ha="center", va="center", color="#444", zorder=9)
+    axd.add_patch(FancyArrowPatch((9.1, 3.1), (10.05, 3.1), arrowstyle="-|>", mutation_scale=9, color=MUTED, lw=1))
+    # transformer: tokens (Gram rows) attend to every other token in the population, repeated over the layers
+    axd.add_patch(FancyBboxPatch((10.2, 2.05), 2.9, 2.35, boxstyle="round,pad=0.03,rounding_size=0.2", fc="white", ec="#8a939c", lw=0.9, zorder=2))
+    axd.text(11.65, 4.2, "transformer, 8 layers", fontsize=7, ha="center", va="center", weight="bold", color=INK, zorder=9)
+    tok_y = np.linspace(2.45, 3.75, 6); TOKC = ["#1f5f8b", "#2a9d8f", "#e8a33d", "#b5533c", "#6a4c93", "#3a7d44"]
+    for i, y in enumerate(tok_y):
+        axd.add_patch(Rectangle((10.45, y - 0.07), 0.55, 0.14, fc=TOKC[i], ec="none", zorder=5))
+        axd.add_patch(Rectangle((12.3, y - 0.07), 0.55, 0.14, fc=TOKC[i], ec="none", zorder=5))
+    for i, y0 in enumerate(tok_y):
+        for j, y1 in enumerate(tok_y):
+            axd.plot([11.0, 12.3], [y0, y1], color="#8a939c", lw=0.35, alpha=0.55 if i != j else 0.9, zorder=4)
+    axd.text(10.72, 2.2, "tokens", fontsize=5.6, ha="center", color="#666"); axd.text(11.65, 2.2, "attention", fontsize=5.6, ha="center", color="#666"); axd.text(12.57, 2.2, "updated", fontsize=5.6, ha="center", color="#666")
     axd.text(11.6, 1.6, "trained on labelled training neurons;\nepoch chosen on a held-out slice", fontsize=6.0, ha="center", va="top", color="#444")
-    axd.add_patch(FancyArrowPatch((13.3, 3.1), (14.3, 3.1), arrowstyle="-|>", mutation_scale=9, color=MUTED, lw=1))
+    axd.add_patch(FancyArrowPatch((13.25, 3.1), (14.3, 3.1), arrowstyle="-|>", mutation_scale=9, color=MUTED, lw=1))
     axd.text(16.9, 4.35, "per-neuron prediction, scored on the test half", fontsize=6.8, ha="center", color=INK)
     axo2 = fig.add_axes(rect(14.6, 2.0, 1.9, 2.0)); axo2.set_xlim(-1.3, 1.3); axo2.set_ylim(-1.3, 1.3); axo2.set_aspect("equal"); axo2.axis("off")
     axo2.add_patch(Circle((0, 0), 1.0, fill=False, ec="#c9cfcc", lw=0.8)); th = np.deg2rad(ds.ori[six[0]]); axo2.plot([-np.cos(th), np.cos(th)], [-np.sin(th), np.sin(th)], color=NC[0], lw=2.2, solid_capstyle="round"); axo2.set_title("orientation class", fontsize=6.3, pad=1)
