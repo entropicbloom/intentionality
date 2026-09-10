@@ -21,3 +21,8 @@ microns_ambiguity/outputs/report.html
 .env
 allen/outputs/preds/
 microns_ambiguity/outputs/paper/figures.html
+microns_ambiguity/paper/*.aux
+microns_ambiguity/paper/*.log
+microns_ambiguity/paper/*.bbl
+microns_ambiguity/paper/*.blg
+microns_ambiguity/paper/*.out
