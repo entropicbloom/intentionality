@@ -305,8 +305,8 @@ def fig_regimes():
 # ---------------------------------------------------------------- Fig 4: Allen 2x2 orientation
 def fig3():
     fig, ax = plt.subplots(figsize=(7.4, 3.0))
-    cells = [("within", "training animals\nsingle-animal pop.", [A["g11_ori_within_n128"]["acc"]], C["single"]),
-             ("pooledwithin", "training animals\nmixed pop.", [A["g7_ori_pooledwithin_n256"]["acc"], A["g7_ori_pooledwithin_n128"]["acc"]], C["mix"]),
+    cells = [("within", "training animals\nsingle-animal pop.", [A["g11_ori_within_n128"]["acc"], A["g13_ori_within_n128_sp1"]["acc"], A["g13_ori_within_n128_sp2"]["acc"]], C["single"]),
+             ("pooledwithin", "training animals\nmixed pop.", [A["g7_ori_pooledwithin_n256"]["acc"], A["g13_ori_pooledwithin_n256_sp1"]["acc"], A["g13_ori_pooledwithin_n256_sp2"]["acc"]], C["mix"]),
              ("cross", "held-out animals\nsingle-animal pop.", [A["dg3_cross_128"]["acc"], A["g11_ori_cross_sp1"]["acc"], A["g11_ori_cross_sp2"]["acc"]], C["single"]),
              ("pooledcross", "held-out animals\nmixed pop.", [np.mean([A[t]["acc"] for t in ["g2_n256_d512L8_cf50", "g10_d512L8_cf50_s1", "g10_d512L8_cf50_s2"]]), A["g10_d512L8_cf50_sp1"]["acc"], A["g10_d512L8_cf50_sp2"]["acc"]], C["mix"])]
     for i, (reg, lab, vals, col) in enumerate(cells):
@@ -320,7 +320,7 @@ def fig3():
     save(fig, "fig5_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
          "Label-free decoder accuracy on labelled test cells for the four regimes. Split: test neurons from the training animals (each animal's cells halved) "
          "or from 9 held-out animals. Population: each sampled population (the unit the Gram is computed on) drawn from one animal or from several. "
-         "Points: individual mouse splits (held-out regimes; the `pooledcross` split-0 point is the mean of 3 seeds) or population sizes (128 / 256). "
+         "Points: the three splits (of neurons within each animal for the top row, of animals for the bottom row); the `pooledcross` split-0 point is the mean of 3 seeds. "
          "Single-animal populations are at the majority baseline whether the animal was seen in training or not; mixed populations are above it in both splits "
          "at the same level, so transfer to unseen brains costs nothing. Mixed populations contain between-animal correlations, which exist only because all mice "
          "saw the same 40 grating conditions and measure tuning similarity; the decoder still never sees condition identities.", "main")
