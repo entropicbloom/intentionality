@@ -155,7 +155,7 @@ def fig_pipeline():
         axd.text(12.82, y - 0.62, "one prediction per\nneuron of the sample", fontsize=5.4, ha="center", va="top", color="#666")
     arr(6.05, 3.55, 7.95, YT + 0.1, col=TR, lw=0.9, rad=-0.25); arr(6.95, 2.5, 7.95, YS - 0.1, col=TE, lw=0.9, rad=0.15)
     axd.text(8.6, YT + 0.72, "Gram of a sample from\nthe training half (512 × 512)", fontsize=5.8, ha="center", va="bottom", color=TR); axd.text(8.6, YS - 0.72, "Gram of a sample from\nthe test half (512 × 512)", fontsize=5.8, ha="center", va="top", color=ORANGE_T)
-    axd.plot([10.85, 10.85], [YS + 0.6, YT - 0.6], color="#8a939c", lw=0.8, ls=(0, (2, 2))); axd.text(11.0, (YT + YS) / 2, "same\nweights", fontsize=5.6, ha="left", va="center", color="#666")
+    axd.add_patch(FancyArrowPatch((10.85, YT - 0.6), (10.85, YS + 0.62), arrowstyle="-|>", mutation_scale=9, color="#6a7380", lw=1.1)); axd.text(11.0, (YT + YS) / 2, "trained\nweights", fontsize=5.6, ha="left", va="center", color="#555")
     # training path: predictions meet the labels in a loss
     arr(13.2, YT, 13.8, YT, col=TR, lw=1.1)
     axd.add_patch(FancyBboxPatch((13.85, YT - 0.55), 1.55, 1.1, boxstyle="round,pad=0.03,rounding_size=0.18", fc="white", ec=TR, lw=1.1))
