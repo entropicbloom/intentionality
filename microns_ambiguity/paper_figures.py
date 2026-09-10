@@ -110,7 +110,62 @@ def fig2():
          "This is what a label-free decoder has to use to output absolute orientation.", "main")
 
 
-# ---------------------------------------------------------------- Fig 3: Allen 2x2 orientation
+
+# ---------------------------------------------------------------- Fig 3: regime schematic
+def fig_regimes():
+    from matplotlib.patches import FancyBboxPatch, Ellipse
+    rng = np.random.default_rng(5)
+    fig, axes = plt.subplots(2, 2, figsize=(7.8, 5.2))
+    TR, TE, MUTED = "#1f5f8b", "#e8a33d", "#8a939c"
+    MX = [0.3, 2.75, 5.2, 7.65]; W = 2.2; Y0, Y1 = 1.2, 4.9            # four mice per panel
+    cells = [((0, 0), "within", "training animals · single-animal populations", "train"),
+             ((0, 1), "pooledwithin", "training animals · mixed populations", "train"),
+             ((1, 0), "cross", "held-out animals · single-animal populations", "heldout"),
+             ((1, 1), "pooledcross", "held-out animals · mixed populations", "heldout")]
+    for (r, c), name, desc, split in cells:
+        ax = axes[r, c]; ax.set_xlim(0, 10.2); ax.set_ylim(0.1, 6.4); ax.axis("off")
+        for mi, x0 in enumerate(MX):
+            ax.add_patch(FancyBboxPatch((x0, Y0), W, Y1 - Y0, boxstyle="round,pad=0.04,rounding_size=0.3", fc="#f2f4f3", ec=MUTED, lw=1))
+            ax.text(x0 + W / 2, Y1 + 0.18, f"mouse {mi + 1}", ha="center", fontsize=6.8, color="#555")
+            gx, gy = np.meshgrid(np.linspace(x0 + 0.4, x0 + W - 0.4, 3), np.linspace(Y0 + 0.4, Y1 - 0.4, 5))
+            xy = np.c_[gx.ravel(), gy.ravel()] + rng.uniform(-0.13, 0.13, (15, 2))
+            if split == "train":
+                is_test = xy[:, 1] < (Y0 + Y1) / 2                    # each mouse halved: lower half test, upper half training
+            else:
+                is_test = np.full(15, mi >= 2)                        # mice 3 and 4 held out entirely
+            ax.scatter(xy[~is_test, 0], xy[~is_test, 1], s=15, c=TR, ec="none", zorder=3)
+            ax.scatter(xy[is_test, 0], xy[is_test, 1], s=15, fc="white", ec=TE, lw=1.1, zorder=3)
+        def loop(x_from, x_to, y_from, y_to, col, lab, lab_y, lab_x=None):
+            cx, cy = (x_from + x_to) / 2, (y_from + y_to) / 2
+            ax.add_patch(Ellipse((cx, cy), (x_to - x_from) * 1.06, (y_to - y_from) * 1.25, fill=False, ec=col, lw=1.4, ls=(0, (4, 2)), zorder=4))
+            ax.text(cx if lab_x is None else lab_x, lab_y, lab, ha="center", fontsize=6.8, color=col)
+        ymid = (Y0 + Y1) / 2; up, lo = (ymid + 0.15, Y1 - 0.25), (Y0 + 0.25, ymid - 0.15)
+        if name == "within":
+            loop(MX[0] + 0.2, MX[0] + W - 0.2, *up, TR, "training population", 0.75)
+            loop(MX[0] + 0.2, MX[0] + W - 0.2, *lo, TE, "test population", 0.4)
+        elif name == "pooledwithin":
+            loop(MX[0] + 0.2, MX[3] + W - 0.2, *up, TR, "training population (all mice, training neurons)", 0.75)
+            loop(MX[0] + 0.2, MX[3] + W - 0.2, *lo, TE, "test population (all mice, test neurons)", 0.4)
+        elif name == "cross":
+            loop(MX[0] + 0.2, MX[0] + W - 0.2, Y0 + 0.25, Y1 - 0.25, TR, "training population", 0.6)
+            loop(MX[2] + 0.2, MX[2] + W - 0.2, Y0 + 0.25, Y1 - 0.25, TE, "test population", 0.6)
+        else:
+            loop(MX[0] + 0.2, MX[1] + W - 0.2, Y0 + 0.25, Y1 - 0.25, TR, "training population (training mice)", 0.6)
+            loop(MX[2] + 0.2, MX[3] + W - 0.2, Y0 + 0.25, Y1 - 0.25, TE, "test population (held-out mice)", 0.6)
+        ax.text(5.1, 6.35, f"`{name}`", ha="center", fontsize=9, family="monospace", weight="bold", va="top")
+        ax.text(5.1, 5.85, desc, ha="center", fontsize=7.5, color="#444", va="top")
+    fig.text(0.5, 0.005, "filled = training neurons (labels are targets)   ·   hollow = test neurons (scored; never used for training or model selection)   ·   dashed loop = one sampled population, the unit the Gram is computed on", ha="center", fontsize=6.8, color="#444")
+    fig.suptitle("Fig. 3  Allen decoder regimes: where the test neurons come from × what one population contains", fontsize=9)
+    save(fig, "fig3_regimes", "The four Allen decoder regimes",
+         "Two independent choices define a run. The split (rows) decides where test neurons come from: each animal's cells halved into training and test neurons "
+         "(top; tests generalisation to new neurons of seen brains) or whole animals held out of training and model selection (bottom; new brains). The population "
+         "(columns) decides what one sample is: the Gram is computed on a sampled population of 128–1024 neurons drawn from one animal (left; a within-circuit "
+         "correlation matrix) or from several animals (right; most entries are between-animal correlations, which exist only because all mice saw the same stimuli). "
+         "Training populations are drawn from training neurons and test populations from test neurons in every regime. MICrONS is one animal, so all MICrONS results "
+         "are in the top-left cell.", "main")
+
+
+# ---------------------------------------------------------------- Fig 4: Allen 2x2 orientation
 def fig3():
     fig, ax = plt.subplots(figsize=(7.4, 3.0))
     cells = [("within", "training animals\nsingle-animal pop.", [A["g11_ori_within_n128"]["acc"]], C["single"]),
@@ -124,8 +179,8 @@ def fig3():
         ax.text(i, 0.322, f"`{reg}`", ha="center", fontsize=7, family="monospace")
     baseline(ax); ax.text(3.45, 0.194, "majority-class\nbaseline", fontsize=7, va="center", color="#666")
     ax.set_xticks(range(4)); ax.set_xticklabels([c[1] for c in cells], fontsize=7.5); ax.set_ylabel("orientation accuracy (6 classes)"); ax.set_ylim(0.1, 0.34); ax.set_xlim(-0.6, 4.4)
-    ax.set_title("Fig. 3  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9, pad=10)
-    save(fig, "fig3_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
+    ax.set_title("Fig. 4  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9, pad=10)
+    save(fig, "fig4_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
          "Label-free decoder accuracy on labelled test cells for the four regimes. Split: test neurons from the training animals (each animal's cells halved) "
          "or from 9 held-out animals. Population: each sampled population (the unit the Gram is computed on) drawn from one animal or from several. "
          "Points: individual mouse splits (held-out regimes; the `pooledcross` split-0 point is the mean of 3 seeds) or population sizes (128 / 256). "
@@ -160,8 +215,8 @@ def fig4():
         ax.set_title(name, fontsize=8.5); ax.set_xlabel("true mean RF position (°)"); ax.set_ylabel("predicted mean (°)"); ax.set_ylim(lo, hi + 12)
         ax.text(0.03, 0.97, f"per-mouse mean, 27 mice: r = {rx:.2f} (x), {ry:.2f} (y)\nwithin mouse, {len(rel):,} cells: r = {rrx:.2f}, {rry:.2f}", transform=ax.transAxes, va="top", fontsize=6.8, bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.5))
         if ax is axes[0]: ax.legend(loc="lower right", fontsize=7)
-    fig.suptitle("Fig. 4  Allen RF: what crosses animals is each animal's screen position, not the retinotopic layout within it", fontsize=9)
-    save(fig, "fig4_allen_rf_mouse_level", "Allen RF: a population-level readout",
+    fig.suptitle("Fig. 5  Allen RF: what crosses animals is each animal's screen position, not the retinotopic layout within it", fontsize=9)
+    save(fig, "fig5_allen_rf_mouse_level", "Allen RF: a population-level readout",
          "Predicted versus true mean receptive-field position of each held-out mouse (9 mice × 3 mouse splits = 27 points; x squares, y dots), from "
          "decoders trained on single-animal or mixed populations. The per-mouse mean is recovered (r 0.36–0.71; permutation p ≤ 0.03), the position of a neuron "
          "relative to its mouse-mates is not (r ≈ 0.1 over 1,259 cells after centring per mouse). R² on absolute coordinates is therefore not a stable summary "
@@ -340,4 +395,4 @@ figcaption code,p code{font-family:"IBM Plex Mono",Menlo,monospace;font-size:.84
 
 
 if __name__ == "__main__":
-    fig1(); fig2(); fig3(); fig4(); figA1(); figA2(); figA3(); figA4(); figA5(); html()
+    fig1(); fig2(); fig_regimes(); fig3(); fig4(); figA1(); figA2(); figA3(); figA4(); figA5(); html()
