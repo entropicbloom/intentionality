@@ -127,14 +127,16 @@ def fig_pipeline():
     axd.add_patch(FancyArrowPatch((3.0, 3.6), (3.7, 3.6), arrowstyle="-|>", mutation_scale=9, color=MUTED, lw=1))
     # (ii) the full correlation matrix, neurons ordered training-first (real 200-neuron excerpt)
     half = rng.permutation(np.flatnonzero(ds.ori_ok & ds.rf_ok)); trn, tst = half[: len(half) // 2], half[len(half) // 2:]
-    ex = np.concatenate([rng.choice(trn, 100, replace=False), rng.choice(np.setdiff1d(tst, six), 94, replace=False), six])
+    ex = np.concatenate([rng.choice(trn, 100, replace=False), rng.choice(np.setdiff1d(tst, six), 100, replace=False)])
+    SIXROWS = [3, 9, 15, 21, 27, 33]                                        # rows of the test block that hold the six example neurons
+    TB, SB = (40, 20), (140, 150)
+    for k, r_ in enumerate(SIXROWS): ex[SB[0] + r_] = six[k]
     Gf = F[ex] @ F[ex].T; np.fill_diagonal(Gf, np.nan)
     axf = fig.add_axes(rect(3.8, 1.75, 3.3, 3.3)); axf.imshow(Gf, cmap="RdBu_r", vmin=-0.5, vmax=0.5, aspect="auto", interpolation="nearest"); axf.set_xticks([]); axf.set_yticks([])
     axf.add_patch(Rectangle((-0.5, -0.5), 100, 100, fc=TR, ec=TR, alpha=0.10, lw=1.2)); axf.add_patch(Rectangle((99.5, 99.5), 100, 100, fc=TE, ec=TE, alpha=0.14, lw=1.2))
     axf.add_patch(Rectangle((99.5, -0.5), 100, 100, fc="white", ec="none", alpha=0.75)); axf.add_patch(Rectangle((-0.5, 99.5), 100, 100, fc="white", ec="none", alpha=0.75))
     axf.text(150, 50, "never\nused", ha="center", va="center", fontsize=5.8, color="#777"); axf.text(50, 150, "never\nused", ha="center", va="center", fontsize=5.8, color="#777")
     axf.text(50, 4, "training × training", ha="center", va="top", fontsize=5.8, color=TR, weight="bold", bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.2)); axf.text(150, 104, "test × test", ha="center", va="top", fontsize=5.8, color="#b07a1e", weight="bold", bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.2))
-    TB, SB = (40, 20), (140, 150)                                           # the two sampled populations: (row0, col0) of a 34 x 34 block
     axf.add_patch(Rectangle((TB[1] - 0.5, TB[0] - 0.5), 34, 34, fill=False, ec=TR, lw=1.3, ls=(0, (3, 1.5)))); axf.add_patch(Rectangle((SB[1] - 0.5, SB[0] - 0.5), 34, 34, fill=False, ec=TE, lw=1.3, ls=(0, (3, 1.5))))
     axf.set_title("full correlation matrix, 12,894 × 12,894\n(200 neurons shown, ordered training first)", fontsize=6.3, pad=2)
     # (iii) the two population Grams, cut from the two diagonal blocks
@@ -146,7 +148,8 @@ def fig_pipeline():
     axd.add_patch(FancyArrowPatch((5.4, 4.05), (7.95, 4.3), arrowstyle="-|>", mutation_scale=8, color=TR, lw=0.9, connectionstyle="arc3,rad=-0.25"))
     axd.add_patch(FancyArrowPatch((7.05, 2.35), (7.95, 2.15), arrowstyle="-|>", mutation_scale=8, color=TE, lw=0.9))
     NC6 = ["#1f5f8b", "#2a9d8f", "#e8a33d", "#b5533c", "#6a4c93", "#3a7d44"]
-    for k in range(6): axte.add_patch(Rectangle((-0.5, 34 - 6 + k - 0.5), 34, 1, fill=False, ec=NC6[k], lw=1.0))   # the six example neurons are the last six rows of the test block
+    for k, r_ in enumerate(SIXROWS):                                        # side ticks mark the six example neurons' rows
+        axte.add_patch(Rectangle((-3.2, r_ - 0.5), 2.2, 1, fc=NC6[k], ec="none", clip_on=False)); axte.add_patch(Rectangle((-0.5, r_ - 0.5), 34, 1, fill=False, ec=NC6[k], lw=0.7, alpha=0.9))
     # (iv) the same decoder: trained on training blocks, scored on test blocks
     axd.add_patch(FancyBboxPatch((10.5, 2.3), 2.1, 2.2, boxstyle="round,pad=0.03,rounding_size=0.2", fc="#2b3038", ec="none", zorder=2))
     axd.text(11.55, 3.75, "transformer", fontsize=7.5, ha="center", va="center", weight="bold", color="white", zorder=9); axd.text(11.55, 3.2, "rows are tokens;\nattention over\nthe population", fontsize=5.8, ha="center", va="center", color="#d8dce2", zorder=9)
@@ -174,8 +177,8 @@ def fig_pipeline():
          "training-first (a real 200-neuron excerpt is shown): the training × training block and the test × test block are used, the cross blocks never. A "
          "population is 512 neurons sampled inside one half, and its Gram is the corresponding diagonal sub-block (dashed). Blocks from the training half train "
          "the decoder, whose loss is on labelled training neurons; blocks from the test half are scored. Each row of a block is one neuron's token; the transformer "
-         "attends over the population and outputs one orientation class and one (x, y) per row (shown for the six neurons of panels b–c, here the last six rows "
-         "of the test block). The epoch is chosen on a held-out slice of the training half. One animal, single-animal populations, new neurons: the `within` cell of Fig. 4.", "main")
+         "attends over the population and outputs one orientation class and one (x, y) per row (shown for the six neurons of panels b–c, marked by side ticks "
+         "in the test block). The epoch is chosen on a held-out slice of the training half. One animal, single-animal populations, new neurons: the `within` cell of Fig. 4.", "main")
 
 
 # ---------------------------------------------------------------- Fig 2: MICrONS label-free decoding
