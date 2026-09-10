@@ -11,8 +11,9 @@
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue]{hyperref}
 \usepackage{caption}
+
 \captionsetup{font=small,labelfont=bf,width=0.95\textwidth}
-\graphicspath{{../outputs/paper/}}
+\graphicspath{{../outputs/paper/tex/}}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\Rsq}{R^{2}}
 
@@ -37,7 +38,7 @@ We answer both on two public datasets. The MICrONS functional-connectomics relea
 
 Our decoder is a transformer \citep{vaswani2017} whose only input is the standardised correlation matrix of a sampled population, one row per neuron. Labels enter as training targets and nowhere else. Every score below is on neurons, or animals, that the training and the model selection never touched. The relational framing follows \citet{framework2025}; here we re-introduce the method and test it in cortex.
 
-\begin{figure}[t]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=\textwidth]{fig1_microns_pipeline.pdf}
   \caption{\textbf{How the MICrONS task is built.} (a)~One mouse, 13 two-photon scans of a cubic millimetre of visual cortex (areas V1, RL, AL, LM), 12,894 neurons co-registered to the electron-microscopy volume. (b)~The relational substrate. Each neuron is its trial-averaged response vector to a stimulus all neurons saw (in vivo: 120 bins of the oracle natural-movie clips; digital twin: 4,999 bins compressed to 512 principal components); shown are six real neurons and their correlation matrix. The oracle clips were shown in all 13 scans, so the matrix is defined across scans. The decoder only ever sees such correlations, never the stimulus. (c)~The contents of the same six neurons: preferred orientation (in vivo, 8 classes, 5,287 neurons with gOSI $\geq 0.25$) and receptive-field centre (digital-twin fit, 11,326 neurons). These are training targets only. (d)~The protocol, with two terms kept apart. The \emph{halves}: all neurons are split at random into a training half and a test half, and the full $12{,}894 \times 12{,}894$ correlation matrix, ordered training-first (a real 200-neuron excerpt is shown), is used only in its training$\times$training and test$\times$test blocks. A \emph{sample}: 512 neurons drawn at random from one half; its Gram is the corresponding diagonal sub-block (dashed), and that $512\times512$ matrix is the decoder's entire input, one row per neuron, one prediction per row. Training draws thousands of samples per epoch from the training half; their predictions meet the labels of the labelled neurons in the sample in a loss that updates the decoder. Scoring draws samples from the test half and compares predictions with held-out labels; no gradient. Labels never enter the input on either path, and the halves share no neuron. The epoch is chosen on a held-out slice of the training half.}
@@ -78,7 +79,7 @@ For the symmetry analysis we average the Gram into a $K\times K$ class-Gram, the
 
 On MICrONS the decoder reads orientation and receptive-field position from the Gram of 512 neurons of the test half (Fig.~\ref{fig:decoder}, Table~\ref{tab:microns}). The twin substrate is cleaner than the in-vivo one, since the twin removes trial noise, and receptive fields carry more than orientation. The predictions are in the true frame: orientation accuracy modulo $D_8$ equals plain accuracy in every run, so the decoder places each neuron at its absolute orientation rather than recovering the class structure up to a rotation.
 
-\begin{table}[t]
+\begin{table}[tbp]
   \centering\small
   \caption{MICrONS, label-free per-neuron decoding on the test half; 17M decoder, 512-neuron populations, mean $\pm$ s.d.\ over 3 seeds.}
   \label{tab:microns}
@@ -94,7 +95,7 @@ On MICrONS the decoder reads orientation and receptive-field position from the G
   \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.85\textwidth]{fig2_microns_decoder.pdf}
   \caption{\textbf{MICrONS: per-neuron content decoded from the population correlation matrix alone.} Accuracy (left, preferred orientation, 8 classes) and $\Rsq$ (right, receptive-field centre) on held-out neurons of the same animal, for decoders of 0.3M, 2.2M and 17M parameters; error bars are the s.d.\ over 3 seeds. The decoder sees only the standardised correlation matrix of 512 sampled neurons. Grey line: majority class.}
@@ -105,7 +106,7 @@ On MICrONS the decoder reads orientation and receptive-field position from the G
 
 The class-Gram of orientation is close to circulant (Fig.~\ref{fig:symmetry}): neighbouring orientations correlate, orthogonal ones anti-correlate, and the pattern repeats around the circle. The circulant part holds 71\% of the variance in vivo and 81\% in the twin. Matching a held-out half to a reference over all $8!$ relabellings gives accuracy 1.0 with the raw class-Gram. After projecting onto the circulant part, absolute accuracy drops to chance (0.11) while accuracy modulo $D_8$ stays at 1.0. The circulant structure determines the classes up to the symmetries of the circle. The residual anisotropy, a cardinal bias whose strength differs between areas, pins which class is $0^\circ$. A label-free decoder that outputs absolute orientation must use it, and the results of the previous section show that it does.
 
-\begin{figure}[t]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.9\textwidth]{fig3_symmetry.pdf}
   \caption{\textbf{What fixes the absolute orientation frame.} Left: mean correlation between orientation classes in vivo (diagonal masked). Middle: its circulant projection. Right: matching a held-out half's class-Gram to the reference over all $8!$ relabellings. With the raw matrix the true labelling wins. After the circulant projection, absolute accuracy collapses to chance while accuracy modulo $D_8$ (dots) stays at 1.0.}
@@ -116,7 +117,7 @@ The class-Gram of orientation is close to circulant (Fig.~\ref{fig:symmetry}): n
 
 With natural-movie relations, orientation is nearly absent from Allen correlations: same-orientation pairs correlate 0.005 more than orthogonal pairs, against 0.09 in MICrONS, and every test is at chance. With grating relations the signal is present (0.05 within a mouse, 0.044 across mice), and the decoder's four cells separate (Fig.~\ref{fig:allen2x2}, Table~\ref{tab:allen}). Single-animal populations sit at the baseline whether or not the animal was seen in training. Mixed populations are above it in both rows, at the same level. Transfer to a new brain costs nothing; what matters is whether the Gram contains between-animal correlations. Those exist only because all mice saw the same 40 conditions, and they measure how similar two tuning profiles are. The decoder still never sees which condition is which, so the absolute frame must again come from the population's relational structure. In this dataset a neuron's orientation is readable from where it sits in a correlation geometry that spans animals; it is not readable from its relations inside its own circuit.
 
-\begin{table}[t]
+\begin{table}[tbp]
   \centering\small
   \caption{Allen, orientation accuracy (6 classes) in the four regimes, three splits per cell (of neurons within each animal for the top row, of animals for the bottom row); the \code{pooledcross} split-0 value is the mean of 3 seeds. Majority-class baseline 0.19 to 0.20.}
   \label{tab:allen}
@@ -130,14 +131,14 @@ With natural-movie relations, orientation is nearly absent from Allen correlatio
   \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.95\textwidth]{fig4_regimes.pdf}
   \caption{\textbf{The four Allen decoder regimes.} Rows: test neurons from the training animals (each animal's cells halved) or from held-out animals. Columns: each sampled population drawn from one animal or from several. Filled dots are training neurons, hollow dots test neurons, dashed boxes one sampled population each. Training populations come only from training neurons and test populations only from test neurons in every regime.}
   \label{fig:regimes}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.85\textwidth]{fig5_allen_2x2_orientation.pdf}
   \caption{\textbf{Allen, 33 mice, grating relations: orientation is readable only from populations that mix animals.} Bars: mean over splits; points: the three splits. Single-animal populations are at the majority baseline whether the animal was seen in training or not; mixed populations are above it in both rows at the same level.}
@@ -150,7 +151,7 @@ Correlation falls with receptive-field distance within a mouse (0.127 at $<5^\ci
 
 The within-mouse layout is present in the correlations, since same-mouse correlation falls with distance. It is not learned because each mouse contributes 23 to 112 labelled cells. MICrONS, with 11,326 labels in one animal, is where the same decoder reaches neuron-level receptive fields at $\Rsq = 0.48$.
 
-\begin{figure}[t]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.85\textwidth]{fig6_allen_rf_mouse_level.pdf}
   \caption{\textbf{Allen receptive fields: what crosses animals is each animal's screen position.} Predicted versus true mean receptive-field position of each held-out mouse (27 points over 3 splits; $x$ squares, $y$ dots), from decoders trained on single-animal (left) or mixed (right) populations. The per-mouse mean is recovered; the position of a neuron relative to its mouse-mates is not.}
@@ -161,6 +162,7 @@ The within-mouse layout is present in the correlations, since same-mouse correla
 
 Capacity pays where labels are plentiful and stops where they are scarce (Fig.~\ref{fig:a1}). Twin receptive fields go from 0.34 to 0.48 to 0.51 $\Rsq$ between 2.2M, 17M and 57M parameters; twin orientation is flat at 0.42 from 7M upward; in-vivo orientation gains one point. Every model above 2M memorises its training neurons within 4 to 17 epochs (training loss 0.001 to 0.06) and is early-stopped on the held-out selection slice (Fig.~\ref{fig:a4}). Population size saturates by 512 neurons in MICrONS and 256 on Allen (Fig.~\ref{fig:a2}). Recomputing training Grams from a random subset of stimulus conditions helps only with capacity, and only where the dimensions are exchangeable conditions: it lifts Allen orientation at 17M and in-vivo receptive fields at 75\% of the bins, hurts the 2M model below 75\%, and destroys a Gram built on principal components (Fig.~\ref{fig:a3}). On Allen, the 17M augmented model and the 2.2M standard model are equal within seed noise ($0.293 \pm 0.012$ against 0.286 to 0.294), and split-to-split variance exceeds both (Fig.~\ref{fig:a5}).
 
+\clearpage
 \section{Discussion}
 
 The correlation matrix of a few hundred cortical neurons, with the stimulus unknown and no neuron labelled, determines each neuron's preferred orientation to within a few points of what a fully labelled linear readout achieves in vivo, and its receptive-field position to $\Rsq = 0.23$ in vivo and 0.48 on the digital twin. The mechanism is the one the symmetry analysis exposes: the relations fix the class structure up to the symmetries of the content, and a small, consistent departure from that symmetry fixes the frame.
@@ -176,48 +178,54 @@ The symmetry result is an instance of a general expectation: a representation th
 \bibliographystyle{unsrtnat}
 \bibliography{refs}
 
+\clearpage
 \appendix
+\renewcommand{\thefigure}{A\arabic{figure}}
+\setcounter{figure}{0}
 \section{Scaling and controls}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\textwidth]{figA1_scaling_params.pdf}
-  \caption{\textbf{Scaling with decoder size.} Test metric versus number of decoder parameters at fixed population size (512 neurons MICrONS, 256 Allen). Error bars: s.d.\ over 3 seeds where run. On MICrONS receptive fields the gain continues to 57M; on orientation it stops at 7M. On Allen the augmented 17M model equals the 2M standard configuration within seed noise, and augmentation on the 57M model hurts.}
-  \label{fig:a1}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.85\textwidth]{figA2_population_size.pdf}
-  \caption{\textbf{Population size.} Test metric versus the number of neurons in each sampled population. Beyond a few hundred neurons the additional companions add redundant context.}
-  \label{fig:a2}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\textwidth]{figA3_augmentation.pdf}
-  \caption{\textbf{Relation augmentation.} Each training population's Gram is recomputed from a random subset of the response dimensions; test Grams use all dimensions. On Allen the augmentation helps only with capacity. On MICrONS it helps only in-vivo receptive fields, costs a point on in-vivo orientation, and destroys the twin Gram, whose dimensions are principal components rather than exchangeable conditions.}
-  \label{fig:a3}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\textwidth]{figA4_training_dynamics.pdf}
-  \caption{\textbf{Training dynamics and epoch selection.} Test metric (solid), selection-set metric (dotted) and training loss (red, right axis) per epoch. The selection set, never the test set, picks the epoch (grey line). Without augmentation the training loss collapses within about 15 epochs.}
-  \label{fig:a4}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\textwidth]{figA5_allen_splits_classlevel.pdf}
-  \caption{\textbf{Allen split variance and the class-level test.} Left: \code{pooledcross} orientation accuracy on the same three held-out-mouse splits for the first protocol and the final configuration. Right: the class-level test with relations from natural movies versus drifting gratings; only the grating relations move every test off chance.}
-  \label{fig:a5}
-\end{figure}
+Figures~\ref{fig:a1} to \ref{fig:a5} report the sweeps behind Section~3.5: decoder size, population size, relation augmentation, training dynamics and split variance.
 
 \section{Labelled reference models}
 TODO: ridge readouts from each neuron's correlations to labelled training neurons (MICrONS in vivo 0.41 / 0.32, twin 0.49 / 0.67; Allen leave-one-mouse-out 0.35 for orientation, 0.20 for receptive fields), with the caveat that ridge is one linear labelled model and the decoder exceeded it on Allen receptive fields.
 
 \section{Receptive-field decomposition per split}
 TODO: per-split table of absolute $\Rsq$, mouse-level correlation and within-mouse correlation for both regimes.
+
+
+\clearpage
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{figA1_scaling_params.pdf}
+  \caption{\textbf{Scaling with decoder size.} Test metric versus number of decoder parameters at fixed population size (512 neurons MICrONS, 256 Allen). Error bars: s.d.\ over 3 seeds where run. On MICrONS receptive fields the gain continues to 57M; on orientation it stops at 7M. On Allen the augmented 17M model equals the 2M standard configuration within seed noise, and augmentation on the 57M model hurts.}
+  \label{fig:a1}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figA2_population_size.pdf}
+  \caption{\textbf{Population size.} Test metric versus the number of neurons in each sampled population. Beyond a few hundred neurons the additional companions add redundant context.}
+  \label{fig:a2}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{figA3_augmentation.pdf}
+  \caption{\textbf{Relation augmentation.} Each training population's Gram is recomputed from a random subset of the response dimensions; test Grams use all dimensions. On Allen the augmentation helps only with capacity. On MICrONS it helps only in-vivo receptive fields, costs a point on in-vivo orientation, and destroys the twin Gram, whose dimensions are principal components rather than exchangeable conditions.}
+  \label{fig:a3}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{figA4_training_dynamics.pdf}
+  \caption{\textbf{Training dynamics and epoch selection.} Test metric (solid), selection-set metric (dotted) and training loss (red, right axis) per epoch. The selection set, never the test set, picks the epoch (grey line). Without augmentation the training loss collapses within about 15 epochs.}
+  \label{fig:a4}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{figA5_allen_splits_classlevel.pdf}
+  \caption{\textbf{Allen split variance and the class-level test.} Left: \code{pooledcross} orientation accuracy on the same three held-out-mouse splits for the first protocol and the final configuration. Right: the class-level test with relations from natural movies versus drifting gratings; only the grating relations move every test off chance.}
+  \label{fig:a5}
+\end{figure}
 
 \end{document}

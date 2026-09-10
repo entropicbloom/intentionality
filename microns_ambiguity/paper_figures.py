@@ -15,6 +15,10 @@ import numpy as np
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 OUT = os.path.join(ROOT, "microns_ambiguity", "outputs", "paper")
+TEX = os.environ.get("PAPER_TEX") == "1"          # PAPER_TEX=1: PDFs without in-figure titles, for the LaTeX paper
+if TEX:
+    OUT = os.path.join(OUT, "tex")
+    matplotlib.figure.Figure.suptitle = lambda self, *a, **k: None
 os.makedirs(OUT, exist_ok=True)
 M = json.load(open(os.path.join(ROOT, "microns_ambiguity", "outputs", "decoder2.json")))
 A = json.load(open(os.path.join(ROOT, "allen", "outputs", "decoder.json")))
@@ -29,7 +33,8 @@ FIGS = []  # (filename, title, caption, section)
 
 
 def save(fig, name, title, caption, section):
-    fig.savefig(os.path.join(OUT, name + ".png"), bbox_inches="tight")
+    if not TEX:
+        fig.savefig(os.path.join(OUT, name + ".png"), bbox_inches="tight")
     fig.savefig(os.path.join(OUT, name + ".pdf"), bbox_inches="tight")
     plt.close(fig); FIGS.append((name, title, caption, section)); print("wrote", name)
 
@@ -316,7 +321,7 @@ def fig3():
         ax.text(i, 0.322, f"`{reg}`", ha="center", fontsize=7, family="monospace")
     baseline(ax); ax.text(3.45, 0.194, "majority-class\nbaseline", fontsize=7, va="center", color="#666")
     ax.set_xticks(range(4)); ax.set_xticklabels([c[1] for c in cells], fontsize=7.5); ax.set_ylabel("orientation accuracy (6 classes)"); ax.set_ylim(0.1, 0.34); ax.set_xlim(-0.6, 4.4)
-    ax.set_title("Fig. 5  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9, pad=10)
+    fig.suptitle("Fig. 5  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9)
     save(fig, "fig5_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
          "Label-free decoder accuracy on labelled test cells for the four regimes. Split: test neurons from the training animals (each animal's cells halved) "
          "or from 9 held-out animals. Population: each sampled population (the unit the Gram is computed on) drawn from one animal or from several. "
@@ -534,4 +539,5 @@ figcaption code,p code{font-family:"IBM Plex Mono",Menlo,monospace;font-size:.84
 
 
 if __name__ == "__main__":
-    fig_pipeline(); fig1(); fig2(); fig_regimes(); fig3(); fig4(); figA1(); figA2(); figA3(); figA4(); figA5(); html()
+    fig_pipeline(); fig1(); fig2(); fig_regimes(); fig3(); fig4(); figA1(); figA2(); figA3(); figA4(); figA5()
+    if not TEX: html()
