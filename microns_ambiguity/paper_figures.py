@@ -43,7 +43,56 @@ def ms(tags, key):
     v = np.array([M[t][key] for t in tags]); return v.mean(), v.std(), v
 
 
-# ---------------------------------------------------------------- Fig 1: MICrONS label-free decoding
+
+# ---------------------------------------------------------------- Fig 1: MICrONS data and pipeline
+def fig_pipeline():
+    from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Circle
+    rng = np.random.default_rng(11)
+    fig, ax = plt.subplots(figsize=(10.8, 5.2)); ax.set_xlim(0, 20); ax.set_ylim(0, 10.5); ax.axis("off")
+    INK, MUTED, TR, TE, FILL = "#1c2230", "#6a7380", "#1f5f8b", "#e8a33d", "#f2f4f3"
+    def box(x, y, w, h, title, lines, fc=FILL, ec="#8a939c"):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.05,rounding_size=0.3", fc=fc, ec=ec, lw=1))
+        ax.text(x + 0.25, y + h - 0.3, title, fontsize=8, weight="bold", va="top", color=INK)
+        for i, l in enumerate(lines): ax.text(x + 0.25, y + h - 0.8 - 0.4 * i, l, fontsize=6.4, va="top", color="#333")
+    def arrow(x0, y0, x1, y1, txt=None, ty=0.2):
+        ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="-|>", mutation_scale=9, color=MUTED, lw=1))
+        if txt: ax.text((x0 + x1) / 2, (y0 + y1) / 2 + ty, txt, fontsize=6.3, ha="center", color=MUTED)
+    box(0.3, 6.2, 5.6, 4.0, "a  One mouse, one mm³ of visual cortex", ["MICrONS release (Ding et al. 2025)", "13 two-photon scans; V1, RL, AL, LM", "12,894 neurons co-registered", "  to the EM volume", "each with responses, orientation,", "  receptive field, soma position"])
+    ax.add_patch(FancyBboxPatch((4.2, 6.5), 1.5, 1.5, boxstyle="round,pad=0.02,rounding_size=0.1", fc="white", ec="#8a939c", lw=0.8))
+    xy = rng.uniform(0, 1, (40, 2)) * 1.3 + [4.3, 6.6]; ax.scatter(xy[:, 0], xy[:, 1], s=4, c=TR, ec="none")
+    box(6.5, 6.2, 6.9, 4.0, "b  Relations: correlations between neurons", ["each neuron = its response vector to a stimulus all neurons saw:", "  in vivo: trial-averaged responses to the oracle movie clips (120 bins)", "  digital twin: model responses to a shared movie (4,999 bins → 512 PCs)", "Gram entry (i, j) = correlation of neuron i's and neuron j's vectors", "12,894 × 12,894 matrix; stimulus identity never enters the decoder"])
+    box(14.0, 6.2, 5.7, 4.0, "c  Contents (training targets only)", ["preferred orientation: in vivo, 8 classes,", "  gOSI ≥ 0.25 → 5,287 labelled neurons", "receptive-field centre (x, y): twin STA fit,", "  test correlation ≥ 0.2 → 11,326 labelled", "unlabelled neurons stay in as tokens"])
+    arrow(5.9, 8.2, 6.5, 8.2); arrow(13.4, 8.2, 14.0, 8.2)
+    box(0.3, 0.3, 19.4, 5.2, "d  Protocol: halve the neurons, sample populations, decode each neuron from its row of the population's Gram", [])
+    ax.text(0.6, 4.35, "all 12,894 neurons, random half split", fontsize=6.6, color="#333")
+    for i in range(48):
+        cx, cy = 0.75 + (i % 12) * 0.36, 3.75 - (i // 12) * 0.36
+        if i % 12 < 6: ax.add_patch(Circle((cx, cy), 0.11, fc=TR, ec="none"))
+        else: ax.add_patch(Circle((cx, cy), 0.11, fc="white", ec=TE, lw=1))
+    ax.text(1.6, 2.35, "training half", fontsize=6.3, color=TR, ha="center"); ax.text(3.85, 2.35, "test half", fontsize=6.3, color=TE, ha="center")
+    ax.text(2.7, 1.6, "populations of 512 are sampled inside a half,\nnever across the two halves", fontsize=6.3, ha="center", color="#333")
+    arrow(5.3, 3.2, 6.2, 3.2, "sample\n512", ty=0.35)
+    ax.text(7.7, 4.6, "population Gram (512 × 512)", fontsize=6.6, ha="center", color="#333")
+    G = rng.normal(0, 1, (14, 14)); G = (G + G.T) / 2; np.fill_diagonal(G, np.nan)
+    ax.imshow(G, extent=(6.4, 9.0, 1.7, 4.3), cmap="viridis", zorder=2); ax.add_patch(FancyBboxPatch((6.4, 1.7), 2.6, 2.6, boxstyle="square,pad=0", fill=False, ec="#8a939c", lw=0.8, zorder=3))
+    ax.add_patch(FancyBboxPatch((6.4, 3.55), 2.6, 0.19, boxstyle="square,pad=0", fill=False, ec=TE, lw=1.4, zorder=4))
+    ax.text(7.7, 1.3, "one row = one neuron's token:\nits correlations to the other 511", fontsize=6.3, ha="center", color="#333", va="top")
+    arrow(9.1, 3.2, 10.0, 3.2)
+    box(10.0, 1.3, 3.6, 3.0, "transformer", ["rows as tokens", "attention over the population", "2M–57M parameters"], fc="white")
+    arrow(13.7, 3.2, 14.6, 3.2)
+    box(14.6, 1.3, 5.0, 3.0, "per-neuron prediction", ["orientation class or (x, y)", "loss on labelled training neurons", "scored on test neurons only", "epoch chosen on a held-out slice", "  of the training half, never on test"], fc="white")
+    ax.text(10.0, 0.6, "Same brain, single-animal populations, new neurons: the `within` cell of the Allen regime table (Fig. 4).", fontsize=6.8, ha="center", color=INK, style="italic")
+    fig.suptitle("Fig. 1  MICrONS: from one imaged cortical volume to a label-free per-neuron decoding task", fontsize=9)
+    save(fig, "fig1_microns_pipeline", "How the MICrONS task is built",
+         "(a) The MICrONS functional-connectomics release: one mouse, 13 two-photon scans of a cubic millimetre of visual cortex, 12,894 neurons co-registered to "
+         "the electron-microscopy volume, each with in-vivo responses, a digital-twin model, preferred orientation and receptive-field centre. (b) The relational "
+         "substrate: every neuron's response vector to a stimulus all neurons saw (in vivo: 120 bins of the oracle natural-movie clips; twin: 4,999 bins compressed to "
+         "512 principal components) and the correlation matrix between neurons. (c) The contents, used only as training targets and never as inputs. (d) The protocol: "
+         "neurons are halved at random; populations of 512 are sampled inside a half; each population's Gram is standardised and its rows become the decoder's tokens; "
+         "the decoder predicts every token's content, is trained on the labelled training neurons, early-stopped on a held-out slice of the training half, and scored on "
+         "the test half. Because there is one animal, every MICrONS result is a within-brain, single-animal-population result, the `within` cell of Fig. 4.", "main")
+
+# ---------------------------------------------------------------- Fig 2: MICrONS label-free decoding
 def fig1():
     REF = {("iv", "ori"): 0.41, ("twin", "ori"): 0.49, ("iv", "rf"): 0.32, ("twin", "rf"): 0.67}
     BASE = {"ori": 0.255, "rf": 0.0}
@@ -73,8 +122,8 @@ def fig1():
             ax.axhline(BASE[con], color=C["base"], lw=1, zorder=0); ax.text(1.42, BASE[con] - 0.03, "majority class", fontsize=6.5, color="#666")
         ax.set_xticks([0, 1]); ax.set_xticklabels(["in vivo", "digital twin"]); ax.set_ylabel(ylab)
         ax.set_xlim(-0.55, 1.75); ax.set_ylim(0, {"ori": 0.5, "rf": 0.6}[con])
-    fig.suptitle("Fig. 1  MICrONS: per-neuron content decoded from the population correlation matrix alone (512 neurons, no labels, no reference)", fontsize=9)
-    save(fig, "fig1_microns_decoder", "MICrONS label-free per-neuron decoding",
+    fig.suptitle("Fig. 2  MICrONS: per-neuron content decoded from the population correlation matrix alone (512 neurons, no labels, no reference)", fontsize=9)
+    save(fig, "fig2_microns_decoder", "MICrONS label-free per-neuron decoding",
          "Bars: label-free decoder accuracy (left, preferred orientation, 8 classes) and R² (right, receptive-field centre) on held-out neurons of the same animal, "
          "for decoders of 0.3M, 2.2M and 17M parameters; error bars are the s.d. over 3 seeds (2.2M and 17M). The decoder sees only the standardised "
          "correlation matrix of 512 sampled neurons: neither labels nor a reference population enter the input, and the test neurons never influenced model "
@@ -100,8 +149,8 @@ def fig2():
     ax.axhline(1 / 8, color=C["base"], lw=1); ax.text(1.4, 1 / 8 + 0.02, "chance", fontsize=7, color="#666")
     ax.set_xticks([0, 1]); ax.set_xticklabels(["in vivo", "digital twin"]); ax.set_ylim(0, 1.15); ax.set_ylabel("class matching accuracy"); ax.legend(loc="center right", fontsize=7)
     ax.set_title("matching over all 8! relabellings", fontsize=9)
-    fig.suptitle("Fig. 2  What fixes the absolute orientation frame: the non-circulant part of the class relations", fontsize=9)
-    save(fig, "fig2_symmetry", "Symmetry: the anisotropy fixes the frame",
+    fig.suptitle("Fig. 3  What fixes the absolute orientation frame: the non-circulant part of the class relations", fontsize=9)
+    save(fig, "fig3_symmetry", "Symmetry: the anisotropy fixes the frame",
          "Left: mean correlation between orientation classes in vivo (diagonal masked); the structure is close to circulant (71 % of the variance in vivo, "
          "81 % in the twin): neighbouring orientations correlate, orthogonal ones anti-correlate. Middle: the circulant projection of the same matrix. "
          "Right: matching a held-out half's class-Gram to the reference over all 8! relabellings. With the raw matrix the true labelling wins (accuracy 1.0). "
@@ -152,8 +201,8 @@ def fig_regimes():
         ax.text(5.1, 6.35, f"`{name}`", ha="center", fontsize=9, family="monospace", weight="bold", va="top")
         ax.text(5.1, 5.85, desc, ha="center", fontsize=7.5, color="#444", va="top")
     fig.text(0.5, 0.005, "filled = training neurons (labels are targets)   ·   hollow = test neurons (scored; never used for training or model selection)   ·   dashed box = one sampled population, the unit the Gram is computed on", ha="center", fontsize=6.8, color="#444")
-    fig.suptitle("Fig. 3  Allen decoder regimes: where the test neurons come from × what one population contains", fontsize=9)
-    save(fig, "fig3_regimes", "The four Allen decoder regimes",
+    fig.suptitle("Fig. 4  Allen decoder regimes: where the test neurons come from × what one population contains", fontsize=9)
+    save(fig, "fig4_regimes", "The four Allen decoder regimes",
          "Two independent choices define a run. The split (rows) decides where test neurons come from: each animal's cells halved into training and test neurons "
          "(top; tests generalisation to new neurons of seen brains) or whole animals held out of training and model selection (bottom; new brains). The population "
          "(columns) decides what one sample is: the Gram is computed on a sampled population of 128–1024 neurons drawn from one animal (left; a within-circuit "
@@ -176,8 +225,8 @@ def fig3():
         ax.text(i, 0.322, f"`{reg}`", ha="center", fontsize=7, family="monospace")
     baseline(ax); ax.text(3.45, 0.194, "majority-class\nbaseline", fontsize=7, va="center", color="#666")
     ax.set_xticks(range(4)); ax.set_xticklabels([c[1] for c in cells], fontsize=7.5); ax.set_ylabel("orientation accuracy (6 classes)"); ax.set_ylim(0.1, 0.34); ax.set_xlim(-0.6, 4.4)
-    ax.set_title("Fig. 4  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9, pad=10)
-    save(fig, "fig4_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
+    ax.set_title("Fig. 5  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9, pad=10)
+    save(fig, "fig5_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
          "Label-free decoder accuracy on labelled test cells for the four regimes. Split: test neurons from the training animals (each animal's cells halved) "
          "or from 9 held-out animals. Population: each sampled population (the unit the Gram is computed on) drawn from one animal or from several. "
          "Points: individual mouse splits (held-out regimes; the `pooledcross` split-0 point is the mean of 3 seeds) or population sizes (128 / 256). "
@@ -212,8 +261,8 @@ def fig4():
         ax.set_title(name, fontsize=8.5); ax.set_xlabel("true mean RF position (°)"); ax.set_ylabel("predicted mean (°)"); ax.set_ylim(lo, hi + 12)
         ax.text(0.03, 0.97, f"per-mouse mean, 27 mice: r = {rx:.2f} (x), {ry:.2f} (y)\nwithin mouse, {len(rel):,} cells: r = {rrx:.2f}, {rry:.2f}", transform=ax.transAxes, va="top", fontsize=6.8, bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.5))
         if ax is axes[0]: ax.legend(loc="lower right", fontsize=7)
-    fig.suptitle("Fig. 5  Allen RF: what crosses animals is each animal's screen position, not the retinotopic layout within it", fontsize=9)
-    save(fig, "fig5_allen_rf_mouse_level", "Allen RF: a population-level readout",
+    fig.suptitle("Fig. 6  Allen RF: what crosses animals is each animal's screen position, not the retinotopic layout within it", fontsize=9)
+    save(fig, "fig6_allen_rf_mouse_level", "Allen RF: a population-level readout",
          "Predicted versus true mean receptive-field position of each held-out mouse (9 mice × 3 mouse splits = 27 points; x squares, y dots), from "
          "decoders trained on single-animal or mixed populations. The per-mouse mean is recovered (r 0.36–0.71; permutation p ≤ 0.03), the position of a neuron "
          "relative to its mouse-mates is not (r ≈ 0.1 over 1,259 cells after centring per mouse). R² on absolute coordinates is therefore not a stable summary "
@@ -392,4 +441,4 @@ figcaption code,p code{font-family:"IBM Plex Mono",Menlo,monospace;font-size:.84
 
 
 if __name__ == "__main__":
-    fig1(); fig2(); fig_regimes(); fig3(); fig4(); figA1(); figA2(); figA3(); figA4(); figA5(); html()
+    fig_pipeline(); fig1(); fig2(); fig_regimes(); fig3(); fig4(); figA1(); figA2(); figA3(); figA4(); figA5(); html()
