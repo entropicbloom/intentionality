@@ -34,6 +34,11 @@ def save(fig, name, title, caption, section):
     plt.close(fig); FIGS.append((name, title, caption, section)); print("wrote", name)
 
 
+def baseline(ax):
+    """Allen majority-class baseline: thin line at the mean over splits, faint band for the range."""
+    ax.axhspan(0.187, 0.201, color=C["base"], alpha=0.18, lw=0); ax.axhline(0.194, color="#888", lw=0.9, zorder=0)
+
+
 def ms(tags, key):
     v = np.array([M[t][key] for t in tags]); return v.mean(), v.std(), v
 
@@ -117,7 +122,7 @@ def fig3():
         jitter = np.linspace(-0.12, 0.12, len(vals)) if len(vals) > 1 else [0]
         ax.plot(i + np.array(jitter), vals, "o", color="k", ms=4, mfc="white")
         ax.text(i, 0.322, f"`{reg}`", ha="center", fontsize=7, family="monospace")
-    ax.axhspan(0.187, 0.201, color=C["base"], alpha=0.5, lw=0); ax.text(3.45, 0.194, "majority-class\nbaseline", fontsize=7, va="center", color="#555")
+    baseline(ax); ax.text(3.45, 0.194, "majority-class\nbaseline", fontsize=7, va="center", color="#666")
     ax.set_xticks(range(4)); ax.set_xticklabels([c[1] for c in cells], fontsize=7.5); ax.set_ylabel("orientation accuracy (6 classes)"); ax.set_ylim(0.1, 0.34); ax.set_xlim(-0.6, 4.4)
     ax.set_title("Fig. 3  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9, pad=10)
     save(fig, "fig3_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
@@ -187,7 +192,7 @@ def figA1():
     ax.plot(xs, ys, "o-", color=C["mix"], label="plain, 256 neurons")
     ax.plot([2.2, 17, 57], [A["g2_n256_d256L4_cf50"]["acc"], A["g2_n256_d512L8_cf50"]["acc"], A["g10_d768L12_cf50"]["acc"]], "s--", color=C["mix"], mfc="white", label="Gram from 50 % of conditions")
     ax.errorbar([17], [np.mean([A[t]["acc"] for t in ["g2_n256_d512L8_cf50", "g10_d512L8_cf50_s1", "g10_d512L8_cf50_s2"]])], yerr=[np.std([A[t]["acc"] for t in ["g2_n256_d512L8_cf50", "g10_d512L8_cf50_s1", "g10_d512L8_cf50_s2"]])], fmt="none", ecolor="k", capsize=3)
-    ax.axhspan(0.187, 0.201, color=C["base"], alpha=0.5, lw=0); ax.set_xscale("log"); ax.set_xticks([2.2, 17, 57]); ax.set_xticklabels(["2.2", "17", "57"]); ax.minorticks_off(); ax.set_xlabel("decoder parameters (M)"); ax.set_ylabel("accuracy"); ax.set_title("Allen orientation, held-out mice (split 0)"); ax.legend(fontsize=7); ax.set_ylim(0.15, 0.35)
+    baseline(ax); ax.set_xscale("log"); ax.set_xticks([2.2, 17, 57]); ax.set_xticklabels(["2.2", "17", "57"]); ax.minorticks_off(); ax.set_xlabel("decoder parameters (M)"); ax.set_ylabel("accuracy"); ax.set_title("Allen orientation, held-out mice (split 0)"); ax.legend(fontsize=7); ax.set_ylim(0.15, 0.35)
     fig.suptitle("Fig. A1  Capacity: RF keeps gaining with model size, orientation does not (label counts 11,326 vs 5,287 in MICrONS; 5,529 in Allen)", fontsize=9)
     save(fig, "figA1_scaling_params", "Appendix: scaling with decoder size",
          "Test metric versus number of decoder parameters at fixed population size (512 neurons MICrONS, 256 Allen). Error bars: s.d. over 3 seeds where run. "
@@ -211,7 +216,7 @@ def figA2():
     ax.plot([256, 512, 1024], [A["g1_n256_d512L8_e60"]["acc"], A["g1_n512_d512L8_e60"]["acc"], A["g1_n1024_d512L8_e60"]["acc"]], "o-", color=C["mix"], label="orientation, 17M, mixed pop.")
     ax.plot([128, 256], [A["dg3_128_sp0_s0"]["acc"], A["dg3_256_sp0_s0"]["acc"]], "o-", color=C["mix"], alpha=0.5, label="orientation, 2M, mixed pop.")
     ax.plot([256, 512, 1024], [A["g4_rf_n256_d256L4_cf50"]["r2"], A["g4_rf_n512_d512L8_cf50"]["r2"], A["g4_rf_n1024_d512L8_cf50"]["r2"]], "s--", color=C["mix"], mfc="white", label="RF R², mixed pop. (split 0)")
-    ax.set_xscale("log", base=2); ax.set_xlabel("neurons per population"); ax.set_title("Allen, held-out mice"); ax.legend(fontsize=6.5); ax.axhspan(0.187, 0.201, color=C["base"], alpha=0.5, lw=0)
+    ax.set_xscale("log", base=2); ax.set_xlabel("neurons per population"); ax.set_title("Allen, held-out mice"); ax.legend(fontsize=6.5); baseline(ax)
     fig.suptitle("Fig. A2  Population size saturates by 512 neurons (MICrONS) and 256 (Allen)", fontsize=9)
     save(fig, "figA2_population_size", "Appendix: population size",
          "Test metric versus the number of neurons in each sampled population (the size of the Gram the decoder sees). The 0.3M in-vivo curves are the original "
@@ -227,7 +232,7 @@ def figA3():
     ax.plot([1.0, 0.85, 0.5], [A["g1_n256_d512L8_e60"]["acc"], A["g5_d512L8_cf85"]["acc"], A["g2_n256_d512L8_cf50"]["acc"]], "o-", color=C["mix"], label="17M")
     ax.plot([1.0, 0.5], [A["g1_n256_d768L12_e60"]["acc"], A["g10_d768L12_cf50"]["acc"]], "o-", color="#1b6b60", label="57M")
     ax.plot([1.0, 1.0], [A["g2_n256_d256L4_gd20"]["acc"], A["g1_n256_d512L8_e60_do2"]["acc"]], "x", color="k", label="Gram dropout 20 % (2M) / dropout 0.2 (17M)")
-    ax.invert_xaxis(); ax.set_xlabel("fraction of the 40 conditions kept"); ax.set_ylabel("accuracy, held-out mice (split 0)"); ax.set_title("Allen orientation"); ax.legend(fontsize=6.5); ax.axhspan(0.187, 0.201, color=C["base"], alpha=0.5, lw=0)
+    ax.invert_xaxis(); ax.set_xlabel("fraction of the 40 conditions kept"); ax.set_ylabel("accuracy, held-out mice (split 0)"); ax.set_title("Allen orientation"); ax.legend(fontsize=6.5); baseline(ax)
     ax = axes[1]
     ax.errorbar([1.0], [np.mean([M[t]["r2"] for t in ["g9_iv_rf_n512_d512L8", "g12_iv_rf_s1", "g12_iv_rf_s2"]])], yerr=[np.std([M[t]["r2"] for t in ["g9_iv_rf_n512_d512L8", "g12_iv_rf_s1", "g12_iv_rf_s2"]])], fmt="o", color=C["iv"], capsize=2)
     ax.plot([1.0, 0.75, 0.5], [np.mean([M[t]["r2"] for t in ["g9_iv_rf_n512_d512L8", "g12_iv_rf_s1", "g12_iv_rf_s2"]]), M["g9_iv_rf_n512_d512L8_cf75"]["r2"], M["g3_iv_rf_n512_d512L8_cf50"]["r2"]], "o-", color=C["iv"], label="in vivo RF, 17M (120 stimulus bins)")
@@ -268,7 +273,7 @@ def figA5():
     groups = {"first protocol\n128 n, 12 ep": ["dg_ori_pooledcross_nm1", "dg_pc_s1", "dg_pc_s2"], "17M + 50 %\n256 n, 60 ep": ["g2_n256_d512L8_cf50", "g10_d512L8_cf50_sp1", "g10_d512L8_cf50_sp2"]}
     for gi, (g, tags) in enumerate(groups.items()):
         for si, t in enumerate(tags): ax.bar(gi + (si - 1) * 0.25, A[t]["acc"], 0.22, color=C[f"s{si}"], label=f"split {si}" if gi == 0 else None)
-    ax.axhspan(0.187, 0.201, color=C["base"], alpha=0.5, lw=0); ax.set_xticks([0, 1]); ax.set_xticklabels(list(groups.keys()), fontsize=8); ax.set_ylabel("accuracy, held-out mice"); ax.set_ylim(0.15, 0.34); ax.legend(fontsize=7, loc="upper left", ncol=3); ax.set_title("Allen orientation, `pooledcross`, by mouse split", fontsize=8.5)
+    baseline(ax); ax.set_xticks([0, 1]); ax.set_xticklabels(list(groups.keys()), fontsize=8); ax.set_ylabel("accuracy, held-out mice"); ax.set_ylim(0.15, 0.34); ax.legend(fontsize=7, loc="upper left", ncol=3); ax.set_title("Allen orientation, `pooledcross`, by mouse split", fontsize=8.5)
     ax = axes[1]
     G = json.load(open(os.path.join(ROOT, "allen", "outputs", "geometric_DG_nm1_sg.json")))["summary"]; Gm = json.load(open(os.path.join(ROOT, "allen", "outputs", "geometric_both_sg.json")))["summary"]
     labs = ["within-mouse\nsplit-half", "one mouse →\nanother", "pooled reference →\nheld-out mouse"]
