@@ -54,8 +54,8 @@ def fig_pipeline():
     NC = ["#1f5f8b", "#2a9d8f", "#e8a33d", "#b5533c", "#6a4c93", "#3a7d44"]
     ok = ds.ori_ok & ds.rf_ok; cand = np.flatnonzero(ok); six = rng.choice(cand, 6, replace=False)
     F = normalize_features(ds.func_iv); Gsix = F[six] @ F[six].T
-    fig = plt.figure(figsize=(10.8, 6.3))
-    TOP, FOOT = 0.90, 0.575                                                # bands: panel titles / footnotes of the top row
+    fig = plt.figure(figsize=(10.8, 6.5))
+    TOP, FOOT = 0.905, 0.59                                                # bands: panel titles / footnotes of the top row
     def label(ax, txt, y=None):
         x0 = ax.get_position().x0; fig.text(x0, TOP if y is None else y, txt, fontsize=8.5, weight="bold", va="bottom", color=INK)
     def foot(x0, x1, txt): fig.text((x0 + x1) / 2, FOOT, txt, fontsize=6.5, ha="center", va="top", color="#444")
@@ -63,7 +63,7 @@ def fig_pipeline():
         ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="-|>", mutation_scale=9, color=MUTED, lw=1, transform=ax.transAxes, clip_on=False))
         if txt: ax.text((x0 + x1) / 2, (y0 + y1) / 2 + dy, txt, transform=ax.transAxes, fontsize=fs, ha="center", color=MUTED)
     # ---- a: the volume
-    ax = fig.add_axes([0.03, 0.605, 0.24, 0.29]); ax.set_xlim(0, 10); ax.set_ylim(0, 10); ax.axis("off"); label(ax, "a  one mouse, 1 mm³ of cortex, 13 scans")
+    ax = fig.add_axes([0.03, 0.62, 0.24, 0.285]); ax.set_xlim(0, 10); ax.set_ylim(0, 10); ax.axis("off"); label(ax, "a  one mouse, 1 mm³ of cortex, 13 scans")
     dx, dy = 2.2, 1.4; X0, Y0, S = 1.2, 1.2, 5.2
     front = [(X0, Y0), (X0 + S, Y0), (X0 + S, Y0 + S), (X0, Y0 + S)]
     top = [(X0, Y0 + S), (X0 + S, Y0 + S), (X0 + S + dx, Y0 + S + dy), (X0 + dx, Y0 + S + dy)]
@@ -79,13 +79,13 @@ def fig_pipeline():
         ax.scatter([0.9 + i * 2.3], [0.35], s=12, c=v, ec="none"); ax.text(1.2 + i * 2.3, 0.35, k, fontsize=6.5, va="center", color="#444")
     foot(0.03, 0.27, "12,894 neurons, co-registered to the EM volume")
     # ---- b: responses -> correlations (real data)
-    axb = fig.add_axes([0.31, 0.605, 0.40, 0.29]); axb.axis("off"); label(axb, "b  responses to a shared stimulus → correlations")
-    axt = fig.add_axes([0.315, 0.65, 0.20, 0.195])
+    axb = fig.add_axes([0.31, 0.62, 0.40, 0.285]); axb.axis("off"); label(axb, "b  responses to a shared stimulus → correlations")
+    axt = fig.add_axes([0.315, 0.663, 0.20, 0.19])
     T = F[six][:, :120]; T = (T - T.mean(1, keepdims=True)) / T.std(1, keepdims=True)
     for i in range(6): axt.plot(np.arange(120), T[i] * 0.32 + (5 - i), color=NC[i], lw=0.9)
     axt.set_xlim(0, 119); axt.set_ylim(-0.9, 5.9); axt.set_yticks([]); axt.set_xticks([0, 60, 119]); axt.set_xticklabels(["0", "60", "120"], fontsize=6); axt.tick_params(length=2)
     axt.set_xlabel("stimulus bin (oracle movie clips)", fontsize=6.5, labelpad=1); axt.spines["left"].set_visible(False); axt.set_title("six neurons, trial-averaged response", fontsize=6.8, pad=2)
-    axg = fig.add_axes([0.585, 0.64, 0.115, 0.2])
+    axg = fig.add_axes([0.585, 0.653, 0.115, 0.195])
     Gm = Gsix.copy(); np.fill_diagonal(Gm, np.nan); axg.imshow(Gm, cmap="RdBu_r", vmin=-0.6, vmax=0.6)
     for i in range(6):
         for j in range(6):
@@ -97,24 +97,24 @@ def fig_pipeline():
     arrow(axb, 0.545, 0.5, 0.64, 0.5)
     foot(0.31, 0.71, "full matrix 12,894 × 12,894; the decoder sees only such matrices, never the stimulus")
     # ---- c: contents (real labels of the same six neurons)
-    axc = fig.add_axes([0.74, 0.605, 0.24, 0.29]); axc.axis("off"); label(axc, "c  contents (training targets only)")
-    axo = fig.add_axes([0.745, 0.63, 0.10, 0.22]); axo.set_xlim(-1.3, 1.3); axo.set_ylim(-1.3, 1.3); axo.set_aspect("equal"); axo.axis("off")
+    axc = fig.add_axes([0.74, 0.62, 0.24, 0.285]); axc.axis("off"); label(axc, "c  contents (training targets only)")
+    axo = fig.add_axes([0.745, 0.643, 0.10, 0.215]); axo.set_xlim(-1.3, 1.3); axo.set_ylim(-1.3, 1.3); axo.set_aspect("equal"); axo.axis("off")
     axo.add_patch(Circle((0, 0), 1.0, fill=False, ec="#c9cfcc", lw=0.8))
     for i, n in enumerate(six):
         th = np.deg2rad(ds.ori[n]); axo.plot([-np.cos(th), np.cos(th)], [-np.sin(th), np.sin(th)], color=NC[i], lw=2.2, solid_capstyle="round")
     for k in range(8):
         th = np.deg2rad(k * 22.5); axo.text(1.18 * np.cos(th), 1.18 * np.sin(th), f"{int(k * 22.5)}°", fontsize=4.8, ha="center", va="center", color="#777")
     axo.set_title("preferred orientation\n(8 classes)", fontsize=6.8, pad=2)
-    axr = fig.add_axes([0.865, 0.64, 0.11, 0.2]); axr.set_xlim(-1.05, 1.05); axr.set_ylim(-1.05, 1.05); axr.set_aspect("equal")
+    axr = fig.add_axes([0.865, 0.653, 0.11, 0.195]); axr.set_xlim(-1.05, 1.05); axr.set_ylim(-1.05, 1.05); axr.set_aspect("equal")
     axr.add_patch(Rectangle((-1, -1), 2, 2, fc="#f2f4f3", ec="#8a939c", lw=0.8))
     for i, n in enumerate(six): axr.scatter(ds.rf[n, 0], ds.rf[n, 1], s=28, c=NC[i], ec="white", lw=0.6, zorder=3)
     axr.set_xticks([]); axr.set_yticks([]); [sp.set_visible(False) for sp in axr.spines.values()]; axr.set_title("receptive-field centre\n(screen)", fontsize=6.8, pad=2)
     foot(0.74, 0.98, "5,287 neurons with orientation (gOSI ≥ 0.25) · 11,326 with RF")
     # ---- d: protocol. Full matrix ordered training-first; a population Gram is a diagonal block; two paths through the
     # same decoder: training blocks meet labels in a loss, test blocks are only scored.
-    axd = fig.add_axes([0.03, 0.03, 0.95, 0.45]); axd.set_xlim(0, 20); axd.set_ylim(0.4, 5.4); axd.set_aspect("equal"); axd.axis("off")
-    label(axd, "d  protocol: the decoder input is the Gram of a 512-neuron sample from one half; train with samples of the training half, score samples of the test half", y=0.475)
-    bx, by, bw, bh = 0.03, 0.03, 0.95, 0.45; ux = bw / 20; uy = ux * 10.8 / 6.3
+    axd = fig.add_axes([0.03, 0.02, 0.95, 0.46]); axd.set_xlim(0, 18.2); axd.set_ylim(0.4, 5.4); axd.set_aspect("equal"); axd.axis("off")
+    label(axd, "d  protocol: the decoder input is the Gram of a 512-neuron sample from one half; train with samples of the training half, score samples of the test half", y=0.5)
+    bx, by, bw, bh = 0.03, 0.02, 0.95, 0.46; ux = bw / 18.2; uy = ux * 10.8 / 6.5
     y_off = by + (bh - 5.0 * uy) / 2
     def rect(x, y, w, h): return [bx + x * ux, y_off + (y - 0.4) * uy, w * ux, h * uy]
     def arr(x0, y0, x1, y1, col=MUTED, lw=1.0, rad=0.0):
@@ -166,7 +166,7 @@ def fig_pipeline():
     axd.add_patch(FancyBboxPatch((13.85, YS - 0.55), 1.55, 1.1, boxstyle="round,pad=0.03,rounding_size=0.18", fc="white", ec=TE, lw=1.1))
     axd.text(14.62, YS + 0.2, "score", fontsize=7, ha="center", va="center", weight="bold", color=ORANGE_T); axd.text(14.62, YS - 0.2, "accuracy / R² vs.\nheld-out labels", fontsize=5.4, ha="center", va="center", color="#444")
     axd.text(16.1, YS, "no gradient;\nthe decoder never\nsees a test label", fontsize=5.6, ha="left", va="center", color="#444")
-    axd.text(17.6, 0.95, "epoch chosen on a held-out slice of the training half.  One brain, samples drawn\nwithin one animal, new neurons: the `within` cell of Fig. 4", fontsize=5.8, ha="right", va="top", color="#444")
+    axd.text(18.0, 0.95, "epoch chosen on a held-out slice of the training half.  One brain, samples drawn\nwithin one animal, new neurons: the `within` cell of Fig. 4", fontsize=5.8, ha="right", va="top", color="#444")
     fig.suptitle("Fig. 1  MICrONS: from one imaged cortical volume to a label-free per-neuron decoding task", fontsize=9, y=0.985)
     save(fig, "fig1_microns_pipeline", "How the MICrONS task is built",
          "(a) The MICrONS functional-connectomics release (Ding, Fahey, Papadopoulos et al. 2025): one mouse, 13 two-photon scans of a cubic millimetre of visual cortex "
