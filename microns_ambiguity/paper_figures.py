@@ -172,7 +172,7 @@ def fig_pipeline():
          "(a) The MICrONS functional-connectomics release (Ding, Fahey, Papadopoulos et al. 2025): one mouse, 13 two-photon scans of a cubic millimetre of visual cortex "
          "(areas V1, RL, AL, LM), 12,894 neurons co-registered to the electron-microscopy volume. (b) The relational substrate. Each neuron is its trial-averaged "
          "response vector to a stimulus all neurons saw (in vivo: 120 bins of the oracle natural-movie clips; digital twin: 4,999 bins compressed to 512 principal "
-         "components); shown are six real neurons and their correlation matrix. The decoder only ever sees such correlations, never the stimulus. (c) The contents "
+         "components); shown are six real neurons and their correlation matrix. The oracle clips were shown in all 13 scans, so the matrix is defined across scans (same-scan pairs correlate ~50 % more than cross-scan pairs at matched RF distance; the twin has no such effect). The decoder only ever sees such correlations, never the stimulus. (c) The contents "
          "of the same six neurons: preferred orientation (in vivo, 8 classes, 5,287 neurons with gOSI ≥ 0.25) and receptive-field centre (digital-twin fit, 11,326 "
          "neurons). (d) The protocol, with two terms kept apart. The <i>halves</i>: all 12,894 neurons are split at random into a training half and a test half, "
          "and the full 12,894 × 12,894 correlation matrix, ordered training-first (a real 200-neuron excerpt is shown), is used only in its training × training "
