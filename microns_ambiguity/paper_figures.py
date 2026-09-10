@@ -64,19 +64,16 @@ def fig1():
                     v, e, _ = ms(seeds[(sub, con, lv)], key)
                 ax.bar(x, v, w * 0.9, color=C[sub], alpha=0.45 + 0.27 * li, yerr=e if e > 0 else None, capsize=2, ecolor="k")
                 ax.text(x, v + 0.012, lv, ha="center", va="bottom", fontsize=6.5, rotation=90)
-            ax.hlines(REF[(sub, con)], x0 - 1.6 * w, x0 + 1.6 * w, colors=C["ref"], linestyles="--", lw=1.2)
-            ax.text(x0 - 1.6 * w, REF[(sub, con)] + 0.012, "labelled reference", fontsize=6.5, va="bottom", ha="left")
         if BASE[con] > 0:
             ax.axhline(BASE[con], color=C["base"], lw=1, zorder=0); ax.text(1.42, BASE[con] - 0.03, "majority class", fontsize=6.5, color="#666")
         ax.set_xticks([0, 1]); ax.set_xticklabels(["in vivo", "digital twin"]); ax.set_ylabel(ylab)
-        ax.set_xlim(-0.55, 1.75); ax.set_ylim(0, {"ori": 0.6, "rf": 0.75}[con])
+        ax.set_xlim(-0.55, 1.75); ax.set_ylim(0, {"ori": 0.5, "rf": 0.6}[con])
     fig.suptitle("Fig. 1  MICrONS: per-neuron content decoded from the population correlation matrix alone (512 neurons, no labels, no reference)", fontsize=9)
     save(fig, "fig1_microns_decoder", "MICrONS label-free per-neuron decoding",
          "Bars: label-free decoder accuracy (left, preferred orientation, 8 classes) and R² (right, receptive-field centre) on held-out neurons of the same animal, "
          "for decoders of 0.3M, 2.2M and 17M parameters; error bars are the s.d. over 3 seeds (2.2M and 17M). The decoder sees only the standardised "
-         "correlation matrix of 512 sampled neurons. Dashed: labelled reference, a ridge readout from each neuron's correlations to ~6,000 labelled training "
-         "neurons (same correlations plus a fully labelled anchor set). Grey line: majority class. In vivo, the 17M decoder reaches 93 % of the labelled "
-         "reference for orientation and 73 % for RF.", "main")
+         "correlation matrix of 512 sampled neurons: neither labels nor a reference population enter the input, and the test neurons never influenced model "
+         "selection. Grey line: majority class. Orientation is read at 0.38 in vivo (8 classes, chance 0.125, majority 0.255); receptive-field position at R² 0.23 in vivo and 0.48 on the twin.", "main")
 
 
 # ---------------------------------------------------------------- Fig 2: symmetry
@@ -119,10 +116,9 @@ def fig3():
         ax.bar(i, np.mean(vals), 0.6, color=col, alpha=0.8)
         jitter = np.linspace(-0.12, 0.12, len(vals)) if len(vals) > 1 else [0]
         ax.plot(i + np.array(jitter), vals, "o", color="k", ms=4, mfc="white")
-        ax.text(i, 0.335, f"`{reg}`", ha="center", fontsize=7, family="monospace")
+        ax.text(i, 0.322, f"`{reg}`", ha="center", fontsize=7, family="monospace")
     ax.axhspan(0.187, 0.201, color=C["base"], alpha=0.5, lw=0); ax.text(3.45, 0.194, "majority-class\nbaseline", fontsize=7, va="center", color="#555")
-    ax.axhline(0.346, color=C["ref"], ls="--", lw=1); ax.text(3.45, 0.346, "labelled reference\n(leave-one-mouse-out)", fontsize=7, va="center")
-    ax.set_xticks(range(4)); ax.set_xticklabels([c[1] for c in cells], fontsize=7.5); ax.set_ylabel("orientation accuracy (6 classes)"); ax.set_ylim(0.1, 0.37); ax.set_xlim(-0.6, 4.4)
+    ax.set_xticks(range(4)); ax.set_xticklabels([c[1] for c in cells], fontsize=7.5); ax.set_ylabel("orientation accuracy (6 classes)"); ax.set_ylim(0.1, 0.34); ax.set_xlim(-0.6, 4.4)
     ax.set_title("Fig. 3  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9, pad=10)
     save(fig, "fig3_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
          "Label-free decoder accuracy on labelled test cells for the four regimes. Split: test neurons from the training animals (each animal's cells halved) "
@@ -137,7 +133,7 @@ def fig3():
 def fig4():
     from allen.data import Allen
     ds = Allen(session="C", movie="both")
-    fig, axes = plt.subplots(1, 3, figsize=(10, 3.1))
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.1))
     runs = {"single-animal populations (`cross`)": ["g8_rf_cross_fine", "g11_rf_cross_fine_sp1", "g11_rf_cross_fine_sp2"],
             "mixed populations (`pooledcross`)": ["g4_rf_n256_d256L4", "g11_rf_pooledcross_sp1", "g11_rf_pooledcross_sp2"]}
     for ax, (name, tags) in zip(axes[:2], runs.items()):
@@ -159,21 +155,13 @@ def fig4():
         ax.set_title(name, fontsize=8.5); ax.set_xlabel("true mean RF position (°)"); ax.set_ylabel("predicted mean (°)"); ax.set_ylim(lo, hi + 12)
         ax.text(0.03, 0.97, f"per-mouse mean, 27 mice: r = {rx:.2f} (x), {ry:.2f} (y)\nwithin mouse, {len(rel):,} cells: r = {rrx:.2f}, {rry:.2f}", transform=ax.transAxes, va="top", fontsize=6.8, bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.5))
         if ax is axes[0]: ax.legend(loc="lower right", fontsize=7)
-    ax = axes[2]
-    vals = {"single-animal": [A["g8_rf_cross_fine"]["r2"], A["g11_rf_cross_fine_sp1"]["r2"], A["g11_rf_cross_fine_sp2"]["r2"]],
-            "mixed": [A["g4_rf_n256_d256L4"]["r2"], A["g11_rf_pooledcross_sp1"]["r2"], A["g11_rf_pooledcross_sp2"]["r2"]]}
-    for i, (k, v) in enumerate(vals.items()):
-        for si, x in enumerate(v): ax.bar(i + (si - 1) * 0.25, x, 0.22, color=C[f"s{si}"])
-    ax.axhline(0, color="k", lw=0.8); ax.axhline(0.20, color=C["ref"], ls="--", lw=1); ax.text(1.45, 0.21, "labelled\nreference", fontsize=7, va="bottom")
-    ax.set_xticks([0, 1]); ax.set_xticklabels(["single-animal", "mixed"]); ax.set_ylabel("R², absolute screen coordinates"); ax.set_title("R² by mouse split", fontsize=8.5); ax.set_xlim(-0.6, 1.9)
     fig.suptitle("Fig. 4  Allen RF: what crosses animals is each animal's screen position, not the retinotopic layout within it", fontsize=9)
     save(fig, "fig4_allen_rf_mouse_level", "Allen RF: a population-level readout",
-         "Left, middle: predicted versus true mean receptive-field position of each held-out mouse (9 mice × 3 splits = 27 points; x squares, y dots), from "
+         "Predicted versus true mean receptive-field position of each held-out mouse (9 mice × 3 mouse splits = 27 points; x squares, y dots), from "
          "decoders trained on single-animal or mixed populations. The per-mouse mean is recovered (r 0.36–0.71; permutation p ≤ 0.03), the position of a neuron "
-         "relative to its mouse-mates is not (r ≈ 0.1 over 1,259 cells after centring per mouse). Right: R² on absolute coordinates by split; it swings from "
-         "+0.29 to −0.45 because it is dominated by whether the between-mouse spread of a particular test set is reproduced at the right scale. "
-         "With 23–112 RF-labelled cells per mouse the decoder learns the strong population-level signal and not the fine one; MICrONS (one animal, 11k labels) "
-         "shows the same decoder recovers neuron-level RF at R² 0.48.", "main")
+         "relative to its mouse-mates is not (r ≈ 0.1 over 1,259 cells after centring per mouse). R² on absolute coordinates is therefore not a stable summary "
+         "here: it depends on whether the between-mouse spread of a given test set is reproduced at the right scale. With 23–112 RF-labelled cells per mouse the "
+         "decoder learns the population-level signal and not the fine one; MICrONS (one animal, 11k labels) shows the same decoder recovers neuron-level RF at R² 0.48.", "main")
 
 
 # ---------------------------------------------------------------- Fig A1: scaling
@@ -328,7 +316,7 @@ figcaption code,p code{font-family:"IBM Plex Mono",Menlo,monospace;font-size:.84
              "assigns each neuron its preferred orientation and receptive-field position. One animal (MICrONS) at scale, thirty-three animals (Allen) for what transfers between brains. "
              "Every number is on held-out neurons or held-out animals; the test set never selected a model.</p>",
              "<ul class=\"glance\">",
-             "<li><b>MICrONS, in vivo</b>orientation <span class=\"n\">0.38</span> (labelled reference <span class=\"n\">0.41</span>), receptive field R² <span class=\"n\">0.23</span> (reference <span class=\"n\">0.32</span>), 17M decoder, 3 seeds</li>",
+             "<li><b>MICrONS, in vivo</b>orientation <span class=\"n\">0.38</span> (majority class <span class=\"n\">0.26</span>), receptive field R² <span class=\"n\">0.23</span> in vivo and <span class=\"n\">0.48</span> on the twin; 17M decoder, 3 seeds</li>",
              "<li><b>Why it is possible</b>the circulant part of the orientation relations fixes structure only up to rotation and reflection; a small anisotropy pins the frame</li>",
              "<li><b>Allen, 33 mice</b>orientation transfers to unseen brains (<span class=\"n\">0.26</span> vs <span class=\"n\">0.19</span>) only through populations that mix animals</li>",
              "<li><b>Allen, receptive fields</b>correlations carry where each animal looks on the screen (r <span class=\"n\">0.4–0.7</span>), not the layout within the animal</li>",
