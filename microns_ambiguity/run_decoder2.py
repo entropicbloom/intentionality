@@ -24,6 +24,8 @@ def main(tag, sub, con, **kw):
         F = np.load(DATA / "func_is_pca512.npy")   # 512 PCs of the twin responses; Gram preserved to r > 0.99
     if con == "ori":
         y, ok, task = bin_orientation(ds.ori, K_ORI), ds.ori_ok, "class"
+    elif con == "oricirc":                       # continuous preferred orientation, circular regression
+        y = ds.ori.astype(float).copy(); y[~ds.ori_ok] = np.nan; ok, task = ds.ori_ok, "circ"
     elif con == "rf":
         y, ok, task = ds.rf, ds.rf_ok, "reg"
     elif con == "rf_dist":
@@ -39,7 +41,7 @@ def main(tag, sub, con, **kw):
     OUT.mkdir(exist_ok=True); p = OUT / "decoder2.json"
     d = json.load(open(p)) if p.exists() else {}
     d[tag] = m; json.dump(d, open(p, "w"))
-    print(f"  -> {tag}: " + " ".join(f"{k}={v:.3f}" for k, v in m.items() if k in ("acc", "r2", "loss", "acc_modD", "sel_metric", "val_at_last_epoch") or "avg" in k) + (f" best_epoch={m['best_epoch']}" if "best_epoch" in m else "") + f" params={m['params']} {m['seconds']:.0f}s", flush=True)
+    print(f"  -> {tag}: " + " ".join(f"{k}={v:.3f}" for k, v in m.items() if k in ("acc", "r2", "err", "within15", "err_modD", "loss", "acc_modD", "sel_metric", "val_at_last_epoch") or "avg" in k) + (f" best_epoch={m['best_epoch']}" if "best_epoch" in m else "") + f" params={m['params']} {m['seconds']:.0f}s", flush=True)
 
 
 if __name__ == "__main__":

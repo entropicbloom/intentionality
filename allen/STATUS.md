@@ -1,5 +1,24 @@
 # Allen work: status and next steps (written 2026-09-09, before context compaction)
 
+## IN FLIGHT (2026-09-11): orientation as circular regression, re-run of every plotted configuration
+Decision: orientation is decoded as a circular regression (target (cos 2θ, sin 2θ), metric = mean absolute angular
+error in degrees, `within15` = fraction within 15°, `err_modD` = error after the best global rotation/reflection, i.e.
+the frame check). Classification stays only for the class-level symmetry analysis and one appendix table. RF unchanged.
+Allen labels are quantised at 30° (static gratings): quantisation floor ~7.5°; say so in the paper. Baseline: 45° (uniform).
+Code: `task == "circ"` in `microns_ambiguity/decoder2.py`; content `oricirc` in `microns_ambiguity/run_decoder2.py` and
+`allen/run_decoder.py`. Smoke-tested locally on CPU.
+Pod: RunPod RTX 4090, id bofozxleuvk0d5, $0.74/h, host/port in scratchpad `pod3.env` (else query the GraphQL API with
+the key in `.env`). Two detached streams on the pod, logs in `/workspace/intentionality/logs/circ_microns.log` and
+`circ_allen.log`; sweeps `microns_ambiguity/sweeps/sweep_circ_microns.sh` (15 runs, tags `c_is_*`, `c_iv_*`) and
+`allen/sweep_circ_allen.sh` (24 runs, tags `c_pc_*`, `c_pw_*`, `c_wi_*`, `c_cr_*`); end markers SWEEP_CIRC_MICRONS_DONE /
+SWEEP_CIRC_ALLEN_DONE. Expected ~3.5 h wall, ~$3.
+When done: pull `allen/outputs/decoder.json`, `microns_ambiguity/outputs/decoder2.json`, `allen/outputs/preds`, `logs`
+(tar over ssh; do NOT print anything else into the tar stream), merge into the local JSONs (dict update), terminate the
+pod (GraphQL podTerminate), then: (1) update `microns_ambiguity/paper_figures.py` so Figs 2, 5, A1, A2, A3, A4, A5
+plot angular error for orientation (lower is better; baseline line at 45°), keep RF panels; (2) update tables and text in
+`microns_ambiguity/paper/main.tex` and `paper_draft.md` (Table 1, Table 2, Sections 3.1, 3.3, 3.5, abstract numbers);
+(3) recompile, copy PDF to ~/Desktop/relational_decoding_draft.pdf, commit, push.
+
 ## Done
 - Session A (natural movies one+three) cached for 36 containers / 33 mice: `allen_data/cache/`
 - Session C (locally sparse noise RF + movies one+two): `allen_data/cache_C/`

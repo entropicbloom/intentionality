@@ -142,9 +142,20 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     s = rng.choice(len(F), min(2000, len(F)), replace=False); Gs = Fn[s] @ Fn[s].T
     off = Gs[~torch.eye(len(s), dtype=torch.bool, device=device)]
     mean, std = float(off.mean()), float(off.std())
+    ang = None
+    if task == "circ":                          # orientation as a circular regression: target (cos 2θ, sin 2θ), θ in degrees mod 180
+        ang = np.asarray(y, np.float64); th = np.deg2rad(2 * ang)
+        y = np.c_[np.cos(th), np.sin(th)].astype(np.float32); y[~np.isfinite(ang)] = np.nan
     if task == "class":
         K = int(y.max()) + 1; yt = torch.as_tensor(y, device=device, dtype=torch.long); out_dim = K
         loss_fn = nn.CrossEntropyLoss(ignore_index=-1); labelled = y >= 0
+    elif task == "circ":
+        labelled = np.isfinite(y).all(1); mu, sd = np.zeros(2, np.float32), np.ones(2, np.float32)
+        yt = torch.as_tensor(np.nan_to_num(y), device=device); out_dim = 2
+        lab_t = torch.as_tensor(labelled, device=device)
+        def loss_fn(out, tgt, _idx=None):
+            m = lab_t[_idx]
+            return ((out[m] - tgt[m]) ** 2).mean() if m.any() else (out * 0).sum()
     else:
         y = np.atleast_2d(y.T).T.astype(np.float32); labelled = np.isfinite(y).all(1)
         mu, sd = np.nanmean(y[train_idx], 0), np.nanstd(y[train_idx], 0)
@@ -202,6 +213,15 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
                 for sgn in (1, -1):
                     best = max(best, float(((sgn * pred + k) % K == true).mean()))
             return dict(acc=float((pred == true).mean()), acc_modD=best, preds=preds)
+        if task == "circ":
+            th_hat = np.rad2deg(np.arctan2(P[:, 1], P[:, 0])) / 2; th = ang[T]
+            d = np.abs((th_hat - th + 90) % 180 - 90)                  # angular error in [0, 90]
+            # frame check: error after the best global rotation (and reflection) of the predictions
+            best = d.mean()
+            for sgn in (1, -1):
+                z = np.exp(1j * np.deg2rad(2 * (sgn * th_hat - th))); off = np.rad2deg(np.angle(z.mean())) / 2
+                best = min(best, np.abs((sgn * th_hat - off - th + 90) % 180 - 90).mean())
+            return dict(err=float(d.mean()), within15=float((d <= 15).mean()), err_modD=float(best), preds=preds)
         Y = (y[T] - mu) / sd; r2 = 1 - ((P - Y) ** 2).sum(0) / ((Y - Y.mean(0)) ** 2).sum(0)
         return dict(r2=float(r2.mean()), r2_dims=r2.tolist(), preds=preds)
 
@@ -220,20 +240,21 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             torch.mps.empty_cache()          # the MPS caching allocator otherwise grows across epochs
         m = evaluate(); m.pop("preds", None); m["loss"] = tot / (pops_per_epoch // batch); m["t"] = time.time() - t0
         if se is not None:
-            ms = evaluate(reps=sel_reps, sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = ms.get("acc", ms.get("r2"))
+            ms = evaluate(reps=sel_reps, sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = -ms["err"] if task == "circ" else ms.get("acc", ms.get("r2"))
             if best_state is None or m["sel"] > max(h["sel"] for h in hist):
                 best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         hist.append(m)
         if verbose:
-            print(f"    ep{ep} loss={m['loss']:.3f} " + " ".join(f"{k}={v:.3f}" for k, v in m.items() if k in ("acc", "r2", "sel")) + f" ({m['t']:.0f}s)", flush=True)
+            print(f"    ep{ep} loss={m['loss']:.3f} " + " ".join(f"{k}={v:.3f}" for k, v in m.items() if k in ("acc", "r2", "err", "within15", "sel")) + f" ({m['t']:.0f}s)", flush=True)
     final = dict(hist[-1]); final.pop("preds", None)
     if se is not None:                       # early stopping: report the epoch best on the selection set
-        key = "acc" if task == "class" else "r2"
+        key = {"class": "acc", "circ": "err"}.get(task, "r2")
         b = int(np.argmax([h["sel"] for h in hist])); final.update({key: hist[b][key], "best_epoch": b, "sel_metric": hist[b]["sel"]})
+        if task == "circ": final.update(within15=hist[b]["within15"], err_modD=hist[b]["err_modD"])
         final["val_at_last_epoch"] = hist[-1][key]
         model.load_state_dict(best_state)      # test-time averaging uses the selected model
     for reps in avg_reps:
-        m = evaluate(reps); final[f"acc_avg{reps}" if task == "class" else f"r2_avg{reps}"] = m.get("acc", m.get("r2"))
+        m = evaluate(reps); k_ = {"class": "acc", "circ": "err"}.get(task, "r2"); final[f"{k_}_avg{reps}"] = m[k_]
         if return_preds and reps == max(avg_reps):
             final["preds"] = m["preds"]
     if verbose:

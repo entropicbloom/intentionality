@@ -46,6 +46,8 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
     ds = Allen(movie=movie, ori_source=ori_source, session=session)
     if content == "ori":
         y = ds.ori_class.copy(); y[~ds.ori_ok] = -1; task = "class"
+    elif content == "oricirc":                   # static-grating orientation in degrees, circular regression
+        y = ds.ori.astype(float).copy(); y[~ds.ori_ok] = np.nan; task = "circ"
     elif content == "rf":
         y = ds.rf.copy(); y[~ds.rf_ok] = np.nan; task = "reg"
     elif content == "rf_rel":
@@ -98,8 +100,8 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
     m.update(split_seed=int(split_seed), test_frac=test_frac, sel_frac=sel_frac, ori_source=ori_source, regime=regime, movie=movie, content=content, session=session, n_train=int(len(tr)), n_val=int(len(va)), test_mice=[str(x) for x in test_mice])
     os.makedirs(OUT, exist_ok=True); p = os.path.join(OUT, "decoder.json"); d = json.load(open(p)) if os.path.exists(p) else {}
     d[tag] = m; json.dump(d, open(p, "w"))
-    key = "acc" if task == "class" else "r2"
-    print(f"  -> {tag}: {key}={m[key]:.3f} avg32={m.get(key + '_avg32', 0):.3f}" + (f" best_epoch={m['best_epoch']}" if "best_epoch" in m else ""), flush=True)
+    key = {"class": "acc", "circ": "err"}.get(task, "r2")
+    print(f"  -> {tag}: {key}={m[key]:.3f} avg32={m.get(key + '_avg32', 0):.3f}" + (f" within15={m['within15']:.3f} err_modD={m['err_modD']:.3f}" if task == "circ" else "") + (f" best_epoch={m['best_epoch']}" if "best_epoch" in m else ""), flush=True)
 
 
 if __name__ == "__main__":
