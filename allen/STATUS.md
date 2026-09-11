@@ -64,16 +64,39 @@ planned because both streams ran; check balance every hour.
 Splits 1 and 2 for the training-animal cells (`g13_*`): within ori 0.216 / 0.217, pooledwithin ori 0.283 / 0.283,
 within RF 0.359 / 0.364, pooledwithin RF 0.123 / 0.157.  Every 2x2 cell now has three splits.  Balance $6.61.
 
-## Related work notes (for the paper)
-- Oizumi, Lim & Kanai, "Principal Bundle Geometry of Qualia: Understanding the Quality of Consciousness from Symmetry",
-  PNAS Nexus 5(9) pgag261 (2026), https://academic.oup.com/pnasnexus/article/5/9/pgag261/8788187 .  Theory only:
-  equivariant encoders split the state space into a group-inherited, universal part ("qualia attributes") and a
-  learnable, individual part ("signatures"); proposes Gromov-Wasserstein alignment / TDA for cross-subject tests.
-  Use: theoretical framing for the symmetry result (circulant part = group-fixed structure identical up to
-  relabelling; the anisotropy = what pins the frame).  Their objects are similarity structures over stimuli across
-  subjects; ours are correlation structures over neurons, decoded per neuron and tested across animals.  One paragraph.
-- Oizumi group's unsupervised Gromov-Wasserstein alignment of similarity structures across individuals (e.g. Kawakita
-  et al.): the continuous relaxation of our exhaustive permutation matching in the class-level test; cite in methods.
+## Related work notes (for the paper; all references verified against publisher records on 2026-09-11)
+The intro lineage (paragraph 2 of `paper/main.tex`), one line each on what the source claims and what we take from it:
+- Shepard & Chipman 1970 (Cogn. Psychol. 1:1-17): second-order isomorphism; a representation need not resemble its
+  object, the relations among representations should mirror the relations among objects.
+- Edelman 1998 (BBS 21(4):449-467): representation is representation of similarities; content is a position in a
+  similarity structure ("chorus of prototypes"). The cleanest statement of the idea we build on.
+- Kriegeskorte, Mur & Bandettini 2008 (Front. Syst. Neurosci. 2:4); Kriegeskorte & Kievit 2013 (TICS 17(8):401-412):
+  RSA; similarity structure is the level at which brains, models and species are compared, independent of coordinates.
+- Haxby et al. 2011 (Neuron 72(2):404-416): hyperalignment; a shared representational space across subjects built from
+  response structure under a shared movie. Closest precedent for our across-brain regime, at subject level.
+- Sucholutsky et al. 2023 (arXiv:2310.13018); Huh et al. 2024 (ICML, PMLR 235:20617-20642, "Position: the platonic
+  representation hypothesis"): representational alignment across systems via relations among representations.
+- Tsodyks et al. 1999 (Science 286:1943-1946); Kenet et al. 2003 (Nature 425:954-956): spontaneous activity in the dark
+  reproduces evoked orientation maps; a single neuron's spike-triggered population pattern matches the map of its
+  preferred orientation. THE key precedent. What it lacks: reading the tuning out required the evoked map (a labelled
+  reference); correlations sort neurons by orientation and order the groups on the circle but do not say which group is
+  vertical. Our additions: (1) no reference (the anisotropy pins the frame; symmetry section), (2) per-neuron, learned,
+  thousands of identified neurons, (3) across animals. Our setting is weaker than theirs in one respect: relations from
+  responses to a shared stimulus with its identity discarded, not spontaneous activity (open question noted below).
+- Berkes et al. 2011 (Science 331:83-87): spontaneous activity statistics converge to evoked statistics over
+  development. NOT an orientation-map result; cite only for "matches the statistics of evoked activity" (fixed).
+- Ko et al. 2011 (Nature 473:87-91); Ding et al. 2025 (Nature 640(8058):459-469): like-to-like connectivity.
+- Safaie et al. 2023 (Nature 623:765-771): latent dynamics preserved across animals, aligned without matched neurons.
+- Lyre 2022 (Neurosci. Conscious. 2022(1):niac012): neurophenomenal structuralism, qualities individuated by position in
+  quality spaces; carries the structuralist claim. Kleiner & Ludwig 2024 (Synthese 203(3):89): formal definition of a
+  mathematical structure of experience; cite as definition, not as the claim (fixed).
+- Oizumi, Lim & Kanai 2026 (PNAS Nexus 5(9):pgag261): equivariant encoders -> rigid group-inherited orbits ("attributes",
+  universal) + plastic quotient ("signatures", individual). Our circulant part = rigid, anisotropy = what pins the frame.
+- Kawakita et al. 2024 (Sci. Rep. 14:15917): Gromov-Wasserstein unsupervised alignment of similarity structures; the
+  continuous relaxation of our exhaustive permutation matching.
+- Lässig 2025 (arXiv:2512.11000, q-bio.NC): our framework paper; cited after the lineage, never first.
+Decisions: no consciousness framing; the framework paper and Oizumi appear in one discussion paragraph; the
+spontaneous-activity papers get a sentence in the discussion as the precedent.
 
 ## Possible next steps
 - Spontaneous-activity relations (Allen sessions have a grey-screen block): Kenet 2003 / Tsodyks 1999 show spontaneous
