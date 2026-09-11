@@ -57,6 +57,10 @@ within RF 0.359 / 0.364, pooledwithin RF 0.123 / 0.157.  Every 2x2 cell now has 
   et al.): the continuous relaxation of our exhaustive permutation matching in the class-level test; cite in methods.
 
 ## Possible next steps
+- Spontaneous-activity relations (Allen sessions have a grey-screen block): Kenet 2003 / Tsodyks 1999 show spontaneous
+  correlations group neurons by orientation (the circulant part). The open question for a label-free readout is whether
+  the anisotropy (cardinal bias, area differences) that pins the absolute frame is also present in spontaneous
+  correlations. Within-animal cells only (no shared time axis across mice). Needs a re-download to extract the traces.
 - Ensembles over seeds on a shared split (predictions saved in allen/outputs/preds; `python -m allen.ensemble tag1 tag2`).
 - Labelled reference ("ceiling") is not settled: ridge is one linear labelled model and the decoder
   beat it on RF.  Open checks (deferred, user wants label-free decoding first): ridge accuracy vs
