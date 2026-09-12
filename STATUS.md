@@ -24,6 +24,8 @@ Horizontal-vs-vertical readout (post hoc, from saved preds; keep next to the ang
 
 Smoke-test fact: only 2 % of the MICrONS RF label variance is between scans, 9 % between areas, so a scan-identity readout bounds at R² ~0.02.## In-flight
 
+Class-Gram residual checks (`microns_ambiguity/residual_check.py`, 2026-09-12): the non-circulant residual holds 0.29 (in vivo) / 0.19 (twin) of the class-Gram variance; it correlates 0.94 between random neuron halves, 0.84 ± 0.11 (in vivo, 60 bins per half) / 0.99 (twin, 2,499 per half) between disjoint stimulus-bin halves, and 0.99 with the residual on class-balanced subsamples (330 neurons per class, same fraction). So the anisotropy is signal, not a stimulus-sample artefact, and not neuron-count bias. In vivo the neighbour correlation peaks at 90° (0.073) with 0° only average (0.033); twin peaks at 0°/90°/157° (~0.05). Synthetic generator note: a random 120-frame stimulus sample or random frame amplitudes alone produce a residual of the same size (0.2–0.3 range in neighbour correlation) in an otherwise isotropic model; the isotropic baseline needs even orientation coverage and constant amplitude (range 0.01).
+
 ## Run ledger (circular-regression era, 2026-09-11 onward)
 
 Every run writes config + per-epoch history + final metrics to `microns_ambiguity/outputs/decoder2.json` (MICrONS) or `allen/outputs/decoder.json` (Allen) under its tag; per-neuron predictions (idx, P, y[, scan, area]) go to `<...>/outputs/preds/<tag>.npz`; sweep scripts in `microns_ambiguity/sweeps/` and `allen/`; pod logs in `microns_ambiguity/outputs/logs_pod4/` (pod 5 logs to be added). Chance for orientation error is 45°.
