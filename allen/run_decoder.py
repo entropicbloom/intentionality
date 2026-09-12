@@ -31,7 +31,7 @@ class MouseSampler(d2.Sampler):
         import torch
         idx = np.stack([self.rng.choice(self.pools[self.rng.choice(len(self.pools), p=self.w)], self.n, replace=False) for _ in range(B)])
         it = torch.as_tensor(idx, device=self.Fn.device); X = self.Fn[it]
-        return idx, d2.gram_from_features(X, self.mean, self.std)
+        return idx, d2.gram_from_features(X, self.mean, self.std), X
 
 
 def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", ori_source="sg", content="ori", session="A", **kw):
