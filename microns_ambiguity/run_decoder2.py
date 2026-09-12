@@ -31,7 +31,7 @@ def main(tag, sub, con, **kw):
     if bins:                                     # bins=1: disjoint halves of the stimulus bins for training and test Grams
         kw.pop("pca", None); perm = np.random.default_rng(SEED + 11).permutation(F.shape[1]); h = len(perm) // 2
         if bins == 2: F = F[:, perm[:h]]         # bins=2: control, the same half for both (isolates the cost of fewer bins)
-        else: F, kw["F_eval"] = F[:, perm[:h]], F[:, perm[h:]]
+        else: F, kw["F_eval"] = F[:, perm[:h]], F[:, perm[h:2 * h]]   # equal widths (the activity input layer needs them)
     if sub == "func_is" and kw.pop("pca", 0):
         from .config import DATA
         F = np.load(DATA / "func_is_pca512.npy")   # 512 PCs of the twin responses; Gram preserved to r > 0.99

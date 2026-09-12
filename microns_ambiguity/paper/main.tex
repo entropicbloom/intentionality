@@ -83,16 +83,16 @@ On MICrONS the decoder reads orientation and receptive-field position from the G
 
 \begin{table}[tbp]
   \centering\small
-  \caption{MICrONS, label-free per-neuron decoding on the test half; 17M decoder, 512-neuron populations, mean $\pm$ s.d.\ over 3 seeds.}
+  \caption{MICrONS, per-neuron decoding on the test half. Relations only: the 17M decoder on the Gram of 512-neuron populations, mean $\pm$ s.d.\ over 3 seeds. Stimulus-known linear readout: a linear map from each neuron's own response vector to its content, the ordinary tuning measurement (Appendix~\ref{app:controls}).}
   \label{tab:microns}
-  \begin{tabular}{llcc}
+  \begin{tabular}{llccc}
     \toprule
-    content & substrate & score & chance \\
+    content & substrate & relations only & stimulus-known linear readout & chance \\
     \midrule
-    orientation (mean angular error) & in vivo & $25.4^\circ \pm 0.5^\circ$ & $45^\circ$ \\
-    orientation (mean angular error) & digital twin & $20.2^\circ \pm 0.4^\circ$ & $45^\circ$ \\
-    receptive field ($\Rsq$) & in vivo & $0.234 \pm 0.007$ & 0 \\
-    receptive field ($\Rsq$) & digital twin & $0.480 \pm 0.010$ & 0 \\
+    orientation (mean angular error) & in vivo & $25.4^\circ \pm 0.5^\circ$ & $20.2^\circ$ & $45^\circ$ \\
+    orientation (mean angular error) & digital twin & $20.2^\circ \pm 0.4^\circ$ & $15.6^\circ$ & $45^\circ$ \\
+    receptive field ($\Rsq$) & in vivo & $0.234 \pm 0.007$ & 0.34 & 0 \\
+    receptive field ($\Rsq$) & digital twin & $0.480 \pm 0.010$ & 0.69 & 0 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -100,7 +100,7 @@ On MICrONS the decoder reads orientation and receptive-field position from the G
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=0.85\textwidth]{fig2_microns_decoder.pdf}
-  \caption{\textbf{MICrONS: per-neuron content decoded from the population correlation matrix alone.} Left: mean angular error of the decoded preferred orientation on held-out neurons of the same animal, for decoders of 0.3M, 2.2M and 17M parameters; error bars are the s.d.\ over 3 seeds; grey line: the $45^\circ$ error of an uninformed decoder. Middle: $\Rsq$ of the decoded receptive-field centre. Right: coarse readouts of the same decoder on neuron splits 1 and 2: whether the decoded angle falls on the correct cardinal axis, for all neurons and for the neurons whose preference lies within $15^\circ$ of an axis, and whether it falls in the correct one of four classes at $0^\circ$, $45^\circ$, $90^\circ$ and $135^\circ$; black ticks: majority class. The decoder sees only the standardised correlation matrix of 512 sampled neurons.}
+  \caption{\textbf{MICrONS: per-neuron content decoded from the population correlation matrix alone.} Left: mean angular error of the decoded preferred orientation on held-out neurons of the same animal, for decoders of 0.3M, 2.2M and 17M parameters; error bars are the s.d.\ over 3 seeds; grey line: the $45^\circ$ error of an uninformed decoder; black marks: the stimulus-known linear readout of each neuron's own responses. Middle: $\Rsq$ of the decoded receptive-field centre, same marks. Right: coarse readouts of the same decoder on neuron splits 1 and 2: whether the decoded angle falls on the correct cardinal axis, for all neurons and for the neurons whose preference lies within $15^\circ$ of an axis, and whether it falls in the correct one of four classes at $0^\circ$, $45^\circ$, $90^\circ$ and $135^\circ$; black ticks: majority class. The decoder sees only the standardised correlation matrix of 512 sampled neurons.}
   \label{fig:decoder}
 \end{figure}
 
@@ -192,6 +192,25 @@ Figures~\ref{fig:a1} to \ref{fig:a4} report the sweeps behind Section~3.5: decod
 Four controls on the MICrONS standard configuration (17M, 512-neuron populations, digital twin unless stated; Table~\ref{tab:controls}).
 
 \paragraph{What the decoder reads.} With the three row statistics as the only input per neuron and no relational term, the error is $37.7^\circ$; with the statistics plus the Gram entering only as an attention bias, which makes the decoder equivariant to the order of the neurons, it is $19.6^\circ$, the same as the standard decoder ($20.2^\circ$), whose input layer also projects the raw Gram row in sample order. The relations carry the readout, and the order-dependent input layer contributes nothing.
+
+\paragraph{Reference decoders that see the activity.} To put a scale on what the relations discard, the same transformer was trained with each neuron's token built from its response vector instead of its Gram row, so that the decoder sees the stimulus-aligned activity that the Gram is computed from (Table~\ref{tab:ref}). It reaches $21.9^\circ$ in vivo and $14.9^\circ$ on the twin, against $25.4^\circ$ and $20.2^\circ$ for the relational decoder, and $\Rsq$ 0.37 and 0.80 for receptive fields against 0.23 and 0.48. Adding the Gram to this decoder as an attention bias changes nothing ($22.2^\circ$, $15.0^\circ$). A linear readout of each neuron's own response vector, with no population context at all, does as well as the activity transformer ($20.2^\circ$, $15.6^\circ$; $\Rsq$ 0.34, 0.69), so the activity decoder is in effect a per-neuron tuning readout, and what it has over the relational decoder is the alignment of the responses to the stimulus. On orientation the relations retain about 85\% of the gain over chance that the aligned activity gives; on receptive fields about 60\%; the twin receptive-field gap is inflated by the twin's labels and responses coming from the same model. PENDINGACTBINS
+
+\begin{table}[htbp]
+  \centering\small
+  \caption{Reference decoders that see the activity, 17M unless linear, 512-neuron populations, seed 0. Orientation as mean angular error (chance $45^\circ$), receptive field as $\Rsq$.}
+  \label{tab:ref}
+  \begin{tabular}{lcccc}
+    \toprule
+    decoder input & ori.\ in vivo & ori.\ twin & RF in vivo & RF twin \\
+    \midrule
+    Gram row (this paper) & $25.4^\circ$ & $20.2^\circ$ & 0.23 & 0.48 \\
+    response vector, transformer & $21.9^\circ$ & $14.9^\circ$ & 0.37 & 0.80 \\
+    response vector + Gram as attention bias & $22.2^\circ$ & $15.0^\circ$ & -- & -- \\
+    response vector, linear, no population context & $20.2^\circ$ & $15.6^\circ$ & 0.34 & 0.69 \\
+    response vector, transformer, disjoint stimulus bins & PENDINGAIV & PENDINGAIS & -- & -- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \paragraph{Cross-stimulus test.} Training and selection Grams built from one random half of the stimulus bins and test Grams from the other half give $21.2^\circ$ on the twin (2,500 bins per half, raw responses rather than principal components) against $20.2^\circ$ with shared bins, and $34.2^\circ$ in vivo (60 bins per half) against $25.4^\circ$. A control with the same 60-bin half on both sides gives $25.3^\circ$, so the in-vivo cost is not the smaller Gram but the stimulus sample: a correlation matrix over 60 movie bins partly reflects which frames it was built from, and one over 2,500 bins does not. The relational structure that the decoder reads is stable across stimuli once the stimulus sample is large.
 

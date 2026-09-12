@@ -129,6 +129,22 @@ anisotropy rather than by the difference structure.
     python -m microns_ambiguity.plot_decoder2 && python -m microns_ambiguity.summarize_decoder2
 
 
+## Findings so far (2026-09-12; run ledger and in-flight queue in `STATUS.md`)
+
+Orientation is decoded as a continuous angle; the metric is mean angular error, chance 45°.
+
+- **Content from relations alone.** A 17M transformer that sees only the 512 × 512 correlation matrix of a sampled population decodes preferred orientation to 20.2° (twin) / 25.4° (in vivo) and receptive-field position at R² 0.48 / 0.23, on held-out neurons; three seeds and three neuron splits agree within 1°.
+- **The frame is recovered.** The error after the best global rotation or reflection equals the raw error in every run.
+- **The readout is cardinal.** Horizontal vs vertical is right for 87 % / 79 % of neurons (chance 56 %); obliques sit near chance; 72 % of predictions fall on 0° or 90°. Labels are bimodal at 0°/90° in MICrONS but flat in Allen, where the readout is cardinal too, so the pattern comes from the correlation structure, not from label density (best constant 41°, scan/area prior 39°).
+- **Neuron-level, not scan-level.** RF R² is unchanged after centring per scan (0.50 / 0.25 within scan); orientation error changes < 0.2° after per-scan or per-area rotation.
+- **What the relations discard.** The same transformer on each neuron's response vector reaches 21.9° / 14.9° and R² 0.37 / 0.80; a linear per-neuron readout matches it (20.2° / 15.6°), so the activity decoder is a tuning readout whose advantage is stimulus alignment. Relations keep ~85 % of the gain on orientation, ~60 % on RF.
+- **The relational structure transfers across stimuli; stimulus-aligned features do not.** With training and test Grams from disjoint halves of the movie, the Gram decoder loses 1° (twin) and 9° (in vivo; the 60-bin same-half control shows this is the small stimulus sample); the activity decoder under the same test falls to 49.5° in vivo, worse than chance (39.7° after the best rotation).
+- **Architecture.** An equivariant decoder (row statistics + Gram as attention bias) matches the standard one (19.6° vs 20.2°); row statistics alone give 37.7°; capacity beyond 2M and population size beyond 256–512 add nothing to orientation; label-free augmentation adds nothing in angular error and is dropped.
+- **Across animals (Allen, 33 mice, grating relations).** Mixed populations transfer to unseen mice at no detectable cost (35–38° in both splits); single-animal populations stay within 3° of chance (42–43°); labels sit on a 30° grid (7.5° floor). Whether the single-animal failure is the circuit or the training diversity is open.
+- **Allen receptive fields** are a mouse-level readout (per-mouse mean position r 0.36–0.71, within-mouse layout r ≈ 0.1).
+- **Mechanism (symmetry).** The class-Gram is near-circulant (71 % / 81 % of variance), which fixes orientation only up to rotation and reflection; the residual cardinal anisotropy, differing by area, is the candidate frame source. Queued tests: rotated-label training (structure without frame), orientation-balanced loss, cross-area transfer; planned: synthetic von Mises populations.
+- **Positioning.** NeuPRINT / NuCLR / POYO read neuron identity (cell type, region) from activity with population context and transfer across animals; this paper reads stimulus content from relations only and says what fixes the frame. Notes in `STATUS.md`.
+
 ## Results
 
 All numbers: 200 random half-splits unless noted; "null" is the pure-chance
@@ -369,6 +385,20 @@ Controls (17M, twin unless noted; `outputs/decoder2.json`, scripts
 | scan-mean / area-mean RF predictor | 0.02 / 0.09 (= between-group label variance) |
 | best constant orientation / scan-prior / area-prior | 41.3° / 39.0° / 38.7° |
 | balanced error over 8 true-orientation bins, twin / in vivo | 24.5° / 27.9° |
+
+Reference decoders that see the activity (tokens = response vectors, `input_mode=act`; 17M, seed 0):
+
+| decoder input | ori in vivo | ori twin | RF in vivo | RF twin |
+|---|---|---|---|---|
+| Gram row (relational, this paper) | 25.4° | 20.2° | 0.23 | 0.48 |
+| response vector, transformer (`a_*`) | 21.9° | 14.9° | 0.37 | 0.80 |
+| response vector + Gram attention bias (`ab_*`) | 22.2° | 15.0° | – | – |
+| response vector, linear, layers=0 (`lin_*`) | 20.2° | 15.6° | 0.34 | 0.69 |
+| response vector, transformer, disjoint bins (`a_*_bins`) | pending | pending | – | – |
+
+Relations keep ~85 % of the gain over chance on orientation and ~60 % on RF; the linear
+per-neuron readout matches the activity transformer, so the activity decoder is a tuning
+readout and its advantage is the stimulus alignment, not the population.
 
 The readout is cardinal: neurons preferring 0° or 90° are decoded to 11–12° (twin),
 obliques to 37–39°, and 72 % of predictions fall on the cardinal axes. Read as a horizontal-vs-vertical

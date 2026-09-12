@@ -270,6 +270,10 @@ def fig1():
                 ax.bar(x, v, w * 0.9, color=C[sub], alpha=0.45 + 0.27 * li, yerr=e if e > 0 else None, capsize=2, ecolor="k")
                 ax.text(x, v + (1.0 if con == "ori" else 0.012), lv, ha="center", va="bottom", fontsize=6.5, rotation=90)
         if con == "ori": chance(ax, x_text=1.42)
+        for gi, sub in enumerate(["iv", "twin"]):                      # stimulus-known linear readout of each neuron's own responses
+            t = {"iv": "lin_iv", "twin": "lin_is"}[sub] + {"ori": "_ori", "rf": "_rf"}[con]
+            if t in M: ax.plot([gi - 0.3, gi + 0.3], [M[t][key]] * 2, "-", color="k", lw=1.2, label="stimulus-known linear readout" if gi == 0 and con == "ori" else None)
+        if con == "ori": ax.legend(fontsize=6.5, loc="upper left")
         ax.set_xticks([0, 1]); ax.set_xticklabels(["in vivo", "digital twin"]); ax.set_ylabel(ylab)
         ax.set_xlim(-0.55, 1.75); ax.set_ylim(0, {"ori": 50, "rf": 0.6}[con])
     if sc: coarse_panel(axes[2], [("in vivo", C["iv"], [os.path.join(MPREDS, t + ".npz") for t in ("c_iv_17M_sp1", "c_iv_17M_sp2")]), ("digital twin", C["twin"], [os.path.join(MPREDS, t + ".npz") for t in ("c_is_17M_sp1", "c_is_17M_sp2")])], "coarse readouts, 17M (neuron splits 1, 2)")
@@ -279,6 +283,7 @@ def fig1():
          "for decoders of 0.3M, 2.2M and 17M parameters; error bars are the s.d. over 3 seeds. A decoder that knows nothing has errors spread evenly over 0–90°, mean 45° (grey line). "
          "Middle: R² of the decoded receptive-field centre. The decoder sees only the standardised correlation matrix of 512 sampled neurons: neither labels nor a reference "
          "population enter the input, and the test neurons never influenced model selection. Right: coarse readouts of the same decoder (17M, neuron splits 1 and 2): whether the decoded angle falls on the correct cardinal axis, for all neurons and for the neurons whose preference lies within 15° of an axis, and whether it falls in the correct one of four classes at 0°, 45°, 90° and 135°; black ticks: majority class. "
+         "Black marks: a linear readout of each neuron's own response vector, the ordinary tuning measurement with the stimulus known (20° / 16° for orientation, R² 0.34 / 0.69 for receptive fields). "
          "Orientation is read to 25° in vivo and 20° on the twin; receptive-field position at R² 0.23 in vivo and 0.48 on the twin.", "main")
 
 
