@@ -73,6 +73,8 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
             tr = tr[~np.isin(ds.mouse[tr], sel_mice)]; va = va[~np.isin(ds.mouse[va], sel_mice)]
         else:
             ks = int(len(tr) * sel_frac); sel, tr = tr[:ks], tr[ks:]      # selection slice of training neurons
+    train_pool = kw.pop('train_pool', 0)     # diversity control: restrict the training neurons (mixed across mice) to this many
+    if train_pool: tr = np.random.default_rng(split_seed + 5).choice(tr, int(train_pool), replace=False)
     pools_tr = [np.intersect1d(tr, np.flatnonzero(ds.mouse == m)) for m in mice]
     pools_va = [np.intersect1d(va, np.flatnonzero(ds.mouse == m)) for m in mice]
     print(f"[{tag}] regime={regime} train neurons={len(tr)} val neurons={len(va)} mice={len(mice)}", flush=True)
