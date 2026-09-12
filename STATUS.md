@@ -41,9 +41,10 @@ Every run writes config + per-epoch history + final metrics to `microns_ambiguit
 | cross-stimulus (activity) | `a_{is,iv}_17M_bins` | does the activity decoder learn relations implicitly | in vivo done: 49.5° raw, 39.7° frame-corrected (Gram: 34.2°) -> no, it reads stimulus-aligned features; twin rerunning after an equal-halves fix (2499 vs 2500 bins) |
 | Allen 2x2 (2.2M plain) | `c_{wi,pw,cr}_2M_sp{0,1,2}`, `c_pc_2M_plain{,_sp1,_sp2,_s1,_s2}` | Fig 5, Table 2, Fig A4 | done |
 | Allen sweeps | `c_pc_17M_cf50_sp0_s*`, `c_pc_17M_cf50_sp{1,2}`, `c_pc_{2M,17M,57M}_plain`, `c_pc_2M_cf{75,50,30}`, `c_pc_17M_cf85`, `c_pc_57M_cf50`, `c_pc_17M_n{512,1024}` | capacity / augmentation / population size | done (3 tags reconstructed from logs) |
-| Allen activity decoder | `act_pc_2M_sp{0,1,2}`, `act_cr_2M_sp{0,1,2}` | fair cross-animal comparison; single-animal cell with activity tokens | queued (pod 5) |
+| Allen activity decoder | `act_pc_2M_sp{0,1,2}`, `act_cr_2M_sp{0,1,2}` | fair cross-animal comparison; single-animal cell with activity tokens | running: pooledcross sp0 32.4° (Gram 35.2°) |
 | rotated labels | `m_rot_{is,iv}` | what the symmetric part alone gives per neuron (report err_modD) | queued (pod 5) |
 | orientation-balanced loss | `m_w_{is,iv}` | are obliques recoverable when weighted | queued (pod 5) |
+| synthetic von Mises populations | `syn_c{0,1}s{0,1}t{0,1}` in `microns_ambiguity/outputs/synthetic.json` (`microns_ambiguity/synthetic.py`) | which switch fixes the frame: count bias / cardinal sharpening / stimulus bias; baseline circulant to 0.01 | queued (pod 5, after mech) |
 | cross-area transfer (twin) | `m_{V1toRL,RLtoV1,V1toV1,RLtoRL}_is`, `m_{V1toAL,ALtoV1,V1toV1}_is_n128` | is the frame source area-specific (raw vs err_modD gap) | queued (pod 5) |
 
 ## Related work notes (for the paper; all references verified against publisher records on 2026-09-11)
