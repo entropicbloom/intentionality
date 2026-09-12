@@ -138,7 +138,7 @@ Orientation is decoded as a continuous angle; the metric is mean angular error, 
 - **The readout is cardinal.** Horizontal vs vertical is right for 87 % / 79 % of neurons (chance 56 %); obliques sit near chance; 72 % of predictions fall on 0° or 90°. Labels are bimodal at 0°/90° in MICrONS but flat in Allen, where the readout is cardinal too, so the pattern comes from the correlation structure, not from label density (best constant 41°, scan/area prior 39°).
 - **Neuron-level, not scan-level.** RF R² is unchanged after centring per scan (0.50 / 0.25 within scan); orientation error changes < 0.2° after per-scan or per-area rotation.
 - **What the relations discard.** The same transformer on each neuron's response vector reaches 21.9° / 14.9° and R² 0.37 / 0.80; a linear per-neuron readout matches it (20.2° / 15.6°), so the activity decoder is a tuning readout whose advantage is stimulus alignment. Relations keep ~85 % of the gain on orientation, ~60 % on RF.
-- **The relational structure transfers across stimuli; stimulus-aligned features do not.** With training and test Grams from disjoint halves of the movie, the Gram decoder loses 1° (twin) and 9° (in vivo; the 60-bin same-half control shows this is the small stimulus sample); the activity decoder under the same test falls to 49.5° in vivo, worse than chance (39.7° after the best rotation).
+- **The relational structure transfers across stimuli; stimulus-aligned features do not.** With training and test Grams from disjoint halves of the movie, the Gram decoder loses 1° (twin) and 9° (in vivo; the 60-bin same-half control shows this is the small stimulus sample); the activity decoder under the same test falls to 49.5° in vivo and 41.0° on the twin, at or below chance. It transfers across animals under a shared protocol (Allen mixed populations 32.4 / 33.7 / 34.3° vs Gram 35.2 / 37.0 / 38.4°) but not across stimuli.
 - **Architecture.** An equivariant decoder (row statistics + Gram as attention bias) matches the standard one (19.6° vs 20.2°); row statistics alone give 37.7°; capacity beyond 2M and population size beyond 256–512 add nothing to orientation; label-free augmentation adds nothing in angular error and is dropped.
 - **Across animals (Allen, 33 mice, grating relations).** Mixed populations transfer to unseen mice at no detectable cost (35–38° in both splits); single-animal populations stay within 3° of chance (42–43°); labels sit on a 30° grid (7.5° floor). Whether the single-animal failure is the circuit or the training diversity is open.
 - **Allen receptive fields** are a mouse-level readout (per-mouse mean position r 0.36–0.71, within-mouse layout r ≈ 0.1).
@@ -394,7 +394,7 @@ Reference decoders that see the activity (tokens = response vectors, `input_mode
 | response vector, transformer (`a_*`) | 21.9° | 14.9° | 0.37 | 0.80 |
 | response vector + Gram attention bias (`ab_*`) | 22.2° | 15.0° | – | – |
 | response vector, linear, layers=0 (`lin_*`) | 20.2° | 15.6° | 0.34 | 0.69 |
-| response vector, transformer, disjoint bins (`a_*_bins`) | pending | pending | – | – |
+| response vector, transformer, disjoint bins (`a_*_bins`) | 49.5° | 41.0° | – | – |
 
 Relations keep ~85 % of the gain over chance on orientation and ~60 % on RF; the linear
 per-neuron readout matches the activity transformer, so the activity decoder is a tuning

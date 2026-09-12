@@ -40,14 +40,15 @@ Every run writes config + per-epoch history + final metrics to `microns_ambiguit
 | cross-stimulus (Gram) | `c_{is,iv}_17M_bins`, `c_iv_17M_bins60` | disjoint stimulus bins; 60-bin control | done: twin 21.2, in vivo 34.2 / 25.3 |
 | architecture ablations | `c_is_17M_statsbias`, `c_is_17M_statsonly` | equivariant decoder; stats only | done: 19.6 / 37.7 |
 | raw-activity references | `a_{is,iv}_17M_{ori,rf}`, `ab_{is,iv}_17M_ori`, `lin_{is,iv}_{ori,rf}` | ceiling: activity tokens; + Gram bias; linear per-neuron | done: see README §4b |
-| cross-stimulus (activity) | `a_{is,iv}_17M_bins` | does the activity decoder learn relations implicitly | in vivo done: 49.5° raw, 39.7° frame-corrected (Gram: 34.2°) -> no, it reads stimulus-aligned features; twin rerunning after an equal-halves fix (2499 vs 2500 bins) |
+| cross-stimulus (activity) | `a_{is,iv}_17M_bins` | does the activity decoder learn relations implicitly | done: in vivo 49.5° (39.7° frame-corrected; Gram 34.2°), twin 41.0° (Gram 21.2°) -> no, it reads stimulus-aligned features |
 | Allen 2x2 (2.2M plain) | `c_{wi,pw,cr}_2M_sp{0,1,2}`, `c_pc_2M_plain{,_sp1,_sp2,_s1,_s2}` | Fig 5, Table 2, Fig A4 | done |
 | Allen sweeps | `c_pc_17M_cf50_sp0_s*`, `c_pc_17M_cf50_sp{1,2}`, `c_pc_{2M,17M,57M}_plain`, `c_pc_2M_cf{75,50,30}`, `c_pc_17M_cf85`, `c_pc_57M_cf50`, `c_pc_17M_n{512,1024}` | capacity / augmentation / population size | done (3 tags reconstructed from logs) |
-| Allen activity decoder | `act_pc_2M_sp{0,1,2}`, `act_cr_2M_sp{0,1,2}` | fair cross-animal comparison; single-animal cell with activity tokens | running: pooledcross sp0 32.4° (Gram 35.2°) |
+| Allen activity decoder | `act_pc_2M_sp{0,1,2}`, `act_cr_2M_sp{0,1,2}` | fair cross-animal comparison; single-animal cell with activity tokens | pooledcross 32.4 / 33.7 / 34.3° (Gram 35.2 / 37.0 / 38.4°); cross (single-animal) sp0 32.8° (Gram 43.1°), sp1/sp2 running after a sampler fix |
 | rotated labels | `m_rot_{is,iv}` | what the symmetric part alone gives per neuron (report err_modD) | queued (pod 5) |
 | orientation-balanced loss | `m_w_{is,iv}` | are obliques recoverable when weighted | queued (pod 5) |
 | synthetic von Mises populations | `syn_c{0,1}s{0,1}t{0,1}` in `microns_ambiguity/outputs/synthetic.json` (`microns_ambiguity/synthetic.py`) | which switch fixes the frame: count bias / cardinal sharpening / stimulus bias; baseline circulant to 0.01 | queued (pod 5, after mech) |
 | stimulus-agnostic activity decoder | `bp_{iv,is}_17M_{ori,rf}` (`input_mode=act bin_perm=1`) | upper bound on all bin-permutation-invariant statistics (pairwise and higher); gap to the Gram decoder = content beyond pairwise relations (plus per-neuron marginals) | queued (pod 5, after synthetic) |
+| bin-permuted per-neuron control | `bp0_{iv,is}_ori` (`input_mode=act bin_perm=1 layers=0`) | shuffled vector, no population context: if it matches `bp_*`, the gain over the Gram is intrinsic per-neuron statistics, not relations | queued (pod 5, appended to the bp queue) |
 | cross-area transfer (twin) | `m_{V1toRL,RLtoV1,V1toV1,RLtoRL}_is`, `m_{V1toAL,ALtoV1,V1toV1}_is_n128` | is the frame source area-specific (raw vs err_modD gap) | queued (pod 5) |
 
 ## Related work notes (for the paper; all references verified against publisher records on 2026-09-11)
