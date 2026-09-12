@@ -107,5 +107,5 @@ def main(tag, regime="cross", n=128, test_frac=0.3, sel_frac=0.2, movie="both", 
 if __name__ == "__main__":
     tag, regime = sys.argv[1], sys.argv[2]; kw = {}
     for a in sys.argv[3:]:
-        k, v = a.split("="); kw[k] = v if k in ("device", "movie", "ori_source", "content", "session") else (float(v) if k in ("lr", "early_stop", "dropout", "test_frac", "sel_frac", "cond_frac", "gram_drop", "aug_prob") else (bool(int(v)) if k == "rel_bias" else int(v)))
+        k, v = a.split("="); kw[k] = v if k in ("device", "movie", "ori_source", "content", "session", "input_mode") else (float(v) if k in ("lr", "early_stop", "dropout", "test_frac", "sel_frac", "cond_frac", "gram_drop", "aug_prob") else (bool(int(v)) if k == "rel_bias" else int(v)))
     main(tag, regime, **kw)

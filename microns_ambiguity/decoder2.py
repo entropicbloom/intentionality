@@ -55,18 +55,22 @@ class Block(nn.Module):
 
 
 class RelDecoder(nn.Module):
-    def __init__(self, n_tokens, out_dim, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True, dropout=0.1):
+    def __init__(self, n_tokens, out_dim, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True, dropout=0.1, input_mode="gram", act_dim=0):
         super().__init__()
-        self.row_proj = row_proj
-        # token init: projected Gram row (+ 3 permutation-invariant row statistics)
-        self.inp = nn.Linear((n_tokens if row_proj else 0) + 3, dim)
+        self.row_proj, self.input_mode = row_proj, input_mode
+        # token init: "gram": projected Gram row (+ 3 permutation-invariant row statistics);
+        # "act": the neuron's own (row-normalised) response vector, the raw-activity reference (no Gram in the input)
+        self.inp = nn.Linear(act_dim if input_mode == "act" else (n_tokens if row_proj else 0) + 3, dim)
         self.blocks = nn.ModuleList([Block(dim, heads, rel_bias, dropout) for _ in range(layers)])
         self.head = nn.Sequential(nn.LayerNorm(dim), nn.Linear(dim, out_dim))
 
-    def forward(self, G):                                  # G: (B, n, n) standardized
-        stats = torch.stack([G.mean(-1), G.std(-1), (G ** 3).mean(-1)], -1)
-        x = torch.cat([G, stats], -1) if self.row_proj else stats
-        x = self.inp(x)
+    def forward(self, G, X=None):                          # G: (B, n, n) standardized; X: (B, n, d) row-normalised responses
+        if self.input_mode == "act":
+            x = self.inp(X * math.sqrt(X.shape[-1]))       # unit-norm rows scaled to unit variance per feature
+        else:
+            stats = torch.stack([G.mean(-1), G.std(-1), (G ** 3).mean(-1)], -1)
+            x = torch.cat([G, stats], -1) if self.row_proj else stats
+            x = self.inp(x)
         for b in self.blocks:
             x = b(x, G)
         return self.head(x)                                 # (B, n, out)
@@ -109,7 +113,7 @@ class Sampler:
         idx = np.stack([self.rng.choice(self.pool, self.n, replace=False) for _ in range(B)])
         it = torch.as_tensor(idx, device=self.Fn.device)
         X = self.Fn[it]                                     # (B, n, d)
-        return idx, gram_from_features(X, self.mean, self.std)
+        return idx, gram_from_features(X, self.mean, self.std), X
 
 
 def normalize_features(F):
@@ -120,7 +124,7 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
@@ -131,7 +135,13 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     cover_groups: (N,) group id per neuron; if given, the averaged evaluation forms its
     populations within a group (e.g. within a mouse), matching a group-restricted Sampler.
     F_eval: optional (N, d') features used ONLY for the validation-set Grams (cross-stimulus
-    test: training and selection Grams from F, test Grams from disjoint stimulus bins)."""
+    test: training and selection Grams from F, test Grams from disjoint stimulus bins).
+    input_mode: "gram" (default) or "act": tokens from each neuron's response vector instead of its
+    Gram row, the raw-activity reference decoder; with rel_bias the Gram still enters attention,
+    without it the Gram is not used at all; layers=0 makes it a linear per-neuron readout.
+    label_rot (circ): each training population's labels are rotated by a random angle, so the
+    labels carry no frame; selection and the reported error use the frame-corrected err_modD.
+    ori_weight (circ): loss weight per labelled neuron = inverse density of its 15° label bin."""
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
     AUG.update(cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob, active=False)
     if sel_idx is not None:                     # caller-provided selection set (e.g. held-out mice)
@@ -159,9 +169,15 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
         labelled = np.isfinite(y).all(1); mu, sd = np.zeros(2, np.float32), np.ones(2, np.float32)
         yt = torch.as_tensor(np.nan_to_num(y), device=device); out_dim = 2
         lab_t = torch.as_tensor(labelled, device=device)
+        w_np = np.ones(len(y), np.float32)
+        if ori_weight:                          # inverse density of the label's 15° bin, over the labelled training neurons
+            b = ((np.nan_to_num(ang) % 180) // 15).astype(int); cnt = np.bincount(b[np.asarray(train_idx)][labelled[np.asarray(train_idx)]], minlength=12).astype(float)
+            w_np = (cnt.mean() / np.maximum(cnt, 1))[b].astype(np.float32)
+        w_t = torch.as_tensor(w_np, device=device)
         def loss_fn(out, tgt, _idx=None):
             m = lab_t[_idx]
-            return ((out[m] - tgt[m]) ** 2).mean() if m.any() else (out * 0).sum()
+            if not m.any(): return (out * 0).sum()
+            w = w_t[_idx][m]; return (((out[m] - tgt[m]) ** 2).mean(1) * w).sum() / w.sum()
     else:
         y = np.atleast_2d(y.T).T.astype(np.float32); labelled = np.isfinite(y).all(1)
         mu, sd = np.nanmean(y[train_idx], 0), np.nanstd(y[train_idx], 0)
@@ -170,7 +186,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
         def loss_fn(out, tgt, _idx=None):
             m = lab_t[_idx]
             return ((out[m] - tgt[m]) ** 2).mean() if m.any() else (out * 0).sum()
-    model = RelDecoder(n, out_dim, dim, heads, layers, rel_bias, row_proj, dropout=dropout).to(device)
+    model = RelDecoder(n, out_dim, dim, heads, layers, rel_bias, row_proj, dropout=dropout, input_mode=input_mode, act_dim=Fn.shape[1]).to(device)
     nparam = sum(p.numel() for p in model.parameters())
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     steps = epochs * (pops_per_epoch // batch)
@@ -191,7 +207,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
         with torch.no_grad():
             if reps == 1:
                 for _ in range(max(1, val_pops // batch)):
-                    idx, G = sampler.batch(batch); out = model(G).cpu().numpy()
+                    idx, G, X = sampler.batch(batch); out = model(G, X).cpu().numpy()
                     np.add.at(S, idx.reshape(-1), out.reshape(-1, out_dim)); np.add.at(C, idx.reshape(-1), 1)
             else:
                 pool = np.asarray(pool_idx); r = np.random.default_rng(seed + 7)
@@ -202,7 +218,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
                     perm = perm[r.permutation(len(perm))]
                     for b in range(0, len(perm), batch):
                         idx = perm[b:b + batch]; it = torch.as_tensor(idx, device=device); X = sampler.Fn[it]
-                        out = model(gram_from_features(X, sampler.mean, sampler.std)).cpu().numpy()
+                        out = model(gram_from_features(X, sampler.mean, sampler.std), X).cpu().numpy()
                         np.add.at(S, idx.reshape(-1), out.reshape(-1, out_dim)); np.add.at(C, idx.reshape(-1), 1)
         model.train()
         if score_only is not None:
@@ -236,9 +252,13 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
         tot = 0.0
         AUG["active"] = True
         for _ in range(pops_per_epoch // batch):
-            idx, G = tr.batch(batch)
-            out = model(G).reshape(-1, out_dim); it = torch.as_tensor(idx.reshape(-1), device=device)
-            loss = loss_fn(out, yt[it]) if task == "class" else loss_fn(out, yt[it], it)
+            idx, G, X = tr.batch(batch)
+            out = model(G, X).reshape(-1, out_dim); it = torch.as_tensor(idx.reshape(-1), device=device)
+            tgt = yt[it]
+            if label_rot and task == "circ":    # rotate each population's targets by a random angle (2φ on the (cos 2θ, sin 2θ) circle)
+                phi = torch.rand(idx.shape[0], 1, device=device) * 2 * math.pi; c, s_ = torch.cos(phi), torch.sin(phi)
+                t = tgt.view(idx.shape[0], -1, 2); tgt = torch.stack([c * t[..., 0] - s_ * t[..., 1], s_ * t[..., 0] + c * t[..., 1]], -1).reshape(-1, 2)
+            loss = loss_fn(out, tgt) if task == "class" else loss_fn(out, tgt, it)
             opt.zero_grad(); loss.backward(); torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0); opt.step(); sched.step()
             tot += loss.item()
         AUG["active"] = False
@@ -246,7 +266,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             torch.mps.empty_cache()          # the MPS caching allocator otherwise grows across epochs
         m = evaluate(); m.pop("preds", None); m["loss"] = tot / (pops_per_epoch // batch); m["t"] = time.time() - t0
         if se is not None:
-            ms = evaluate(reps=sel_reps, sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = -ms["err"] if task == "circ" else ms.get("acc", ms.get("r2"))
+            ms = evaluate(reps=sel_reps, sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = -(ms["err_modD"] if label_rot else ms["err"]) if task == "circ" else ms.get("acc", ms.get("r2"))
             if best_state is None or m["sel"] > max(h["sel"] for h in hist):
                 best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         hist.append(m)
@@ -265,7 +285,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             final["preds"] = m["preds"]
     if verbose:
         print("    test-time averaging: " + " ".join(f"{k}={v:.3f}" for k, v in final.items() if "avg" in k), flush=True)
-    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
+    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, input_mode=input_mode, label_rot=label_rot, ori_weight=ori_weight, cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
                  heads=heads, dropout=dropout, lr=lr, seed=seed, early_stop=early_stop, sel_reps=sel_reps, n_sel=(int(len(sel_idx)) if sel_idx is not None else 0),
                                          params=nparam, pops_per_epoch=pops_per_epoch, epochs=epochs, batch=batch)
     return final

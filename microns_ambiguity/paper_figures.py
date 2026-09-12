@@ -59,6 +59,39 @@ def scatter_tag(d, tag):
     p = os.path.join(d, tag + ".npz"); return p if os.path.exists(p) else None
 
 
+def coarse_scores(path):
+    """Coarse readouts from saved predictions: nearest cardinal axis (all neurons; neurons within 15° of an axis)
+    and nearest of four classes at 0/45/90/135; each with its majority-class chance."""
+    z = np.load(path, allow_pickle=True); P, y = z["P"], z["y"]
+    if y.ndim == 2: y = y[:, 0]
+    ok = np.isfinite(y); P, y = P[ok], y[ok] % 180
+    th = (np.rad2deg(np.arctan2(P[:, 1], P[:, 0])) / 2) % 180
+    d = lambda a, b: np.abs((a - b + 90) % 180 - 90)
+    out = {}
+    for key, keep in [("axis_all", np.ones(len(y), bool)), ("axis_near", (d(y, 0) <= 15) | (d(y, 90) <= 15))]:
+        th_h, y_h = d(th[keep], 0) <= d(th[keep], 90), d(y[keep], 0) <= d(y[keep], 90)
+        out[key] = (float((th_h == y_h).mean()), float(max(y_h.mean(), 1 - y_h.mean())))
+    cls = lambda a: ((a + 22.5) // 45 % 4).astype(int)
+    out["four"] = (float((cls(th) == cls(y)).mean()), float(np.bincount(cls(y), minlength=4).max() / len(y)))
+    return out
+
+
+def coarse_panel(ax, groups, title):
+    """groups: list of (label, colour, [pred paths]); bars = mean over paths, points = paths, black ticks = chance."""
+    scores = ["axis_all", "axis_near", "four"]; names = ["nearest axis\n(0° or 90°),\nall neurons", "nearest axis,\nneurons within\n15° of an axis", "nearest of\n0°, 45°,\n90°, 135°"]
+    w = 0.8 / len(groups)
+    for gi, (lab, col, paths) in enumerate(groups):
+        sc = [coarse_scores(p) for p in paths if os.path.exists(p)]
+        if not sc: continue
+        for si, key in enumerate(scores):
+            x = si + (gi - (len(groups) - 1) / 2) * w; v = [c[key][0] for c in sc]; ch = np.mean([c[key][1] for c in sc])
+            ax.bar(x, np.mean(v), w * 0.9, color=col, alpha=0.85, label=lab if si == 0 else None)
+            if len(v) > 1: ax.plot(x + np.linspace(-0.25, 0.25, len(v)) * w, v, "o", color="k", ms=2.5, mfc="white")
+            ax.plot([x - w * 0.45, x + w * 0.45], [ch, ch], "-", color="k", lw=1.2)
+    ax.set_xticks(range(3)); ax.set_xticklabels(names, fontsize=6.5); ax.set_ylim(0, 1); ax.set_ylabel("accuracy"); ax.set_title(title, fontsize=8)
+    ax.plot([], [], "-", color="k", lw=1.2, label="majority class"); ax.legend(fontsize=6.5, loc="upper right")
+
+
 def ori_scatter(ax, path, title, allen=False):
     """Decoded vs true preferred orientation for every scored neuron."""
     z = np.load(path); P, y = z["P"], z["y"]
@@ -225,7 +258,7 @@ def fig1():
              ("iv", "rf", "17M"): ["g9_iv_rf_n512_d512L8", "g12_iv_rf_s1", "g12_iv_rf_s2"], ("twin", "rf", "17M"): ["g3_is_rf_n512_d512L8", "g9_is_rf_n512_d512L8_s1", "g9_is_rf_n512_d512L8_s2"]}
     single = {("iv", "ori", "0.3M"): "c_iv_03M_s0", ("twin", "ori", "0.3M"): "c_is_03M_s0", ("iv", "rf", "0.3M"): "n512_rel_rf", ("twin", "rf", "0.3M"): "twin_n512_rf"}
     sc = scatter_tag(MPREDS, "c_iv_17M_sp1")
-    fig, axes = plt.subplots(1, 3 if sc else 2, figsize=(10.2 if sc else 8, 2.9), gridspec_kw=dict(width_ratios=[1, 1, 0.9] if sc else [1, 1]))
+    fig, axes = plt.subplots(1, 3 if sc else 2, figsize=(10.2 if sc else 8, 2.9), gridspec_kw=dict(width_ratios=[1, 1, 1.05] if sc else [1, 1]))
     for ax, con, key, ylab in [(axes[0], "ori", "err", "orientation error (°), lower is better"), (axes[1], "rf", "r2", "receptive-field position R²")]:
         levels = ["0.3M", "2.2M", "17M"]; w = 0.2
         for gi, sub in enumerate(["iv", "twin"]):
@@ -239,13 +272,13 @@ def fig1():
         if con == "ori": chance(ax, x_text=1.42)
         ax.set_xticks([0, 1]); ax.set_xticklabels(["in vivo", "digital twin"]); ax.set_ylabel(ylab)
         ax.set_xlim(-0.55, 1.75); ax.set_ylim(0, {"ori": 50, "rf": 0.6}[con])
-    if sc: ori_scatter(axes[2], sc, "in vivo, 17M, held-out neurons")
+    if sc: coarse_panel(axes[2], [("in vivo", C["iv"], [os.path.join(MPREDS, t + ".npz") for t in ("c_iv_17M_sp1", "c_iv_17M_sp2")]), ("digital twin", C["twin"], [os.path.join(MPREDS, t + ".npz") for t in ("c_is_17M_sp1", "c_is_17M_sp2")])], "coarse readouts, 17M (neuron splits 1, 2)")
     fig.suptitle("Fig. 2  MICrONS: per-neuron content decoded from the population correlation matrix alone (512 neurons, no labels, no reference)", fontsize=9)
     save(fig, "fig2_microns_decoder", "MICrONS label-free per-neuron decoding",
          "Left: mean absolute error of the decoded preferred orientation (degrees, orientation is defined modulo 180°) on held-out neurons of the same animal, "
          "for decoders of 0.3M, 2.2M and 17M parameters; error bars are the s.d. over 3 seeds. A decoder that knows nothing has errors spread evenly over 0–90°, mean 45° (grey line). "
          "Middle: R² of the decoded receptive-field centre. The decoder sees only the standardised correlation matrix of 512 sampled neurons: neither labels nor a reference "
-         "population enter the input, and the test neurons never influenced model selection. Right: decoded against true orientation for every held-out in vivo neuron (17M decoder). "
+         "population enter the input, and the test neurons never influenced model selection. Right: coarse readouts of the same decoder (17M, neuron splits 1 and 2): whether the decoded angle falls on the correct cardinal axis, for all neurons and for the neurons whose preference lies within 15° of an axis, and whether it falls in the correct one of four classes at 0°, 45°, 90° and 135°; black ticks: majority class. "
          "Orientation is read to 25° in vivo and 20° on the twin; receptive-field position at R² 0.23 in vivo and 0.48 on the twin.", "main")
 
 
@@ -347,15 +380,15 @@ def fig3():
         ax.text(i, 2.5, f"`{reg}`", ha="center", fontsize=5.8, family="monospace", color="white")
     chance(ax, x_text=3.45, allen=True)
     ax.set_xticks(range(4)); ax.set_xticklabels([c[1] for c in cells], fontsize=7.5); ax.set_ylabel("orientation error (°), lower is better"); ax.set_ylim(0, 50); ax.set_xlim(-0.6, 4.4)
-    if sc: ori_scatter(axes[1], sc, "`pooledcross`, 2M, held-out mice", allen=True)
+    if sc: coarse_panel(axes[1], [("`pooledcross`, 2M", C["mix"], [os.path.join(PREDS, t + ".npz") for t in ("c_pc_2M_plain", "c_pc_2M_plain_sp1", "c_pc_2M_plain_sp2")])], "coarse readouts, held-out mice (3 splits)")
     fig.suptitle("Fig. 5  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9)
     save(fig, "fig5_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
          "Left: mean angular error of the label-free decoder (2M parameters, 256 neurons per population) on labelled test cells for the four regimes. Split: test neurons from the training animals "
          "(each animal's cells halved) or from 9 held-out animals. Population: each sampled population (the unit the Gram is computed on) drawn from one animal or from several. "
          "Points: the three splits (of neurons within each animal for the top row, of animals for the bottom row). Grey line: 45° chance; dashed line: the 7.5° mean disagreement "
          "a perfect decoder would show against labels that sit on a 30° grid. Single-animal populations are within 3° of chance whether the animal was seen in training or not; "
-         "mixed populations are 8–10° below it in both splits, so transfer to unseen brains has no detectable cost. Right: decoded against true orientation for the held-out mice; "
-         "the six columns are the six grating orientations.", "main")
+         "mixed populations are 8–10° below it in both splits, so transfer to unseen brains has no detectable cost. Right: coarse readouts of the mixed-population decoder on the held-out mice (three splits): correct cardinal axis for all cells and for the cells labelled 0° or 90°, "
+         "and correct one of four classes at 0°, 45°, 90°, 135°; black ticks: majority class.", "main")
 
 
 # ---------------------------------------------------------------- Fig 4: Allen RF mouse-level

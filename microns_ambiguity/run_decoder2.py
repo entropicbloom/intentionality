@@ -3,6 +3,10 @@ python -m microns_ambiguity.run_decoder2 <tag> <substrate> <content> [n=128] [di
     [split_seed=<int>]  seed of the stratified neuron half split (default: config SEED)
     [bins=1|2]          cross-stimulus test (2: control with the same half on both sides): training/selection Grams from a random half of the stimulus bins,
                         test Grams from the other half (disjoint); twin uses the raw 4999-bin responses, not the PCs
+    [input_mode=act]    raw-activity reference: tokens from response vectors instead of Gram rows (rel_bias=0: no Gram at all; layers=0: linear per-neuron readout)
+    [label_rot=1]       labels of each training population rotated by a random angle (no frame in the labels; report err_modD)
+    [ori_weight=1]      loss weighted by inverse label density (orientation-balanced training)
+    [area_train=V1 area_test=RL]  cross-area transfer: training half restricted to one area, test half to another
     [save_preds=1]      save averaged per-neuron predictions to outputs/preds/<tag>.npz (idx, P, y, scan, area)
 Appends to outputs/decoder2.json under key <tag>."""
 from __future__ import annotations
@@ -44,13 +48,16 @@ def main(tag, sub, con, **kw):
     keep = np.flatnonzero(ok)
     strat = y[keep] if task == "class" else np.zeros(len(keep), int)
     tr, va = stratified_half_split(strat, np.random.default_rng(split_seed)); tr, va = keep[tr], keep[va]
+    area_train, area_test = kw.pop("area_train", ""), kw.pop("area_test", "")     # cross-area transfer: restrict the halves by cortical area
+    if area_train: tr = tr[ds.area[tr] == area_train]
+    if area_test: va = va[ds.area[va] == area_test]
     t0 = time.time(); print(f"[{tag}] {sub} {con} n_neurons={len(keep)} split_seed={split_seed} bins={bins} {({k: v for k, v in kw.items() if k != 'F_eval'})}", flush=True)
     m = train(F, y, task, tr, va, return_preds=bool(save_preds), **{k: v for k, v in kw.items()})
     if save_preds:
         pr = m.pop("preds"); (OUT / "preds").mkdir(parents=True, exist_ok=True)
         np.savez(OUT / "preds" / f"{tag}.npz", idx=pr["idx"], P=pr["P"], y=np.asarray(y, float)[pr["idx"]], scan=ds.scan[pr["idx"]].astype(str), area=ds.area[pr["idx"]].astype(str))
     m.pop("preds", None); m.pop("F_eval", None)
-    m.update(sub=sub, con=con, seconds=time.time() - t0, n_neurons=int(len(keep)), split_seed=int(split_seed), bins=int(bins))
+    m.update(sub=sub, con=con, seconds=time.time() - t0, n_neurons=int(len(keep)), split_seed=int(split_seed), bins=int(bins), area_train=area_train, area_test=area_test, n_train=int(len(tr)), n_test=int(len(va)))
     OUT.mkdir(exist_ok=True); p = OUT / "decoder2.json"
     d = json.load(open(p)) if p.exists() else {}
     d[tag] = m; json.dump(d, open(p, "w"))
@@ -61,7 +68,7 @@ if __name__ == "__main__":
     tag, sub, con = sys.argv[1:4]
     kw = {}
     for a in sys.argv[4:]:
-        k, v = a.split("="); kw[k] = v if k == "device" else (bool(int(v)) if k in ("rel_bias", "row_proj") else (float(v) if k in ("lr", "early_stop", "dropout", "cond_frac", "gram_drop", "aug_prob") else int(v)))
+        k, v = a.split("="); kw[k] = v if k in ("device", "input_mode", "area_train", "area_test") else (bool(int(v)) if k in ("rel_bias", "row_proj", "label_rot", "ori_weight") else (float(v) if k in ("lr", "early_stop", "dropout", "cond_frac", "gram_drop", "aug_prob") else int(v)))
     pca = kw.pop("pca", 0)
     if pca: kw["pca"] = 1
     main(tag, sub, con, **kw)

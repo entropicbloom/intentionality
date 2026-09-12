@@ -371,7 +371,10 @@ Controls (17M, twin unless noted; `outputs/decoder2.json`, scripts
 | balanced error over 8 true-orientation bins, twin / in vivo | 24.5° / 27.9° |
 
 The readout is cardinal: neurons preferring 0° or 90° are decoded to 11–12° (twin),
-obliques to 37–39°, and 72 % of predictions fall on the cardinal axes. Label-free
+obliques to 37–39°, and 72 % of predictions fall on the cardinal axes. Read as a horizontal-vs-vertical
+question (nearest cardinal axis), the decoder is right for 87 % (twin) / 79 % (in vivo) of all
+neurons (chance 56 %) and 94 % / 86 % of the neurons within ±15° of an axis; Allen 62 % / 68 %
+(3 splits; chance ~51 %). Four-way 0/45/90/135: twin 0.66, in vivo 0.59 (majority 0.40), Allen 0.32 (0.33). Label-free
 augmentation (Gram from a random subset of the feature dimensions) changes the angular
 error by less than the seed spread and is no longer used.
 
