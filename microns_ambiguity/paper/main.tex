@@ -106,12 +106,14 @@ On MICrONS the decoder reads orientation and receptive-field position from the G
 
 \subsection{Why the absolute frame is recoverable}
 
-The class-Gram of orientation is close to circulant (Fig.~\ref{fig:symmetry}): neighbouring orientations correlate, orthogonal ones anti-correlate, and the pattern repeats around the circle. The circulant part holds 71\% of the variance in vivo and 81\% in the twin. A circulant class-Gram is invariant under every rotation and reflection of the orientation circle, so it cannot single out which class is $0^\circ$: after projecting onto the circulant part, a held-out half's class-Gram is compatible with all 16 elements of $D_8$ and with nothing else (absolute matching at chance, matching modulo $D_8$ at 1.0). The raw class-Gram singles out the true labelling. The difference is the residual anisotropy, a cardinal bias whose strength differs between areas, and that is what pins the frame. A label-free decoder that outputs absolute orientation must use some such departure from the symmetry, in the relations or in the uneven distribution of preferred orientations over the circle; the frame check of the previous section shows that it does recover the frame.
+The class-Gram of orientation is close to circulant (Fig.~\ref{fig:symmetry}): neighbouring orientations correlate, orthogonal ones anti-correlate, and the pattern repeats around the circle. A circulant matrix is unchanged by every rotation and reflection of the orientation circle, so that part of the relations fixes the classes only up to the 16 elements of $D_8$ and cannot say which class is $0^\circ$. Whatever fixes the frame must be the departure from circulant structure. That residual holds 29\% of the class-Gram variance in vivo and 19\% on the twin, and it is signal: it correlates at 0.94 between random halves of the neurons, at 0.84 and 0.99 between disjoint halves of the stimulus bins, and at 0.99 with the residual computed on class-balanced subsamples, so it is neither a finite-stimulus artefact nor a consequence of the uneven number of neurons per orientation. Its form is a cardinal anisotropy, stronger relations among neurons near the cardinal axes, whose shape differs between areas (residual correlation V1--RL 0.77, V1--AL 0.31).
+
+Four observations say that the decoder reads exactly this residual. First, it recovers the absolute frame (Section~3.1), while predictors that use only the distribution of labels, the best constant orientation or each scan's or area's mean, reach $39^\circ$ to $41^\circ$. Second, its errors have the shape of the symmetry breaking: neurons near a cardinal axis are decoded to $11^\circ$ to $12^\circ$ on the twin and oblique ones to $37^\circ$ to $40^\circ$, and reweighting the loss so that obliques count as much as cardinals does not change this (Appendix~\ref{app:controls}), so the oblique ordering is not in the relations at single-neuron resolution and the anisotropy is the main readable signal rather than a small correction. Third, a decoder trained on V1 neurons transfers to RL, whose anisotropy resembles V1's, with a $1.6^\circ$ frame gap, and to AL, whose anisotropy differs, with a raw error of $58^\circ$ that falls to $32^\circ$ after a single global rotation: it carries the structure and the wrong frame, as it should if the frame anchor is the area's own anisotropy. Fourth, PENDINGROT2. A synthetic population with von Mises tuning reproduces the effect: PENDINGSYN.
 
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=0.9\textwidth]{fig3_symmetry.pdf}
-  \caption{\textbf{What fixes the absolute orientation frame.} Left: mean correlation between orientation classes in vivo (diagonal masked). Middle: its circulant projection. Right: matching a held-out half's class-Gram to the reference over all $8!$ relabellings. With the raw matrix the true labelling wins. After the circulant projection, absolute accuracy collapses to chance while accuracy modulo $D_8$ (dots) stays at 1.0.}
+  \caption{\textbf{What fixes the absolute orientation frame.} Left: mean correlation between orientation classes in vivo (diagonal masked). Middle: its circulant projection. Right: matching a held-out half's class-Gram to the reference over all $8!$ relabellings. With the raw matrix the true labelling wins. After the circulant projection, absolute accuracy collapses to chance while accuracy modulo $D_8$ (dots) stays at 1.0, as it must, since a circulant matrix is invariant under $D_8$; the panel illustrates what the residual has to supply.}
   \label{fig:symmetry}
 \end{figure}
 
@@ -236,6 +238,10 @@ Four controls on the MICrONS standard configuration (17M, 512-neuron populations
     disjoint stimulus bins (60 per side) & in vivo & $34.2^\circ$ \\
     same 60 bins on both sides & in vivo & $25.3^\circ$ \\
     neuron split 1 / 2 & in vivo & $25.4^\circ$ / $24.6^\circ$ \\
+    orientation-balanced loss (raw / balanced over 8 bins) & twin & $21.4^\circ$ / $25.3^\circ$ (standard $20.3^\circ$ / $24.5^\circ$) \\
+    trained on V1, scored on V1 (raw / after best rotation) & twin & $22.2^\circ$ / $22.2^\circ$ \\
+    trained on V1, scored on RL & twin & $26.2^\circ$ / $24.6^\circ$ \\
+    trained on V1, scored on AL & twin & $58.2^\circ$ / $31.6^\circ$ \\
     \bottomrule
   \end{tabular}
 \end{table}
