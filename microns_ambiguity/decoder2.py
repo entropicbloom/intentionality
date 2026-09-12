@@ -182,9 +182,21 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             b = ((np.nan_to_num(ang) % 180) // 15).astype(int); cnt = np.bincount(b[np.asarray(train_idx)][labelled[np.asarray(train_idx)]], minlength=12).astype(float)
             w_np = (cnt.mean() / np.maximum(cnt, 1))[b].astype(np.float32)
         w_t = torch.as_tensor(w_np, device=device)
-        def loss_fn(out, tgt, _idx=None):
+        def loss_fn(out, tgt, _idx=None, _B=None):
             m = lab_t[_idx]
             if not m.any(): return (out * 0).sum()
+            if label_rot:                       # frame-free loss: align each population's predictions to its targets by the best
+                B = _B; n_ = out.shape[0] // B  # rotation (and reflection) before the error, so only relative structure is learned
+                o = out.view(B, n_, 2); t = tgt.view(B, n_, 2); mm = m.view(B, n_).float()
+                best = None
+                for sgn in (1.0, -1.0):
+                    oc = torch.stack([o[..., 0], sgn * o[..., 1]], -1)                      # optional reflection
+                    z_re = (mm * (t[..., 0] * oc[..., 0] + t[..., 1] * oc[..., 1])).sum(1); z_im = (mm * (t[..., 1] * oc[..., 0] - t[..., 0] * oc[..., 1])).sum(1)
+                    a = torch.atan2(z_im, z_re).detach()[:, None]; c, s_ = torch.cos(a), torch.sin(a)
+                    ro = torch.stack([c * oc[..., 0] - s_ * oc[..., 1], s_ * oc[..., 0] + c * oc[..., 1]], -1)
+                    e = (((ro - t) ** 2).sum(-1) * mm).sum(1) / mm.sum(1).clamp_min(1)     # per-population error after alignment
+                    best = e if best is None else torch.minimum(best, e)
+                return best.mean()
             w = w_t[_idx][m]; return (((out[m] - tgt[m]) ** 2).mean(1) * w).sum() / w.sum()
     else:
         y = np.atleast_2d(y.T).T.astype(np.float32); labelled = np.isfinite(y).all(1)
@@ -266,7 +278,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             if label_rot and task == "circ":    # rotate each population's targets by a random angle (2φ on the (cos 2θ, sin 2θ) circle)
                 phi = torch.rand(idx.shape[0], 1, device=device) * 2 * math.pi; c, s_ = torch.cos(phi), torch.sin(phi)
                 t = tgt.view(idx.shape[0], -1, 2); tgt = torch.stack([c * t[..., 0] - s_ * t[..., 1], s_ * t[..., 0] + c * t[..., 1]], -1).reshape(-1, 2)
-            loss = loss_fn(out, tgt) if task == "class" else loss_fn(out, tgt, it)
+            loss = loss_fn(out, tgt) if task == "class" else (loss_fn(out, tgt, it, idx.shape[0]) if (task == "circ" and label_rot) else loss_fn(out, tgt, it))
             opt.zero_grad(); loss.backward(); torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0); opt.step(); sched.step()
             tot += loss.item()
         AUG["active"] = False
