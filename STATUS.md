@@ -47,6 +47,7 @@ Every run writes config + per-epoch history + final metrics to `microns_ambiguit
 | rotated labels | `m_rot_{is,iv}` | what the symmetric part alone gives per neuron (report err_modD) | queued (pod 5) |
 | orientation-balanced loss | `m_w_{is,iv}` | are obliques recoverable when weighted | queued (pod 5) |
 | synthetic von Mises populations | `syn_c{0,1}s{0,1}t{0,1}` in `microns_ambiguity/outputs/synthetic.json` (`microns_ambiguity/synthetic.py`) | which switch fixes the frame: count bias / cardinal sharpening / stimulus bias; baseline circulant to 0.01 | queued (pod 5, after mech) |
+| stimulus-agnostic activity decoder | `bp_{iv,is}_17M_{ori,rf}` (`input_mode=act bin_perm=1`) | upper bound on all bin-permutation-invariant statistics (pairwise and higher); gap to the Gram decoder = content beyond pairwise relations (plus per-neuron marginals) | queued (pod 5, after synthetic) |
 | cross-area transfer (twin) | `m_{V1toRL,RLtoV1,V1toV1,RLtoRL}_is`, `m_{V1toAL,ALtoV1,V1toV1}_is_n128` | is the frame source area-specific (raw vs err_modD gap) | queued (pod 5) |
 
 ## Related work notes (for the paper; all references verified against publisher records on 2026-09-11)

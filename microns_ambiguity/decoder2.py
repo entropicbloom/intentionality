@@ -82,6 +82,14 @@ class RelDecoder(nn.Module):
 #                  feature dimensions (stimulus conditions / time bins), rows re-standardised;
 #   gram_drop > 0: random Gram entries are zeroed (zero = the mean correlation).
 AUG = dict(cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, active=False)   # aug_prob: fraction of training populations augmented
+BINPERM = dict(on=False)   # bin_perm: permute the stimulus bins of every population (same permutation for all its neurons),
+                           # at training and test; keeps every bin-permutation-invariant statistic, destroys stimulus alignment
+
+
+def permute_bins(X):
+    if not BINPERM["on"]: return X
+    B, n, d = X.shape; order = torch.rand(B, d, device=X.device).argsort(1)
+    return torch.gather(X, 2, order.unsqueeze(1).expand(B, n, d))
 
 
 def gram_from_features(X, mean, std, rng=None):
@@ -124,7 +132,7 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False, bin_perm=False):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
@@ -143,7 +151,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     labels carry no frame; selection and the reported error use the frame-corrected err_modD.
     ori_weight (circ): loss weight per labelled neuron = inverse density of its 15° label bin."""
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
-    AUG.update(cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob, active=False)
+    AUG.update(cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob, active=False); BINPERM["on"] = bool(bin_perm)
     if sel_idx is not None:                     # caller-provided selection set (e.g. held-out mice)
         sel_idx = np.asarray(sel_idx); train_idx = np.setdiff1d(np.asarray(train_idx), sel_idx)
     elif early_stop > 0:
@@ -207,7 +215,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
         with torch.no_grad():
             if reps == 1:
                 for _ in range(max(1, val_pops // batch)):
-                    idx, G, X = sampler.batch(batch); out = model(G, X).cpu().numpy()
+                    idx, G, X = sampler.batch(batch); out = model(G, permute_bins(X)).cpu().numpy()
                     np.add.at(S, idx.reshape(-1), out.reshape(-1, out_dim)); np.add.at(C, idx.reshape(-1), 1)
             else:
                 pool = np.asarray(pool_idx); r = np.random.default_rng(seed + 7)
@@ -218,7 +226,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
                     perm = perm[r.permutation(len(perm))]
                     for b in range(0, len(perm), batch):
                         idx = perm[b:b + batch]; it = torch.as_tensor(idx, device=device); X = sampler.Fn[it]
-                        out = model(gram_from_features(X, sampler.mean, sampler.std), X).cpu().numpy()
+                        out = model(gram_from_features(X, sampler.mean, sampler.std), permute_bins(X)).cpu().numpy()
                         np.add.at(S, idx.reshape(-1), out.reshape(-1, out_dim)); np.add.at(C, idx.reshape(-1), 1)
         model.train()
         if score_only is not None:
@@ -253,7 +261,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
         AUG["active"] = True
         for _ in range(pops_per_epoch // batch):
             idx, G, X = tr.batch(batch)
-            out = model(G, X).reshape(-1, out_dim); it = torch.as_tensor(idx.reshape(-1), device=device)
+            out = model(G, permute_bins(X)).reshape(-1, out_dim); it = torch.as_tensor(idx.reshape(-1), device=device)
             tgt = yt[it]
             if label_rot and task == "circ":    # rotate each population's targets by a random angle (2φ on the (cos 2θ, sin 2θ) circle)
                 phi = torch.rand(idx.shape[0], 1, device=device) * 2 * math.pi; c, s_ = torch.cos(phi), torch.sin(phi)
@@ -285,7 +293,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             final["preds"] = m["preds"]
     if verbose:
         print("    test-time averaging: " + " ".join(f"{k}={v:.3f}" for k, v in final.items() if "avg" in k), flush=True)
-    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, input_mode=input_mode, label_rot=label_rot, ori_weight=ori_weight, cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
+    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, input_mode=input_mode, label_rot=label_rot, ori_weight=ori_weight, bin_perm=bin_perm, cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
                  heads=heads, dropout=dropout, lr=lr, seed=seed, early_stop=early_stop, sel_reps=sel_reps, n_sel=(int(len(sel_idx)) if sel_idx is not None else 0),
                                          params=nparam, pops_per_epoch=pops_per_epoch, epochs=epochs, batch=batch)
     return final

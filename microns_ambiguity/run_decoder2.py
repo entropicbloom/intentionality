@@ -7,6 +7,7 @@ python -m microns_ambiguity.run_decoder2 <tag> <substrate> <content> [n=128] [di
     [label_rot=1]       labels of each training population rotated by a random angle (no frame in the labels; report err_modD)
     [ori_weight=1]      loss weighted by inverse label density (orientation-balanced training)
     [area_train=V1 area_test=RL]  cross-area transfer: training half restricted to one area, test half to another
+    [bin_perm=1]        with input_mode=act: stimulus bins permuted per population at training and test (stimulus-agnostic activity decoder)
     [save_preds=1]      save averaged per-neuron predictions to outputs/preds/<tag>.npz (idx, P, y, scan, area)
 Appends to outputs/decoder2.json under key <tag>."""
 from __future__ import annotations
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     tag, sub, con = sys.argv[1:4]
     kw = {}
     for a in sys.argv[4:]:
-        k, v = a.split("="); kw[k] = v if k in ("device", "input_mode", "area_train", "area_test") else (bool(int(v)) if k in ("rel_bias", "row_proj", "label_rot", "ori_weight") else (float(v) if k in ("lr", "early_stop", "dropout", "cond_frac", "gram_drop", "aug_prob") else int(v)))
+        k, v = a.split("="); kw[k] = v if k in ("device", "input_mode", "area_train", "area_test") else (bool(int(v)) if k in ("rel_bias", "row_proj", "label_rot", "ori_weight", "bin_perm") else (float(v) if k in ("lr", "early_stop", "dropout", "cond_frac", "gram_drop", "aug_prob") else int(v)))
     pca = kw.pop("pca", 0)
     if pca: kw["pca"] = 1
     main(tag, sub, con, **kw)
