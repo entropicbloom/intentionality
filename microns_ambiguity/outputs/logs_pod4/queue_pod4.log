@@ -1,0 +1,530 @@
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/numpy/lib/_npyio_impl.py", line 494, in load
+    return pickle.load(fid, **pickle_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_pickle.UnpicklingError: invalid load key, '\x00'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/intentionality/allen/run_decoder.py", line 111, in <module>
+    main(tag, regime, **kw)
+  File "/workspace/intentionality/allen/run_decoder.py", line 46, in main
+    ds = Allen(movie=movie, ori_source=ori_source, session=session)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/allen/data.py", line 32, in __init__
+    z = np.load(os.path.join(cache, f), allow_pickle=True)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/numpy/lib/_npyio_impl.py", line 496, in load
+    raise pickle.UnpicklingError(
+_pickle.UnpicklingError: Failed to interpret file '/workspace/intentionality/allen_data/cache_DG/._501271265.npz' as a pickle
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/numpy/lib/_npyio_impl.py", line 494, in load
+    return pickle.load(fid, **pickle_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_pickle.UnpicklingError: invalid load key, '\x00'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/intentionality/allen/run_decoder.py", line 111, in <module>
+    main(tag, regime, **kw)
+  File "/workspace/intentionality/allen/run_decoder.py", line 46, in main
+    ds = Allen(movie=movie, ori_source=ori_source, session=session)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/allen/data.py", line 32, in __init__
+    z = np.load(os.path.join(cache, f), allow_pickle=True)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/numpy/lib/_npyio_impl.py", line 496, in load
+    raise pickle.UnpicklingError(
+_pickle.UnpicklingError: Failed to interpret file '/workspace/intentionality/allen_data/cache_DG/._501271265.npz' as a pickle
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/numpy/lib/_npyio_impl.py", line 494, in load
+    return pickle.load(fid, **pickle_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_pickle.UnpicklingError: invalid load key, '\x00'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/intentionality/allen/run_decoder.py", line 111, in <module>
+    main(tag, regime, **kw)
+  File "/workspace/intentionality/allen/run_decoder.py", line 46, in main
+    ds = Allen(movie=movie, ori_source=ori_source, session=session)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/allen/data.py", line 32, in __init__
+    z = np.load(os.path.join(cache, f), allow_pickle=True)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/numpy/lib/_npyio_impl.py", line 496, in load
+    raise pickle.UnpicklingError(
+_pickle.UnpicklingError: Failed to interpret file '/workspace/intentionality/allen_data/cache_DG/._501271265.npz' as a pickle
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/numpy/lib/_npyio_impl.py", line 494, in load
+    return pickle.load(fid, **pickle_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_pickle.UnpicklingError: invalid load key, '\x00'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/intentionality/allen/run_decoder.py", line 111, in <module>
+    main(tag, regime, **kw)
+  File "/workspace/intentionality/allen/run_decoder.py", line 46, in main
+    ds = Allen(movie=movie, ori_source=ori_source, session=session)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/allen/data.py", line 32, in __init__
+    z = np.load(os.path.join(cache, f), allow_pickle=True)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/numpy/lib/_npyio_impl.py", line 496, in load
+    raise pickle.UnpicklingError(
+_pickle.UnpicklingError: Failed to interpret file '/workspace/intentionality/allen_data/cache_DG/._501271265.npz' as a pickle
+[c_iv_03M_n128] func_iv oricirc n_neurons=5287 split_seed=0 bins=0 {'dim': 128, 'layers': 2, 'epochs': 20, 'batch': 64, 'seed': 0, 'n': 128, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.540 err=32.768 within15=0.387 sel=-36.785 (2s)
+    ep1 loss=0.445 err=30.805 within15=0.384 sel=-31.992 (3s)
+    ep2 loss=0.424 err=29.327 within15=0.413 sel=-30.107 (5s)
+    ep3 loss=0.408 err=29.844 within15=0.398 sel=-30.137 (6s)
+    ep4 loss=0.400 err=28.870 within15=0.432 sel=-28.843 (8s)
+    ep5 loss=0.395 err=28.453 within15=0.435 sel=-28.615 (9s)
+    ep6 loss=0.390 err=28.123 within15=0.433 sel=-28.438 (10s)
+    ep7 loss=0.387 err=28.146 within15=0.428 sel=-27.638 (11s)
+    ep8 loss=0.384 err=27.985 within15=0.440 sel=-27.466 (12s)
+    ep9 loss=0.382 err=27.566 within15=0.435 sel=-27.031 (14s)
+    ep10 loss=0.382 err=27.671 within15=0.442 sel=-26.918 (15s)
+    ep11 loss=0.378 err=27.337 within15=0.447 sel=-27.388 (17s)
+    ep12 loss=0.378 err=27.105 within15=0.447 sel=-27.059 (18s)
+    ep13 loss=0.376 err=27.782 within15=0.446 sel=-26.992 (19s)
+    ep14 loss=0.376 err=27.192 within15=0.450 sel=-27.313 (20s)
+    ep15 loss=0.374 err=27.329 within15=0.446 sel=-27.113 (22s)
+    ep16 loss=0.373 err=27.347 within15=0.447 sel=-26.819 (23s)
+    ep17 loss=0.374 err=26.951 within15=0.453 sel=-26.861 (25s)
+    ep18 loss=0.373 err=27.435 within15=0.442 sel=-26.679 (27s)
+    ep19 loss=0.373 err=27.383 within15=0.447 sel=-26.717 (29s)
+    test-time averaging: err_avg8=27.445 err_avg32=27.042
+  -> c_iv_03M_n128: err=27.435 within15=0.442 err_modD=27.363 loss=0.373 sel_metric=-26.679 val_at_last_epoch=27.383 err_avg8=27.445 err_avg32=27.042 best_epoch=18 params=282378 30s
+[c_iv_03M_n256] func_iv oricirc n_neurons=5287 split_seed=0 bins=0 {'dim': 128, 'layers': 2, 'epochs': 20, 'batch': 64, 'seed': 0, 'n': 256, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.563 err=32.965 within15=0.376 sel=-36.713 (2s)
+    ep1 loss=0.439 err=30.762 within15=0.392 sel=-30.945 (3s)
+    ep2 loss=0.424 err=30.149 within15=0.413 sel=-30.592 (5s)
+    ep3 loss=0.409 err=30.238 within15=0.426 sel=-31.041 (6s)
+    ep4 loss=0.400 err=29.920 within15=0.397 sel=-30.038 (8s)
+    ep5 loss=0.394 err=29.114 within15=0.415 sel=-29.519 (9s)
+    ep6 loss=0.389 err=28.796 within15=0.421 sel=-28.996 (11s)
+    ep7 loss=0.384 err=28.171 within15=0.422 sel=-28.341 (12s)
+    ep8 loss=0.378 err=28.530 within15=0.408 sel=-29.218 (14s)
+    ep9 loss=0.373 err=27.713 within15=0.429 sel=-27.590 (15s)
+    ep10 loss=0.369 err=27.427 within15=0.445 sel=-26.987 (17s)
+    ep11 loss=0.366 err=27.483 within15=0.440 sel=-26.760 (19s)
+    ep12 loss=0.363 err=27.276 within15=0.441 sel=-26.517 (20s)
+    ep13 loss=0.361 err=26.916 within15=0.443 sel=-26.560 (22s)
+    ep14 loss=0.359 err=27.066 within15=0.439 sel=-26.613 (23s)
+    ep15 loss=0.358 err=27.018 within15=0.443 sel=-26.569 (24s)
+    ep16 loss=0.358 err=26.950 within15=0.443 sel=-26.465 (26s)
+    ep17 loss=0.357 err=26.932 within15=0.441 sel=-26.285 (27s)
+    ep18 loss=0.356 err=26.816 within15=0.446 sel=-26.379 (29s)
+    ep19 loss=0.356 err=26.914 within15=0.443 sel=-26.375 (30s)
+    test-time averaging: err_avg8=27.186 err_avg32=26.891
+  -> c_iv_03M_n256: err=26.932 within15=0.441 err_modD=26.872 loss=0.356 sel_metric=-26.285 val_at_last_epoch=26.914 err_avg8=27.186 err_avg32=26.891 best_epoch=17 params=298762 31s
+[c_iv_03M_n1024] func_iv oricirc n_neurons=5287 split_seed=0 bins=0 {'dim': 128, 'layers': 2, 'epochs': 20, 'batch': 64, 'seed': 0, 'n': 1024, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/intentionality/microns_ambiguity/run_decoder2.py", line 66, in <module>
+    main(tag, sub, con, **kw)
+  File "/workspace/intentionality/microns_ambiguity/run_decoder2.py", line 47, in main
+    m = train(F, y, task, tr, va, return_preds=bool(save_preds), **{k: v for k, v in kw.items()})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/microns_ambiguity/decoder2.py", line 249, in train
+    ms = evaluate(reps=sel_reps, sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = -ms["err"] if task == "circ" else ms.get("acc", ms.get("r2"))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/microns_ambiguity/decoder2.py", line 201, in evaluate
+    perm = np.concatenate([r.permutation(p)[: (len(p) // n) * n].reshape(-1, n) for p in subpools])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: need at least one array to concatenate
+[c_is_2M_n256] func_is oricirc n_neurons=5287 split_seed=0 bins=0 {'dim': 256, 'layers': 4, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 256, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.552 err=38.972 within15=0.289 sel=-40.365 (3s)
+    ep1 loss=0.493 err=37.751 within15=0.237 sel=-37.255 (6s)
+    ep2 loss=0.480 err=39.578 within15=0.286 sel=-35.363 (8s)
+    ep3 loss=0.456 err=29.583 within15=0.396 sel=-30.528 (11s)
+    ep4 loss=0.432 err=28.458 within15=0.431 sel=-27.943 (13s)
+    ep5 loss=0.420 err=27.847 within15=0.439 sel=-26.495 (16s)
+    ep6 loss=0.402 err=25.420 within15=0.472 sel=-24.913 (19s)
+    ep7 loss=0.384 err=24.222 within15=0.494 sel=-26.175 (21s)
+    ep8 loss=0.375 err=24.939 within15=0.475 sel=-26.343 (24s)
+    ep9 loss=0.361 err=23.289 within15=0.495 sel=-26.031 (26s)
+    ep10 loss=0.349 err=23.928 within15=0.485 sel=-26.047 (29s)
+    ep11 loss=0.337 err=22.700 within15=0.508 sel=-25.952 (32s)
+    ep12 loss=0.328 err=22.247 within15=0.515 sel=-25.108 (34s)
+    ep13 loss=0.321 err=22.158 within15=0.507 sel=-25.131 (37s)
+    ep14 loss=0.315 err=22.225 within15=0.517 sel=-24.394 (39s)
+    ep15 loss=0.307 err=22.832 within15=0.502 sel=-24.231 (42s)
+    ep16 loss=0.299 err=21.612 within15=0.525 sel=-24.002 (45s)
+    ep17 loss=0.295 err=21.450 within15=0.519 sel=-24.190 (48s)
+    ep18 loss=0.290 err=21.078 within15=0.530 sel=-24.294 (51s)
+    ep19 loss=0.287 err=21.341 within15=0.521 sel=-24.077 (54s)
+    ep20 loss=0.284 err=21.344 within15=0.517 sel=-23.740 (56s)
+    ep21 loss=0.283 err=21.469 within15=0.522 sel=-23.772 (59s)
+    ep22 loss=0.280 err=21.200 within15=0.523 sel=-23.784 (61s)
+    ep23 loss=0.278 err=21.100 within15=0.526 sel=-23.697 (64s)
+    ep24 loss=0.276 err=20.848 within15=0.533 sel=-23.879 (67s)
+    ep25 loss=0.276 err=20.976 within15=0.526 sel=-23.732 (70s)
+    ep26 loss=0.274 err=20.943 within15=0.533 sel=-23.650 (73s)
+    ep27 loss=0.274 err=20.888 within15=0.529 sel=-23.672 (75s)
+    ep28 loss=0.273 err=21.124 within15=0.526 sel=-23.664 (78s)
+    ep29 loss=0.272 err=21.240 within15=0.525 sel=-23.652 (81s)
+    test-time averaging: err_avg8=21.055 err_avg32=20.683
+  -> c_is_2M_n256: err=20.943 within15=0.533 err_modD=20.916 loss=0.272 sel_metric=-23.650 val_at_last_epoch=21.240 err_avg8=21.055 err_avg32=20.683 best_epoch=26 params=2176018 82s
+[c_is_2M_n1024] func_is oricirc n_neurons=5287 split_seed=0 bins=0 {'dim': 256, 'layers': 4, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 1024, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/intentionality/microns_ambiguity/run_decoder2.py", line 66, in <module>
+    main(tag, sub, con, **kw)
+  File "/workspace/intentionality/microns_ambiguity/run_decoder2.py", line 47, in main
+    m = train(F, y, task, tr, va, return_preds=bool(save_preds), **{k: v for k, v in kw.items()})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/microns_ambiguity/decoder2.py", line 249, in train
+    ms = evaluate(reps=sel_reps, sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = -ms["err"] if task == "circ" else ms.get("acc", ms.get("r2"))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/intentionality/microns_ambiguity/decoder2.py", line 201, in evaluate
+    perm = np.concatenate([r.permutation(p)[: (len(p) // n) * n].reshape(-1, n) for p in subpools])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: need at least one array to concatenate
+[c_is_17M_statsonly] func_is oricirc n_neurons=5287 split_seed=0 bins=0 {'row_proj': False, 'rel_bias': False, 'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.677 err=43.702 within15=0.186 sel=-42.842 (24s)
+    ep1 loss=0.493 err=38.867 within15=0.204 sel=-39.427 (47s)
+    ep2 loss=0.493 err=40.991 within15=0.205 sel=-40.901 (70s)
+    ep3 loss=0.477 err=39.406 within15=0.240 sel=-38.943 (94s)
+    ep4 loss=0.468 err=39.630 within15=0.268 sel=-39.012 (117s)
+    ep5 loss=0.459 err=38.498 within15=0.256 sel=-38.516 (141s)
+    ep6 loss=0.454 err=37.015 within15=0.307 sel=-38.747 (164s)
+    ep7 loss=0.449 err=37.598 within15=0.289 sel=-38.456 (188s)
+    ep8 loss=0.444 err=37.411 within15=0.288 sel=-38.495 (211s)
+    ep9 loss=0.440 err=37.680 within15=0.279 sel=-38.271 (235s)
+    ep10 loss=0.437 err=38.289 within15=0.278 sel=-38.953 (258s)
+    ep11 loss=0.434 err=37.208 within15=0.309 sel=-40.707 (282s)
+    ep12 loss=0.431 err=37.832 within15=0.286 sel=-39.641 (305s)
+    ep13 loss=0.429 err=38.736 within15=0.265 sel=-39.535 (329s)
+    ep14 loss=0.427 err=38.973 within15=0.258 sel=-39.567 (352s)
+    ep15 loss=0.425 err=38.724 within15=0.269 sel=-39.782 (375s)
+    ep16 loss=0.424 err=38.357 within15=0.276 sel=-39.741 (399s)
+    ep17 loss=0.423 err=38.520 within15=0.264 sel=-40.489 (422s)
+    ep18 loss=0.422 err=38.534 within15=0.268 sel=-39.778 (465s)
+    ep19 loss=0.421 err=39.029 within15=0.261 sel=-39.854 (518s)
+    ep20 loss=0.419 err=38.291 within15=0.270 sel=-39.982 (570s)
+    ep21 loss=0.418 err=38.100 within15=0.276 sel=-40.003 (623s)
+    ep22 loss=0.418 err=38.288 within15=0.272 sel=-39.597 (675s)
+    ep23 loss=0.417 err=38.853 within15=0.266 sel=-39.591 (727s)
+    ep24 loss=0.417 err=38.002 within15=0.275 sel=-39.517 (779s)
+    ep25 loss=0.416 err=38.526 within15=0.269 sel=-39.419 (824s)
+    ep26 loss=0.416 err=38.597 within15=0.264 sel=-39.307 (879s)
+    ep27 loss=0.416 err=38.428 within15=0.275 sel=-39.430 (933s)
+    ep28 loss=0.416 err=38.253 within15=0.265 sel=-39.364 (988s)
+    ep29 loss=0.415 err=38.179 within15=0.263 sel=-39.347 (1042s)
+    test-time averaging: err_avg8=37.847 err_avg32=37.641
+  -> c_is_17M_statsonly: err=37.680 within15=0.279 err_modD=37.680 loss=0.415 sel_metric=-38.271 val_at_last_epoch=38.179 err_avg8=37.847 err_avg32=37.641 best_epoch=9 params=16826370 1045s
+[c_is_17M_statsbias] func_is oricirc n_neurons=5287 split_seed=0 bins=0 {'row_proj': False, 'rel_bias': True, 'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.642 err=43.326 within15=0.259 sel=-42.176 (57s)
+    ep1 loss=0.455 err=37.850 within15=0.343 sel=-37.575 (114s)
+    ep2 loss=0.463 err=36.951 within15=0.182 sel=-33.214 (171s)
+    ep3 loss=0.418 err=30.173 within15=0.384 sel=-29.510 (227s)
+    ep4 loss=0.383 err=27.668 within15=0.458 sel=-30.011 (284s)
+    ep5 loss=0.360 err=22.304 within15=0.512 sel=-24.618 (341s)
+    ep6 loss=0.314 err=22.196 within15=0.512 sel=-25.234 (398s)
+    ep7 loss=0.287 err=21.527 within15=0.515 sel=-23.416 (455s)
+    ep8 loss=0.275 err=21.615 within15=0.504 sel=-21.909 (512s)
+    ep9 loss=0.265 err=21.827 within15=0.510 sel=-21.827 (569s)
+    ep10 loss=0.257 err=20.250 within15=0.526 sel=-21.561 (626s)
+    ep11 loss=0.245 err=19.550 within15=0.544 sel=-21.275 (683s)
+    ep12 loss=0.234 err=19.497 within15=0.548 sel=-22.627 (739s)
+    ep13 loss=0.216 err=19.516 within15=0.545 sel=-22.528 (796s)
+    ep14 loss=0.197 err=19.670 within15=0.544 sel=-23.927 (853s)
+    ep15 loss=0.176 err=20.303 within15=0.536 sel=-25.274 (910s)
+    ep16 loss=0.160 err=20.062 within15=0.520 sel=-24.863 (967s)
+    ep17 loss=0.123 err=19.895 within15=0.539 sel=-26.097 (995s)
+    ep18 loss=0.095 err=20.789 within15=0.520 sel=-26.462 (1019s)
+    ep19 loss=0.069 err=20.542 within15=0.524 sel=-26.559 (1043s)
+    ep20 loss=0.051 err=21.140 within15=0.509 sel=-25.488 (1068s)
+    ep21 loss=0.039 err=21.033 within15=0.513 sel=-25.815 (1092s)
+    ep22 loss=0.031 err=21.034 within15=0.508 sel=-25.248 (1116s)
+    ep23 loss=0.026 err=21.189 within15=0.516 sel=-25.302 (1141s)
+    ep24 loss=0.022 err=20.787 within15=0.519 sel=-24.904 (1165s)
+    ep25 loss=0.020 err=21.032 within15=0.519 sel=-24.728 (1189s)
+    ep26 loss=0.018 err=20.910 within15=0.521 sel=-24.778 (1214s)
+    ep27 loss=0.018 err=20.897 within15=0.514 sel=-24.693 (1238s)
+    ep28 loss=0.017 err=20.756 within15=0.520 sel=-24.786 (1262s)
+    ep29 loss=0.017 err=20.821 within15=0.519 sel=-24.769 (1287s)
+    test-time averaging: err_avg8=19.612 err_avg32=19.591
+  -> c_is_17M_statsbias: err=19.550 within15=0.544 err_modD=19.468 loss=0.017 sel_metric=-21.275 val_at_last_epoch=20.821 err_avg8=19.612 err_avg32=19.591 best_epoch=11 params=16826402 1288s
+[c_is_17M_bins] func_is oricirc n_neurons=5287 split_seed=0 bins=1 {'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.581 err=40.737 within15=0.290 sel=-42.801 (25s)
+    ep1 loss=0.537 err=39.993 within15=0.326 sel=-41.914 (51s)
+    ep2 loss=0.503 err=34.845 within15=0.258 sel=-31.825 (76s)
+    ep3 loss=0.473 err=35.337 within15=0.338 sel=-27.965 (101s)
+    ep4 loss=0.447 err=29.126 within15=0.413 sel=-26.903 (126s)
+    ep5 loss=0.410 err=28.363 within15=0.438 sel=-25.659 (152s)
+    ep6 loss=0.374 err=25.002 within15=0.465 sel=-25.560 (177s)
+    ep7 loss=0.339 err=23.876 within15=0.491 sel=-26.943 (202s)
+    ep8 loss=0.302 err=22.977 within15=0.506 sel=-24.444 (227s)
+    ep9 loss=0.280 err=22.068 within15=0.519 sel=-24.403 (253s)
+    ep10 loss=0.269 err=21.803 within15=0.520 sel=-24.540 (278s)
+    ep11 loss=0.260 err=21.539 within15=0.519 sel=-24.161 (303s)
+    ep12 loss=0.253 err=21.204 within15=0.519 sel=-24.253 (328s)
+    ep13 loss=0.245 err=21.265 within15=0.519 sel=-23.998 (353s)
+    ep14 loss=0.236 err=22.288 within15=0.504 sel=-23.635 (379s)
+    ep15 loss=0.225 err=20.251 within15=0.534 sel=-23.626 (404s)
+    ep16 loss=0.208 err=21.153 within15=0.512 sel=-23.169 (429s)
+    ep17 loss=0.192 err=20.538 within15=0.523 sel=-23.468 (455s)
+    ep18 loss=0.175 err=20.870 within15=0.514 sel=-23.871 (480s)
+    ep19 loss=0.158 err=20.866 within15=0.508 sel=-24.436 (505s)
+    ep20 loss=0.141 err=20.758 within15=0.519 sel=-24.396 (530s)
+    ep21 loss=0.127 err=21.078 within15=0.515 sel=-24.163 (555s)
+    ep22 loss=0.113 err=21.498 within15=0.503 sel=-24.106 (580s)
+    ep23 loss=0.103 err=21.002 within15=0.506 sel=-23.918 (606s)
+    ep24 loss=0.095 err=21.332 within15=0.516 sel=-23.956 (631s)
+    ep25 loss=0.089 err=21.250 within15=0.512 sel=-24.224 (656s)
+    ep26 loss=0.085 err=21.180 within15=0.505 sel=-24.172 (681s)
+    ep27 loss=0.082 err=21.336 within15=0.502 sel=-24.322 (706s)
+    ep28 loss=0.081 err=21.214 within15=0.505 sel=-24.369 (731s)
+    ep29 loss=0.080 err=21.299 within15=0.506 sel=-24.435 (756s)
+    test-time averaging: err_avg8=22.158 err_avg32=21.281
+  -> c_is_17M_bins: err=21.153 within15=0.512 err_modD=21.140 loss=0.080 sel_metric=-23.169 val_at_last_epoch=21.299 err_avg8=22.158 err_avg32=21.281 best_epoch=16 params=17088546 759s
+[c_iv_17M_bins] func_iv oricirc n_neurons=5287 split_seed=0 bins=1 {'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.542 err=37.827 within15=0.295 sel=-36.592 (25s)
+    ep1 loss=0.462 err=43.678 within15=0.164 sel=-37.487 (49s)
+    ep2 loss=0.416 err=37.675 within15=0.271 sel=-30.787 (73s)
+    ep3 loss=0.394 err=35.542 within15=0.307 sel=-27.958 (98s)
+    ep4 loss=0.386 err=35.745 within15=0.340 sel=-27.749 (122s)
+    ep5 loss=0.372 err=34.805 within15=0.354 sel=-27.118 (147s)
+    ep6 loss=0.358 err=34.673 within15=0.352 sel=-26.243 (172s)
+    ep7 loss=0.350 err=33.992 within15=0.356 sel=-25.558 (196s)
+    ep8 loss=0.334 err=34.151 within15=0.360 sel=-25.547 (221s)
+    ep9 loss=0.325 err=34.478 within15=0.357 sel=-25.548 (245s)
+    ep10 loss=0.312 err=34.124 within15=0.350 sel=-25.970 (270s)
+    ep11 loss=0.301 err=33.722 within15=0.351 sel=-26.328 (294s)
+    ep12 loss=0.284 err=33.701 within15=0.346 sel=-27.115 (318s)
+    ep13 loss=0.281 err=33.166 within15=0.345 sel=-26.700 (343s)
+    ep14 loss=0.250 err=33.826 within15=0.343 sel=-27.447 (367s)
+    ep15 loss=0.219 err=33.546 within15=0.342 sel=-28.700 (392s)
+    ep16 loss=0.197 err=33.153 within15=0.346 sel=-28.202 (416s)
+    ep17 loss=0.159 err=33.039 within15=0.337 sel=-29.290 (440s)
+    ep18 loss=0.126 err=32.554 within15=0.351 sel=-29.200 (465s)
+    ep19 loss=0.099 err=32.751 within15=0.352 sel=-29.964 (489s)
+    ep20 loss=0.077 err=32.507 within15=0.356 sel=-29.408 (514s)
+    ep21 loss=0.063 err=32.862 within15=0.351 sel=-29.589 (538s)
+    ep22 loss=0.052 err=32.538 within15=0.351 sel=-29.771 (562s)
+    ep23 loss=0.045 err=32.629 within15=0.351 sel=-30.181 (587s)
+    ep24 loss=0.041 err=32.649 within15=0.356 sel=-30.324 (611s)
+    ep25 loss=0.037 err=32.535 within15=0.353 sel=-30.246 (636s)
+    ep26 loss=0.035 err=32.593 within15=0.359 sel=-30.414 (660s)
+    ep27 loss=0.033 err=32.642 within15=0.352 sel=-30.183 (684s)
+    ep28 loss=0.033 err=32.590 within15=0.355 sel=-30.166 (709s)
+    ep29 loss=0.033 err=32.629 within15=0.358 sel=-30.237 (733s)
+    test-time averaging: err_avg8=34.482 err_avg32=34.671
+  -> c_iv_17M_bins: err=34.151 within15=0.360 err_modD=34.133 loss=0.033 sel_metric=-25.547 val_at_last_epoch=32.629 err_avg8=34.482 err_avg32=34.671 best_epoch=8 params=17088546 735s
+[c_iv_17M_sp2] func_iv oricirc n_neurons=5287 split_seed=2 bins=0 {'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.492 err=30.776 within15=0.373 sel=-28.544 (25s)
+    ep1 loss=0.490 err=32.133 within15=0.351 sel=-31.740 (49s)
+    ep2 loss=0.449 err=30.070 within15=0.389 sel=-27.896 (74s)
+    ep3 loss=0.427 err=28.376 within15=0.429 sel=-28.443 (98s)
+    ep4 loss=0.399 err=27.732 within15=0.405 sel=-26.757 (122s)
+    ep5 loss=0.379 err=27.216 within15=0.436 sel=-26.995 (147s)
+    ep6 loss=0.367 err=26.874 within15=0.440 sel=-26.345 (171s)
+    ep7 loss=0.348 err=25.149 within15=0.472 sel=-26.199 (201s)
+    ep8 loss=0.327 err=24.545 within15=0.477 sel=-25.565 (259s)
+    ep9 loss=0.312 err=24.576 within15=0.471 sel=-25.249 (317s)
+    ep10 loss=0.300 err=24.338 within15=0.477 sel=-26.236 (374s)
+    ep11 loss=0.277 err=24.688 within15=0.470 sel=-25.903 (432s)
+    ep12 loss=0.254 err=24.383 within15=0.481 sel=-25.927 (490s)
+    ep13 loss=0.216 err=25.485 within15=0.459 sel=-25.948 (548s)
+    ep14 loss=0.185 err=25.364 within15=0.462 sel=-26.528 (605s)
+    ep15 loss=0.153 err=25.409 within15=0.465 sel=-25.971 (663s)
+    ep16 loss=0.105 err=25.902 within15=0.444 sel=-26.495 (720s)
+    ep17 loss=0.075 err=25.775 within15=0.448 sel=-25.830 (778s)
+    ep18 loss=0.056 err=25.714 within15=0.447 sel=-25.848 (836s)
+    ep19 loss=0.043 err=25.998 within15=0.450 sel=-26.261 (894s)
+    ep20 loss=0.034 err=26.053 within15=0.444 sel=-26.101 (951s)
+    ep21 loss=0.028 err=26.213 within15=0.447 sel=-26.138 (1009s)
+    ep22 loss=0.024 err=25.942 within15=0.445 sel=-25.869 (1067s)
+    ep23 loss=0.021 err=26.097 within15=0.449 sel=-26.175 (1125s)
+    ep24 loss=0.019 err=26.219 within15=0.446 sel=-25.952 (1182s)
+    ep25 loss=0.018 err=26.058 within15=0.447 sel=-25.769 (1240s)
+    ep26 loss=0.017 err=26.086 within15=0.448 sel=-26.069 (1298s)
+    ep27 loss=0.016 err=26.373 within15=0.445 sel=-26.128 (1355s)
+    ep28 loss=0.016 err=25.999 within15=0.456 sel=-26.215 (1413s)
+    ep29 loss=0.016 err=26.248 within15=0.439 sel=-26.152 (1471s)
+    test-time averaging: err_avg8=24.805 err_avg32=24.609
+  -> c_iv_17M_sp2: err=24.576 within15=0.471 err_modD=24.576 loss=0.016 sel_metric=-25.249 val_at_last_epoch=26.248 err_avg8=24.805 err_avg32=24.609 best_epoch=9 params=17088546 1473s
+[c_is_17M_sp2] func_is oricirc n_neurons=5287 split_seed=2 bins=0 {'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.578 err=40.765 within15=0.307 sel=-38.744 (58s)
+    ep1 loss=0.512 err=41.566 within15=0.123 sel=-41.783 (116s)
+    ep2 loss=0.502 err=41.129 within15=0.184 sel=-38.512 (174s)
+    ep3 loss=0.475 err=33.154 within15=0.295 sel=-32.808 (232s)
+    ep4 loss=0.445 err=29.395 within15=0.422 sel=-31.017 (290s)
+    ep5 loss=0.415 err=25.794 within15=0.469 sel=-27.899 (348s)
+    ep6 loss=0.373 err=24.935 within15=0.443 sel=-25.914 (406s)
+    ep7 loss=0.327 err=22.541 within15=0.512 sel=-25.341 (446s)
+    ep8 loss=0.295 err=21.833 within15=0.512 sel=-24.102 (471s)
+    ep9 loss=0.278 err=21.103 within15=0.520 sel=-22.896 (495s)
+    ep10 loss=0.266 err=20.865 within15=0.524 sel=-28.952 (520s)
+    ep11 loss=0.249 err=20.656 within15=0.525 sel=-24.944 (545s)
+    ep12 loss=0.240 err=20.257 within15=0.532 sel=-26.471 (569s)
+    ep13 loss=0.224 err=20.111 within15=0.535 sel=-22.325 (594s)
+    ep14 loss=0.210 err=19.974 within15=0.544 sel=-23.157 (618s)
+    ep15 loss=0.197 err=20.307 within15=0.535 sel=-22.511 (643s)
+    ep16 loss=0.182 err=20.138 within15=0.537 sel=-21.660 (667s)
+    ep17 loss=0.165 err=20.449 within15=0.530 sel=-23.161 (692s)
+    ep18 loss=0.149 err=20.514 within15=0.528 sel=-22.528 (717s)
+    ep19 loss=0.132 err=20.755 within15=0.533 sel=-21.943 (741s)
+    ep20 loss=0.118 err=20.334 within15=0.530 sel=-22.179 (766s)
+    ep21 loss=0.104 err=20.741 within15=0.522 sel=-22.523 (790s)
+    ep22 loss=0.093 err=20.632 within15=0.532 sel=-22.626 (815s)
+    ep23 loss=0.084 err=20.905 within15=0.522 sel=-22.518 (840s)
+    ep24 loss=0.078 err=20.805 within15=0.527 sel=-22.228 (864s)
+    ep25 loss=0.073 err=20.932 within15=0.524 sel=-22.567 (889s)
+    ep26 loss=0.070 err=20.670 within15=0.528 sel=-22.324 (913s)
+    ep27 loss=0.068 err=20.737 within15=0.528 sel=-22.364 (938s)
+    ep28 loss=0.067 err=20.762 within15=0.529 sel=-22.244 (962s)
+    ep29 loss=0.066 err=20.616 within15=0.529 sel=-22.254 (987s)
+    test-time averaging: err_avg8=20.690 err_avg32=20.332
+  -> c_is_17M_sp2: err=20.138 within15=0.537 err_modD=20.138 loss=0.066 sel_metric=-21.660 val_at_last_epoch=20.616 err_avg8=20.690 err_avg32=20.332 best_epoch=16 params=17088546 989s
+[r_is_17M_s0] func_is rf n_neurons=11326 split_seed=0 bins=0 {'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=1.037 r2=-0.031 sel=-0.032 (25s)
+    ep1 loss=1.007 r2=-0.003 sel=-0.001 (50s)
+    ep2 loss=1.011 r2=-0.014 sel=-0.014 (74s)
+    ep3 loss=0.967 r2=0.063 sel=0.042 (99s)
+    ep4 loss=0.936 r2=0.072 sel=0.069 (123s)
+    ep5 loss=0.888 r2=0.164 sel=0.158 (148s)
+    ep6 loss=0.804 r2=0.261 sel=0.248 (173s)
+    ep7 loss=0.720 r2=0.298 sel=0.273 (197s)
+    ep8 loss=0.661 r2=0.351 sel=0.332 (222s)
+    ep9 loss=0.610 r2=0.416 sel=0.361 (247s)
+    ep10 loss=0.567 r2=0.427 sel=0.407 (271s)
+    ep11 loss=0.532 r2=0.441 sel=0.416 (296s)
+    ep12 loss=0.499 r2=0.477 sel=0.443 (320s)
+    ep13 loss=0.464 r2=0.487 sel=0.440 (345s)
+    ep14 loss=0.430 r2=0.485 sel=0.436 (370s)
+    ep15 loss=0.392 r2=0.485 sel=0.450 (394s)
+    ep16 loss=0.355 r2=0.488 sel=0.444 (419s)
+    ep17 loss=0.319 r2=0.493 sel=0.456 (443s)
+    ep18 loss=0.282 r2=0.470 sel=0.424 (468s)
+    ep19 loss=0.249 r2=0.481 sel=0.397 (492s)
+    ep20 loss=0.221 r2=0.476 sel=0.393 (517s)
+    ep21 loss=0.197 r2=0.468 sel=0.390 (542s)
+    ep22 loss=0.178 r2=0.469 sel=0.383 (566s)
+    ep23 loss=0.163 r2=0.461 sel=0.385 (591s)
+    ep24 loss=0.153 r2=0.459 sel=0.384 (615s)
+    ep25 loss=0.145 r2=0.460 sel=0.378 (640s)
+    ep26 loss=0.139 r2=0.467 sel=0.380 (664s)
+    ep27 loss=0.136 r2=0.458 sel=0.380 (689s)
+    ep28 loss=0.134 r2=0.461 sel=0.379 (713s)
+    ep29 loss=0.134 r2=0.462 sel=0.379 (738s)
+    test-time averaging: r2_avg8=0.486 r2_avg32=0.499
+  -> r_is_17M_s0: r2=0.493 loss=0.134 sel_metric=0.456 val_at_last_epoch=0.462 r2_avg8=0.486 r2_avg32=0.499 best_epoch=17 params=17088546 740s
+[r_iv_17M_s0] func_iv rf n_neurons=11326 split_seed=0 bins=0 {'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=1.068 r2=-0.001 sel=-0.000 (25s)
+    ep1 loss=0.992 r2=-0.068 sel=-0.068 (49s)
+    ep2 loss=1.003 r2=0.006 sel=0.018 (74s)
+    ep3 loss=0.977 r2=0.034 sel=0.042 (98s)
+    ep4 loss=0.961 r2=0.041 sel=0.045 (123s)
+    ep5 loss=0.943 r2=0.070 sel=0.064 (147s)
+    ep6 loss=0.909 r2=0.107 sel=0.082 (172s)
+    ep7 loss=0.873 r2=0.154 sel=0.136 (196s)
+    ep8 loss=0.826 r2=0.174 sel=0.160 (221s)
+    ep9 loss=0.790 r2=0.210 sel=0.179 (245s)
+    ep10 loss=0.751 r2=0.224 sel=0.192 (269s)
+    ep11 loss=0.724 r2=0.237 sel=0.196 (294s)
+    ep12 loss=0.681 r2=0.242 sel=0.208 (319s)
+    ep13 loss=0.644 r2=0.236 sel=0.198 (343s)
+    ep14 loss=0.594 r2=0.231 sel=0.177 (368s)
+    ep15 loss=0.534 r2=0.226 sel=0.183 (392s)
+    ep16 loss=0.467 r2=0.214 sel=0.164 (417s)
+    ep17 loss=0.400 r2=0.203 sel=0.140 (441s)
+    ep18 loss=0.333 r2=0.183 sel=0.105 (465s)
+    ep19 loss=0.276 r2=0.190 sel=0.097 (490s)
+    ep20 loss=0.227 r2=0.187 sel=0.082 (514s)
+    ep21 loss=0.193 r2=0.174 sel=0.076 (539s)
+    ep22 loss=0.167 r2=0.167 sel=0.075 (563s)
+    ep23 loss=0.149 r2=0.175 sel=0.090 (588s)
+    ep24 loss=0.135 r2=0.176 sel=0.077 (612s)
+    ep25 loss=0.127 r2=0.175 sel=0.080 (637s)
+    ep26 loss=0.120 r2=0.173 sel=0.079 (661s)
+    ep27 loss=0.117 r2=0.166 sel=0.079 (686s)
+    ep28 loss=0.115 r2=0.172 sel=0.081 (710s)
+    ep29 loss=0.114 r2=0.172 sel=0.081 (735s)
+    test-time averaging: r2_avg8=0.236 r2_avg32=0.245
+  -> r_iv_17M_s0: r2=0.242 loss=0.114 sel_metric=0.208 val_at_last_epoch=0.172 r2_avg8=0.236 r2_avg32=0.245 best_epoch=12 params=17088546 737s
+[c_iv_17M_sp1] func_iv oricirc n_neurons=5287 split_seed=1 bins=0 {'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.525 err=36.313 within15=0.316 sel=-37.682 (25s)
+    ep1 loss=0.471 err=33.117 within15=0.320 sel=-33.273 (49s)
+    ep2 loss=0.433 err=33.257 within15=0.310 sel=-32.949 (74s)
+    ep3 loss=0.412 err=30.591 within15=0.388 sel=-30.377 (98s)
+    ep4 loss=0.399 err=28.399 within15=0.426 sel=-27.400 (123s)
+    ep5 loss=0.376 err=27.470 within15=0.432 sel=-26.082 (148s)
+    ep6 loss=0.349 err=25.771 within15=0.446 sel=-25.142 (172s)
+    ep7 loss=0.333 err=25.039 within15=0.460 sel=-24.040 (197s)
+    ep8 loss=0.316 err=25.134 within15=0.450 sel=-24.769 (221s)
+    ep9 loss=0.421 err=25.400 within15=0.442 sel=-23.409 (246s)
+    ep10 loss=0.310 err=24.918 within15=0.458 sel=-25.517 (270s)
+    ep11 loss=0.290 err=24.693 within15=0.463 sel=-23.888 (295s)
+    ep12 loss=0.275 err=24.801 within15=0.468 sel=-24.427 (319s)
+    ep13 loss=0.253 err=25.095 within15=0.444 sel=-25.669 (344s)
+    ep14 loss=0.224 err=25.555 within15=0.453 sel=-25.412 (368s)
+    ep15 loss=0.190 err=25.482 within15=0.449 sel=-26.116 (392s)
+    ep16 loss=0.151 err=25.265 within15=0.458 sel=-27.387 (417s)
+    ep17 loss=0.115 err=26.031 within15=0.436 sel=-26.706 (441s)
+    ep18 loss=0.088 err=26.116 within15=0.438 sel=-26.437 (466s)
+    ep19 loss=0.067 err=25.750 within15=0.432 sel=-26.786 (490s)
+    ep20 loss=0.053 err=26.084 within15=0.437 sel=-26.412 (515s)
+    ep21 loss=0.043 err=25.876 within15=0.445 sel=-26.648 (539s)
+    ep22 loss=0.036 err=26.037 within15=0.438 sel=-26.536 (564s)
+    ep23 loss=0.031 err=25.769 within15=0.438 sel=-26.369 (588s)
+    ep24 loss=0.028 err=25.828 within15=0.433 sel=-26.397 (613s)
+    ep25 loss=0.026 err=25.987 within15=0.433 sel=-26.443 (637s)
+    ep26 loss=0.024 err=25.811 within15=0.434 sel=-26.272 (662s)
+    ep27 loss=0.023 err=25.712 within15=0.439 sel=-26.365 (686s)
+    ep28 loss=0.023 err=25.699 within15=0.435 sel=-26.315 (711s)
+    ep29 loss=0.023 err=25.842 within15=0.439 sel=-26.323 (735s)
+    test-time averaging: err_avg8=25.455 err_avg32=25.395
+  -> c_iv_17M_sp1: err=25.400 within15=0.442 err_modD=25.390 loss=0.023 sel_metric=-23.409 val_at_last_epoch=25.842 err_avg8=25.455 err_avg32=25.395 best_epoch=9 params=17088546 737s
+[c_is_17M_sp1] func_is oricirc n_neurons=5287 split_seed=1 bins=0 {'dim': 512, 'layers': 8, 'epochs': 30, 'batch': 64, 'seed': 0, 'n': 512, 'rel_bias': True, 'device': 'cuda', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.579 err=41.198 within15=0.185 sel=-40.176 (25s)
+    ep1 loss=0.521 err=44.870 within15=0.151 sel=-44.276 (49s)
+    ep2 loss=0.496 err=38.837 within15=0.161 sel=-39.699 (74s)
+    ep3 loss=0.471 err=38.241 within15=0.281 sel=-38.858 (99s)
+    ep4 loss=0.440 err=31.360 within15=0.356 sel=-33.717 (123s)
+    ep5 loss=0.402 err=25.880 within15=0.463 sel=-26.171 (148s)
+    ep6 loss=0.367 err=23.488 within15=0.499 sel=-24.677 (173s)
+    ep7 loss=0.322 err=21.993 within15=0.506 sel=-22.335 (197s)
+    ep8 loss=0.298 err=21.273 within15=0.523 sel=-21.988 (222s)
+    ep9 loss=0.281 err=21.161 within15=0.522 sel=-21.572 (247s)
+    ep10 loss=0.269 err=20.309 within15=0.535 sel=-23.302 (271s)
+    ep11 loss=0.256 err=20.075 within15=0.534 sel=-21.186 (296s)
+    ep12 loss=0.242 err=19.605 within15=0.543 sel=-21.499 (320s)
+    ep13 loss=0.226 err=19.744 within15=0.538 sel=-22.670 (345s)
+    ep14 loss=0.213 err=19.956 within15=0.540 sel=-21.261 (369s)
+    ep15 loss=0.195 err=19.295 within15=0.558 sel=-20.599 (394s)
+    ep16 loss=0.176 err=19.567 within15=0.534 sel=-21.908 (418s)
+    ep17 loss=0.156 err=19.652 within15=0.544 sel=-22.573 (443s)
+    ep18 loss=0.136 err=19.930 within15=0.533 sel=-21.792 (468s)
+    ep19 loss=0.117 err=19.984 within15=0.536 sel=-22.482 (492s)
+    ep20 loss=0.101 err=20.392 within15=0.521 sel=-22.136 (517s)
+    ep21 loss=0.087 err=20.430 within15=0.520 sel=-22.622 (541s)
+    ep22 loss=0.075 err=20.347 within15=0.524 sel=-22.392 (566s)
+    ep23 loss=0.067 err=20.285 within15=0.527 sel=-22.593 (590s)
+    ep24 loss=0.060 err=20.400 within15=0.523 sel=-22.649 (615s)
+    ep25 loss=0.056 err=20.347 within15=0.522 sel=-22.741 (639s)
+    ep26 loss=0.053 err=20.331 within15=0.524 sel=-22.924 (664s)
+    ep27 loss=0.052 err=20.396 within15=0.518 sel=-22.754 (688s)
+    ep28 loss=0.051 err=20.393 within15=0.523 sel=-22.784 (713s)
+    ep29 loss=0.051 err=20.476 within15=0.521 sel=-22.769 (737s)
+    test-time averaging: err_avg8=19.898 err_avg32=19.576
+  -> c_is_17M_sp1: err=19.295 within15=0.558 err_modD=19.271 loss=0.051 sel_metric=-20.599 val_at_last_epoch=20.476 err_avg8=19.898 err_avg32=19.576 best_epoch=15 params=17088546 739s
+QUEUE_POD4_DONE

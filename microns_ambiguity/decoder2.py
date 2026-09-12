@@ -120,7 +120,7 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
@@ -129,7 +129,9 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     The model state at the best selection epoch is restored before test-time averaging.
     return_preds: also return per-neuron averaged logits (max avg_reps) for the validation set.
     cover_groups: (N,) group id per neuron; if given, the averaged evaluation forms its
-    populations within a group (e.g. within a mouse), matching a group-restricted Sampler."""
+    populations within a group (e.g. within a mouse), matching a group-restricted Sampler.
+    F_eval: optional (N, d') features used ONLY for the validation-set Grams (cross-stimulus
+    test: training and selection Grams from F, test Grams from disjoint stimulus bins)."""
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
     AUG.update(cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob, active=False)
     if sel_idx is not None:                     # caller-provided selection set (e.g. held-out mice)
@@ -142,6 +144,10 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     s = rng.choice(len(F), min(2000, len(F)), replace=False); Gs = Fn[s] @ Fn[s].T
     off = Gs[~torch.eye(len(s), dtype=torch.bool, device=device)]
     mean, std = float(off.mean()), float(off.std())
+    Fn_ev, mean_ev, std_ev = Fn, mean, std
+    if F_eval is not None:                      # standardisation statistics of the eval Grams from the eval features
+        Fn_ev = torch.as_tensor(normalize_features(F_eval), device=device); Ge = Fn_ev[s] @ Fn_ev[s].T
+        offe = Ge[~torch.eye(len(s), dtype=torch.bool, device=device)]; mean_ev, std_ev = float(offe.mean()), float(offe.std())
     ang = None
     if task == "circ":                          # orientation as a circular regression: target (cos 2θ, sin 2θ), θ in degrees mod 180
         ang = np.asarray(y, np.float64); th = np.deg2rad(2 * ang)
@@ -169,7 +175,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     steps = epochs * (pops_per_epoch // batch)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, lr, total_steps=steps, pct_start=0.1)
-    tr = Sampler(Fn, train_idx, n, rng, mean, std); va = Sampler(Fn, val_idx, n, np.random.default_rng(seed + 100), mean, std)
+    tr = Sampler(Fn, train_idx, n, rng, mean, std); va = Sampler(Fn_ev, val_idx, n, np.random.default_rng(seed + 100), mean_ev, std_ev)
     # selection populations are drawn from selection + training neurons (the
     # selection slice alone can be smaller than n); only selection neurons are scored
     se = None
@@ -195,8 +201,8 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
                     perm = np.concatenate([r.permutation(p)[: (len(p) // n) * n].reshape(-1, n) for p in subpools])
                     perm = perm[r.permutation(len(perm))]
                     for b in range(0, len(perm), batch):
-                        idx = perm[b:b + batch]; it = torch.as_tensor(idx, device=device); X = Fn[it]
-                        out = model(gram_from_features(X, mean, std)).cpu().numpy()
+                        idx = perm[b:b + batch]; it = torch.as_tensor(idx, device=device); X = sampler.Fn[it]
+                        out = model(gram_from_features(X, sampler.mean, sampler.std)).cpu().numpy()
                         np.add.at(S, idx.reshape(-1), out.reshape(-1, out_dim)); np.add.at(C, idx.reshape(-1), 1)
         model.train()
         if score_only is not None:

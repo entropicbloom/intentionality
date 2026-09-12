@@ -333,6 +333,48 @@ the model is large enough to use the weak anisotropies.  This is the per-neuron
 form of the class-level result in §1–3, and it matches the MNIST
 input-neuron subset curve (R² rising from 0.23 at 4 neurons to 0.84 at 784).
 
+### 4b. Orientation as circular regression (final protocol, 2026-09-11/12)
+
+Orientation is now decoded as a continuous angle: target (cos 2θ, sin 2θ), MSE on
+labelled tokens, metric the mean absolute angular error modulo 180° (0–90°). An
+uninformed decoder has errors uniform on 0–90°, mean 45°, so 45° is chance. The
+classification results above lead to the same conclusions; the angular error is the
+better summary of a continuous label (a class score counts a near miss as a miss).
+Tags `c_*` in `outputs/decoder2.json`; predictions in `outputs/preds/` (git-ignored).
+
+| content, substrate | 0.3M | 2.2M (3 seeds) | **17M (3 seeds)** | 57M | chance |
+|---|---|---|---|---|---|
+| orientation error, twin | 27.5° | 20.9° ± 0.4° | **20.2° ± 0.4°** | 19.9° | 45° |
+| orientation error, in vivo | 27.8° | 26.0° ± 1.0° | **25.4° ± 0.5°** | – | 45° |
+| RF (x, y) R², twin / in vivo | | | 0.48 / 0.23 | 0.51 / – | 0 |
+
+Frame check: the error after the best global rotation or reflection of the predictions
+equals the raw error in every run (< 0.1° difference), so the decoder recovers the
+absolute frame. Neuron splits 1 and 2 (17M): twin 19.3° / 20.1°, in vivo 25.4° / 24.6°.
+Population size (in vivo 0.3M): 27.4 / 26.9 / 27.8 / 29.5° at 128 / 256 / 512 / 1024
+neurons; twin 2.2M 20.9 / 20.9 / 21.6° at 256 / 512 / 1024.
+
+Controls (17M, twin unless noted; `outputs/decoder2.json`, scripts
+`scan_decomposition.py`, `balance_check.py`):
+
+| control | error / R² |
+|---|---|
+| row statistics only, no relational term (`row_proj=0 rel_bias=0`) | 37.7° |
+| row statistics + Gram as attention bias, fully permutation-equivariant (`row_proj=0 rel_bias=1`) | 19.6° (standard 20.2°) |
+| disjoint stimulus bins for training vs test Grams (`bins=1`), twin (2,500 bins per half) | 21.2° |
+| disjoint bins, in vivo (60 per half) | 34.2° (25.4° shared) |
+| same 60-bin half on both sides (`bins=2`), in vivo | 25.3° → the in vivo cost is the small stimulus sample, not fewer bins |
+| RF R² absolute / within scan / within area, twin | 0.50 / 0.50 / 0.47 |
+| RF R² absolute / within scan / within area, in vivo | 0.25 / 0.25 / 0.22 |
+| scan-mean / area-mean RF predictor | 0.02 / 0.09 (= between-group label variance) |
+| best constant orientation / scan-prior / area-prior | 41.3° / 39.0° / 38.7° |
+| balanced error over 8 true-orientation bins, twin / in vivo | 24.5° / 27.9° |
+
+The readout is cardinal: neurons preferring 0° or 90° are decoded to 11–12° (twin),
+obliques to 37–39°, and 72 % of predictions fall on the cardinal axes. Label-free
+augmentation (Gram from a random subset of the feature dimensions) changes the angular
+error by less than the seed spread and is no longer used.
+
 ### 5. Reference-free recovery
 
 ![spectral](outputs/spectral.png)
@@ -563,6 +605,29 @@ All held-out-animal regimes select the model on held-out *mice* (25 % of the
 training mice), never on test mice; `pooledwithin` selects on a 25 % slice of
 the training neurons; `within` selects on 25 % of the mice, held out of both
 halves.
+
+### Allen, orientation as circular regression (final protocol)
+
+Same metric as MICrONS (mean angular error, chance 45°). Allen labels sit on a 30° grid,
+so a perfect decoder would still disagree with the labels by 7.5° on average. Standard
+configuration: 2.2M decoder, 256-neuron populations, no augmentation. Tags `c_*` in
+`allen/outputs/decoder.json`.
+
+| test neurons from | single-animal populations (`within` / `cross`) | mixed populations (`pooledwithin` / `pooledcross`) |
+|---|---|---|
+| the training animals | 42.5° / 42.9° / 42.1° | 35.3° / 37.2° / 36.1° |
+| held-out animals | 43.1° / 43.1° / 42.7° | 35.2° / 37.0° / 38.4° |
+
+Three splits per cell (neurons within each animal for the top row, animals for the bottom
+row). Single-animal populations are within 3° of chance; mixed populations 7–10° below
+it in both rows, so transfer to unseen mice has no detectable cost. Capacity and
+augmentation are flat within noise on this metric: plain 2M / 17M / 57M 35.2 / 36.5 /
+36.7°; 2M with 100 / 75 / 50 / 30 % of the conditions 35.2 / 33.5 / 37.7 / 38.0°; 17M with
+100 / 85 / 50 % 36.5 / 34.3 / 35.6° (split 0; the 17M 50 % configuration on splits 0
+(3 seeds) / 1 / 2: 35.6 ± 1.0 / 37.4 / 38.8°). Population size at 17M: 36.5 / 35.4 / 36.5°
+at 256 / 512 / 1024 neurons. Labels are nearly flat across the six orientations, the best
+constant predictor scores 43.9°, and the balanced error is 36.4° (raw 35.7°); as on
+MICrONS the readout is cardinal (0°: 24.8°, 90°: 33.8°, 120°/150°: 45°).
 
 ## Caveats
 

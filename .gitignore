@@ -26,3 +26,4 @@ microns_ambiguity/paper/*.log
 microns_ambiguity/paper/*.bbl
 microns_ambiguity/paper/*.blg
 microns_ambiguity/paper/*.out
+microns_ambiguity/outputs/preds/
