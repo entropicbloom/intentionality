@@ -132,7 +132,7 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False, bin_perm=False):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False, bin_perm=False, sel_modD=False):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
@@ -286,7 +286,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             torch.mps.empty_cache()          # the MPS caching allocator otherwise grows across epochs
         m = evaluate(); m.pop("preds", None); m["loss"] = tot / (pops_per_epoch // batch); m["t"] = time.time() - t0
         if se is not None:
-            ms = evaluate(reps=sel_reps, sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = -(ms["err_modD"] if label_rot else ms["err"]) if task == "circ" else ms.get("acc", ms.get("r2"))
+            ms = evaluate(reps=sel_reps, sampler=se, pool_idx=sel_idx, score_only=sel_idx); m["sel"] = -(ms["err_modD"] if (label_rot or sel_modD) else ms["err"]) if task == "circ" else ms.get("acc", ms.get("r2"))
             if best_state is None or m["sel"] > max(h["sel"] for h in hist):
                 best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         hist.append(m)
@@ -305,7 +305,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             final["preds"] = m["preds"]
     if verbose:
         print("    test-time averaging: " + " ".join(f"{k}={v:.3f}" for k, v in final.items() if "avg" in k), flush=True)
-    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, input_mode=input_mode, label_rot=label_rot, ori_weight=ori_weight, bin_perm=bin_perm, cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
+    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, input_mode=input_mode, label_rot=label_rot, ori_weight=ori_weight, bin_perm=bin_perm, sel_modD=sel_modD, cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
                  heads=heads, dropout=dropout, lr=lr, seed=seed, early_stop=early_stop, sel_reps=sel_reps, n_sel=(int(len(sel_idx)) if sel_idx is not None else 0),
                                          params=nparam, pops_per_epoch=pops_per_epoch, epochs=epochs, batch=batch)
     return final

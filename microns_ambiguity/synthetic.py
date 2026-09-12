@@ -55,5 +55,5 @@ def main(tag, count=0, sharp=0, stim=0, n_neurons=6000, T=120, noise=0.5, data_s
 if __name__ == "__main__":
     tag = sys.argv[1]; kw = {}
     for a in sys.argv[2:]:
-        k, v = a.split("="); kw[k] = v if k in ("device", "input_mode") else (bool(int(v)) if k in ("rel_bias", "row_proj", "label_rot", "ori_weight") else (float(v) if k in ("lr", "early_stop", "dropout", "noise", "sharp_k") else int(v)))
+        k, v = a.split("="); kw[k] = v if k in ("device", "input_mode") else (bool(int(v)) if k in ("rel_bias", "row_proj", "label_rot", "ori_weight", "sel_modD") else (float(v) if k in ("lr", "early_stop", "dropout", "noise", "sharp_k") else int(v)))
     main(tag, **kw)
