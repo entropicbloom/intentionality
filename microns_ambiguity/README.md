@@ -395,10 +395,16 @@ Reference decoders that see the activity (tokens = response vectors, `input_mode
 | response vector + Gram attention bias (`ab_*`) | 22.2° | 15.0° | – | – |
 | response vector, linear, layers=0 (`lin_*`) | 20.2° | 15.6° | 0.34 | 0.69 |
 | response vector, transformer, disjoint bins (`a_*_bins`) | 49.5° | 41.0° | – | – |
+| response vector, bins shuffled per population, transformer (`bp_*`) | 27.1° | 24.5° | 0.04 | 0.08 |
+| response vector, bins shuffled, linear, no population (`bp0_*`) | 40.3° | 40.2° | – | – |
 
 Relations keep ~85 % of the gain over chance on orientation and ~60 % on RF; the linear
 per-neuron readout matches the activity transformer, so the activity decoder is a tuning
-readout and its advantage is the stimulus alignment, not the population.
+readout and its advantage is the stimulus alignment, not the population. With the bins
+shuffled (stimulus-agnostic but free to compute any relation) the activity transformer is no
+better than the Gram on orientation and far worse on RF, and the shuffled vector alone is near
+chance: pairwise relations are the whole of the stimulus-agnostic content here, and the
+explicit Gram beats an implicit relational decoder.
 
 The readout is cardinal: neurons preferring 0° or 90° are decoded to 11–12° (twin),
 obliques to 37–39°, and 72 % of predictions fall on the cardinal axes. Read as a horizontal-vs-vertical
