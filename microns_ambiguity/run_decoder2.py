@@ -9,6 +9,8 @@ python -m microns_ambiguity.run_decoder2 <tag> <substrate> <content> [n=128] [di
     [area_train=V1 area_test=RL]  cross-area transfer: training half restricted to one area, test half to another
     [bin_perm=1]        with input_mode=act: stimulus bins permuted per population at training and test (stimulus-agnostic activity decoder)
     [within_scan=1]     populations drawn within one scan, training and test (single-circuit relations)
+    [ablate=resid|circ] subtract the class-Gram residual (resid) or the whole class structure (circ) from every Gram, using true classes (an ablation, not a decoder)
+    [train_scan=<scan> train_pool=N]  with within_scan=1: train on N neurons of one scan, test on the other scans (matched to one Allen animal)
     [save_preds=1]      save averaged per-neuron predictions to outputs/preds/<tag>.npz (idx, P, y, scan, area)
 Appends to outputs/decoder2.json under key <tag>."""
 from __future__ import annotations
@@ -51,6 +53,15 @@ def main(tag, sub, con, **kw):
     strat = y[keep] if task == "class" else np.zeros(len(keep), int)
     tr, va = stratified_half_split(strat, np.random.default_rng(split_seed)); tr, va = keep[tr], keep[va]
     area_train, area_test = kw.pop("area_train", ""), kw.pop("area_test", "")     # cross-area transfer: restrict the halves by cortical area
+    ablate = kw.pop("ablate", "")                                                    # residual ablation: "resid" subtracts the class-Gram residual (K=8 classes, estimated on the labelled training half) from every Gram, train and test; "circ" subtracts the whole class-Gram structure (control)
+    if ablate:
+        from .residual_check import class_gram, circulant_part, normalise
+        K = 8; ang_all = np.asarray(ds.ori, float) % 180; cls_all = np.full(ds.n, -1)
+        cls_all[keep] = ((ang_all[keep] + 90 / K) // (180 / K) % K).astype(int)
+        Fn_tr = normalise(F[tr].astype(np.float64)); C = class_gram(Fn_tr, cls_all[tr], K)
+        R = C - circulant_part(C) if ablate == "resid" else C - C.mean()
+        kw["gram_adjust"] = dict(cls=cls_all, R=R, name=ablate); print(f"    ablate={ablate}: class-Gram offset range {R.min():.3f}..{R.max():.3f}", flush=True)
+    train_scan, train_pool = kw.pop("train_scan", ""), kw.pop("train_pool", 0)      # matched single-circuit training: one scan, N training neurons; test on the other scans
     within_scan = kw.pop("within_scan", 0)                                          # populations drawn within one scan (the MICrONS analogue of Allen's single-animal populations)
     if within_scan:
         import microns_ambiguity.decoder2 as d2
@@ -67,8 +78,13 @@ def main(tag, sub, con, **kw):
                 return idx, d2.gram_from_features(X, self.mean, self.std), X
         d2.Sampler = ScanSampler; kw["cover_groups"] = scan
         # select the epoch on whole held-out scans (a per-scan slice of the training half would be smaller than one population)
-        rs = np.random.default_rng(split_seed + 3); sel_scans = rs.choice(np.unique(scan[tr]), 3, replace=False)
+        rs = np.random.default_rng(split_seed + 3); cand = np.unique(scan[tr]); cand = cand[cand != train_scan] if train_scan else cand
+        sel_scans = rs.choice(cand, 3, replace=False)
         kw["sel_idx"] = tr[np.isin(scan[tr], sel_scans)]; tr = tr[~np.isin(scan[tr], sel_scans)]; kw["early_stop"] = 0.0
+        if train_scan:
+            tr = tr[scan[tr] == train_scan]; va = va[scan[va] != train_scan]
+            if train_pool: tr = np.random.default_rng(split_seed + 9).choice(tr, int(train_pool), replace=False)
+            print(f"    train_scan={train_scan} n_train={len(tr)} test on the other scans n_test={len(va)}", flush=True)
     if area_train: tr = tr[ds.area[tr] == area_train]
     if area_test: va = va[ds.area[va] == area_test]
     t0 = time.time(); print(f"[{tag}] {sub} {con} n_neurons={len(keep)} split_seed={split_seed} bins={bins} {({k: v for k, v in kw.items() if k != 'F_eval'})}", flush=True)
@@ -77,7 +93,7 @@ def main(tag, sub, con, **kw):
         pr = m.pop("preds"); (OUT / "preds").mkdir(parents=True, exist_ok=True)
         np.savez(OUT / "preds" / f"{tag}.npz", idx=pr["idx"], P=pr["P"], y=np.asarray(y, float)[pr["idx"]], scan=ds.scan[pr["idx"]].astype(str), area=ds.area[pr["idx"]].astype(str))
     m.pop("preds", None); m.pop("F_eval", None)
-    m.update(sub=sub, con=con, seconds=time.time() - t0, n_neurons=int(len(keep)), split_seed=int(split_seed), bins=int(bins), area_train=area_train, area_test=area_test, n_train=int(len(tr)), n_test=int(len(va)), within_scan=int(within_scan))
+    m.update(sub=sub, con=con, seconds=time.time() - t0, n_neurons=int(len(keep)), split_seed=int(split_seed), bins=int(bins), area_train=area_train, area_test=area_test, n_train=int(len(tr)), n_test=int(len(va)), within_scan=int(within_scan), ablate=ablate, train_scan=train_scan, train_pool=int(train_pool))
     OUT.mkdir(exist_ok=True); p = OUT / "decoder2.json"
     d = json.load(open(p)) if p.exists() else {}
     d[tag] = m; json.dump(d, open(p, "w"))
@@ -88,7 +104,7 @@ if __name__ == "__main__":
     tag, sub, con = sys.argv[1:4]
     kw = {}
     for a in sys.argv[4:]:
-        k, v = a.split("="); kw[k] = v if k in ("device", "input_mode", "area_train", "area_test") else (bool(int(v)) if k in ("rel_bias", "row_proj", "label_rot", "ori_weight", "bin_perm") else (float(v) if k in ("lr", "early_stop", "dropout", "cond_frac", "gram_drop", "aug_prob") else int(v)))
+        k, v = a.split("="); kw[k] = v if k in ("device", "input_mode", "area_train", "area_test", "ablate", "train_scan") else (bool(int(v)) if k in ("rel_bias", "row_proj", "label_rot", "ori_weight", "bin_perm") else (float(v) if k in ("lr", "early_stop", "dropout", "cond_frac", "gram_drop", "aug_prob") else int(v)))
     pca = kw.pop("pca", 0)
     if pca: kw["pca"] = 1
     main(tag, sub, con, **kw)

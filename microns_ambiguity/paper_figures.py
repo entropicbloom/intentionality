@@ -171,12 +171,12 @@ def fig_pipeline():
         th = np.deg2rad(ds.ori[n]); axo.plot([-np.cos(th), np.cos(th)], [-np.sin(th), np.sin(th)], color=NC[i], lw=2.2, solid_capstyle="round")
     for k in range(8):
         th = np.deg2rad(k * 22.5); axo.text(1.18 * np.cos(th), 1.18 * np.sin(th), f"{int(k * 22.5)}°", fontsize=4.8, ha="center", va="center", color="#777")
-    axo.set_title("preferred orientation\n(8 classes)", fontsize=6.8, pad=2)
+    axo.set_title("preferred orientation\n(continuous, 0–180°)", fontsize=6.8, pad=2)
     axr = fig.add_axes([0.865, 0.653, 0.11, 0.195]); axr.set_xlim(-1.05, 1.05); axr.set_ylim(-1.05, 1.05); axr.set_aspect("equal")
     axr.add_patch(Rectangle((-1, -1), 2, 2, fc="#f2f4f3", ec="#8a939c", lw=0.8))
     for i, n in enumerate(six): axr.scatter(ds.rf[n, 0], ds.rf[n, 1], s=28, c=NC[i], ec="white", lw=0.6, zorder=3)
     axr.set_xticks([]); axr.set_yticks([]); [sp.set_visible(False) for sp in axr.spines.values()]; axr.set_title("receptive-field centre\n(screen)", fontsize=6.8, pad=2)
-    foot(0.74, 0.98, "5,287 neurons with orientation (gOSI ≥ 0.25) · 11,326 with RF")
+    foot(0.60, 0.98, "5,287 neurons with orientation (gOSI ≥ 0.25), 11,326 with RF")
     # ---- d: protocol. Full matrix ordered training-first; a population Gram is a diagonal block; two paths through the
     # same decoder: training blocks meet labels in a loss, test blocks are only scored.
     axd = fig.add_axes([0.03, 0.02, 0.95, 0.46]); axd.set_xlim(0, 18.2); axd.set_ylim(0.4, 5.4); axd.set_aspect("equal"); axd.axis("off")
@@ -234,13 +234,13 @@ def fig_pipeline():
     axd.text(14.62, YS + 0.2, "score", fontsize=7, ha="center", va="center", weight="bold", color=ORANGE_T); axd.text(14.62, YS - 0.2, "accuracy / R² vs.\nheld-out labels", fontsize=5.4, ha="center", va="center", color="#444")
     axd.text(16.1, YS, "no gradient;\nthe decoder never\nsees a test label", fontsize=5.6, ha="left", va="center", color="#444")
     axd.text(18.0, 0.95, "epoch chosen on a held-out slice of the training half.  One brain, samples drawn\nwithin one animal, new neurons: the `within` cell of Fig. 4", fontsize=5.8, ha="right", va="top", color="#444")
-    fig.suptitle("Fig. 1  MICrONS: from one imaged cortical volume to a label-free per-neuron decoding task", fontsize=9, y=0.985)
+    fig.suptitle("Fig. 1  MICrONS: from one imaged cortical volume to a per-neuron decoding task whose only input is the correlation matrix", fontsize=9, y=0.985)
     save(fig, "fig1_microns_pipeline", "How the MICrONS task is built",
          "(a) The MICrONS functional-connectomics release (Ding, Fahey, Papadopoulos et al. 2025): one mouse, 13 two-photon scans of a cubic millimetre of visual cortex "
          "(areas V1, RL, AL, LM), 12,894 neurons co-registered to the electron-microscopy volume. (b) The relational substrate. Each neuron is its trial-averaged "
          "response vector to a stimulus all neurons saw (in vivo: 120 bins of the oracle natural-movie clips; digital twin: 4,999 bins compressed to 512 principal "
          "components); shown are six real neurons and their correlation matrix. The oracle clips were shown in all 13 scans, so the matrix is defined across scans (same-scan pairs correlate ~50 % more than cross-scan pairs at matched RF distance; the twin has no such effect). The decoder only ever sees such correlations, never the stimulus. (c) The contents "
-         "of the same six neurons: preferred orientation (in vivo, 8 classes, 5,287 neurons with gOSI ≥ 0.25) and receptive-field centre (digital-twin fit, 11,326 "
+         "of the same six neurons: preferred orientation (in vivo, a continuous angle, 5,287 neurons with gOSI ≥ 0.25) and receptive-field centre (digital-twin fit, 11,326 "
          "neurons). (d) The protocol, with two terms kept apart. The <i>halves</i>: all 12,894 neurons are split at random into a training half and a test half, "
          "and the full 12,894 × 12,894 correlation matrix, ordered training-first (a real 200-neuron excerpt is shown), is used only in its training × training "
          "and test × test blocks. A <i>sample</i>: 512 neurons drawn at random from one half; its Gram is the corresponding diagonal sub-block (dashed), and that "
@@ -278,7 +278,7 @@ def fig1():
         ax.set_xlim(-0.55, 1.75); ax.set_ylim(0, {"ori": 50, "rf": 0.6}[con])
     if sc: coarse_panel(axes[2], [("in vivo", C["iv"], [os.path.join(MPREDS, t + ".npz") for t in ("c_iv_17M_sp1", "c_iv_17M_sp2")]), ("digital twin", C["twin"], [os.path.join(MPREDS, t + ".npz") for t in ("c_is_17M_sp1", "c_is_17M_sp2")])], "coarse readouts, 17M (neuron splits 1, 2)")
     fig.suptitle("Fig. 2  MICrONS: per-neuron content decoded from the population correlation matrix alone (512 neurons, no labels, no reference)", fontsize=9)
-    save(fig, "fig2_microns_decoder", "MICrONS label-free per-neuron decoding",
+    save(fig, "fig2_microns_decoder", "MICrONS relational per-neuron decoding",
          "Left: mean absolute error of the decoded preferred orientation (degrees, orientation is defined modulo 180°) on held-out neurons of the same animal, "
          "for decoders of 0.3M, 2.2M and 17M parameters; error bars are the s.d. over 3 seeds. A decoder that knows nothing has errors spread evenly over 0–90°, mean 45° (grey line). "
          "Middle: R² of the decoded receptive-field centre. The decoder sees only the standardised correlation matrix of 512 sampled neurons: neither labels nor a reference "
@@ -313,7 +313,7 @@ def fig2():
          "Right: matching a held-out half's class-Gram to the reference over all 8! relabellings. With the raw matrix the true labelling wins (accuracy 1.0). "
          "After the circulant projection, absolute accuracy collapses to chance while accuracy modulo the dihedral group D8 (dots) stays at 1.0: the circulant "
          "part fixes the structure up to rotation and reflection, and only the residual anisotropy (a cardinal bias that differs between areas) pins which class is 0°. "
-         "This is what a label-free decoder has to use to output absolute orientation.", "main")
+         "This is what a relational decoder has to use to output absolute orientation.", "main")
 
 
 
@@ -388,7 +388,7 @@ def fig3():
     if sc: coarse_panel(axes[1], [("`pooledcross`, 2M", C["mix"], [os.path.join(PREDS, t + ".npz") for t in ("c_pc_2M_plain", "c_pc_2M_plain_sp1", "c_pc_2M_plain_sp2")])], "coarse readouts, held-out mice (3 splits)")
     fig.suptitle("Fig. 5  Allen (33 mice, grating relations): orientation is readable only from populations that mix animals", fontsize=9)
     save(fig, "fig5_allen_2x2_orientation", "Allen 2 × 2: split × population, orientation",
-         "Left: mean angular error of the label-free decoder (2M parameters, 256 neurons per population) on labelled test cells for the four regimes. Split: test neurons from the training animals "
+         "Left: mean angular error of the relational decoder (2M parameters, 256 neurons per population) on labelled test cells for the four regimes. Split: test neurons from the training animals "
          "(each animal's cells halved) or from 9 held-out animals. Population: each sampled population (the unit the Gram is computed on) drawn from one animal or from several. "
          "Points: the three splits (of neurons within each animal for the top row, of animals for the bottom row). Grey line: 45° chance; dashed line: the 7.5° mean disagreement "
          "a perfect decoder would show against labels that sit on a 30° grid. Single-animal populations are within 3° of chance whether the animal was seen in training or not; "

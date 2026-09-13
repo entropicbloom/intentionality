@@ -82,7 +82,16 @@ class RelDecoder(nn.Module):
 #                  feature dimensions (stimulus conditions / time bins), rows re-standardised;
 #   gram_drop > 0: random Gram entries are zeroed (zero = the mean correlation).
 AUG = dict(cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, active=False)   # aug_prob: fraction of training populations augmented
-BINPERM = dict(on=False)   # bin_perm: permute the stimulus bins of every population (same permutation for all its neurons),
+BINPERM = dict(on=False)
+ADJ = dict(on=False, cls=None, R=None)   # gram_adjust: subtract a class-pair offset R[c_i, c_j] (standardised units) from every Gram; for the residual ablation
+
+
+def adjust_gram(G, it):
+    """it: (B, n) neuron indices. Subtracts ADJ["R"][cls_i, cls_j] for labelled pairs, re-zeroes the diagonal."""
+    if not ADJ["on"]: return G
+    c = ADJ["cls"][it]; m = c >= 0; cc = c.clamp_min(0)
+    off = ADJ["R"][cc.unsqueeze(2), cc.unsqueeze(1)] * (m.unsqueeze(2) & m.unsqueeze(1)).float()
+    G = G - off; G.diagonal(dim1=1, dim2=2).zero_(); return G   # bin_perm: permute the stimulus bins of every population (same permutation for all its neurons),
                            # at training and test; keeps every bin-permutation-invariant statistic, destroys stimulus alignment
 
 
@@ -121,7 +130,7 @@ class Sampler:
         idx = np.stack([self.rng.choice(self.pool, self.n, replace=False) for _ in range(B)])
         it = torch.as_tensor(idx, device=self.Fn.device)
         X = self.Fn[it]                                     # (B, n, d)
-        return idx, gram_from_features(X, self.mean, self.std), X
+        return idx, adjust_gram(gram_from_features(X, self.mean, self.std), it), X
 
 
 def normalize_features(F):
@@ -132,7 +141,7 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False, bin_perm=False, sel_modD=False):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False, bin_perm=False, sel_modD=False, gram_adjust=None):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
@@ -152,6 +161,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     ori_weight (circ): loss weight per labelled neuron = inverse density of its 15° label bin."""
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
     AUG.update(cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob, active=False); BINPERM["on"] = bool(bin_perm)
+    ADJ["on"] = False
     if sel_idx is not None:                     # caller-provided selection set (e.g. held-out mice)
         sel_idx = np.asarray(sel_idx); train_idx = np.setdiff1d(np.asarray(train_idx), sel_idx)
     elif early_stop > 0:
@@ -162,6 +172,8 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     s = rng.choice(len(F), min(2000, len(F)), replace=False); Gs = Fn[s] @ Fn[s].T
     off = Gs[~torch.eye(len(s), dtype=torch.bool, device=device)]
     mean, std = float(off.mean()), float(off.std())
+    if gram_adjust is not None:                 # residual ablation: offsets given on the cosine scale, applied in standardised units
+        ADJ.update(on=True, cls=torch.as_tensor(np.asarray(gram_adjust["cls"]), device=device, dtype=torch.long), R=torch.as_tensor(np.asarray(gram_adjust["R"], np.float32) / std, device=device))
     Fn_ev, mean_ev, std_ev = Fn, mean, std
     if F_eval is not None:                      # standardisation statistics of the eval Grams from the eval features
         Fn_ev = torch.as_tensor(normalize_features(F_eval), device=device); Ge = Fn_ev[s] @ Fn_ev[s].T
@@ -238,7 +250,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
                     perm = perm[r.permutation(len(perm))]
                     for b in range(0, len(perm), batch):
                         idx = perm[b:b + batch]; it = torch.as_tensor(idx, device=device); X = sampler.Fn[it]
-                        out = model(gram_from_features(X, sampler.mean, sampler.std), permute_bins(X)).cpu().numpy()
+                        out = model(adjust_gram(gram_from_features(X, sampler.mean, sampler.std), it), permute_bins(X)).cpu().numpy()
                         np.add.at(S, idx.reshape(-1), out.reshape(-1, out_dim)); np.add.at(C, idx.reshape(-1), 1)
         model.train()
         if score_only is not None:
@@ -305,7 +317,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             final["preds"] = m["preds"]
     if verbose:
         print("    test-time averaging: " + " ".join(f"{k}={v:.3f}" for k, v in final.items() if "avg" in k), flush=True)
-    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, input_mode=input_mode, label_rot=label_rot, ori_weight=ori_weight, bin_perm=bin_perm, sel_modD=sel_modD, cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
+    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, input_mode=input_mode, label_rot=label_rot, ori_weight=ori_weight, bin_perm=bin_perm, sel_modD=sel_modD, gram_adjust=(None if gram_adjust is None else gram_adjust.get('name', 'yes')), cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
                  heads=heads, dropout=dropout, lr=lr, seed=seed, early_stop=early_stop, sel_reps=sel_reps, n_sel=(int(len(sel_idx)) if sel_idx is not None else 0),
                                          params=nparam, pops_per_epoch=pops_per_epoch, epochs=epochs, batch=batch)
     return final
