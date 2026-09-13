@@ -25,7 +25,7 @@ def vonmises_pref(n, rng, cardinal):
     return th
 
 
-def make(n=6000, T=120, count=0, sharp=0, stim=0, noise=0.5, seed=0, amp_var=0, sharp_k=4.0, gain=0, gain_k=0.0):
+def make(n=6000, T=120, count=0, sharp=0, stim=0, noise=0.5, seed=0, amp_var=0, sharp_k=4.0, gain=0, gain_k=0.0, cocorr=0, cocorr_k=0.5):
     rng = np.random.default_rng(seed)
     pref = vonmises_pref(n, rng, count)
     kappa = np.full(n, 2.0)
@@ -38,16 +38,21 @@ def make(n=6000, T=120, count=0, sharp=0, stim=0, noise=0.5, seed=0, amp_var=0, 
     amp = rng.gamma(2.0, 1.0, T) if amp_var else np.ones(T)                 # frame-to-frame contrast (off by default: it breaks the symmetry by finite sampling)
     d = np.deg2rad(2 * (pref[:, None] - phi[None, :]))
     R = g[:, None] * amp[None, :] * np.exp(kappa[:, None] * (np.cos(d) - 1)) + noise * rng.normal(size=(n, T))
+    if cocorr:                                                              # shared variability among like-tuned neurons, strongest near 90° (the dominant class of V1):
+        th = np.deg2rad(2 * pref); z = np.zeros((n, T))                     # a smooth random field over preferred orientation (3 Fourier modes per frame) ...
+        for k in range(1, 4): z += np.cos(k * th)[:, None] * rng.normal(size=T)[None, :] + np.sin(k * th)[:, None] * rng.normal(size=T)[None, :]
+        z /= np.sqrt(6.0); s_ = cocorr_k * np.exp(2.0 * (np.cos(np.deg2rad(2 * (pref - 90.0))) - 1))   # ... entering each neuron with a weight peaked at 90°
+        R = R + s_[:, None] * z
     return R.astype(np.float32), pref.astype(np.float32)
 
 
-def main(tag, count=0, sharp=0, stim=0, n_neurons=6000, T=120, noise=0.5, data_seed=0, amp_var=0, sharp_k=4.0, gain=0, gain_k=0.0, **kw):
-    F, pref = make(n_neurons, T, count, sharp, stim, noise, data_seed, amp_var, sharp_k, gain, gain_k)
+def main(tag, count=0, sharp=0, stim=0, n_neurons=6000, T=120, noise=0.5, data_seed=0, amp_var=0, sharp_k=4.0, gain=0, gain_k=0.0, cocorr=0, cocorr_k=0.5, **kw):
+    F, pref = make(n_neurons, T, count, sharp, stim, noise, data_seed, amp_var, sharp_k, gain, gain_k, cocorr, cocorr_k)
     rng = np.random.default_rng(data_seed); perm = rng.permutation(n_neurons); h = n_neurons // 2
     tr, va = perm[:h], perm[h:]
     t0 = time.time(); print(f"[{tag}] synthetic count={count} sharp={sharp} stim={stim} n={n_neurons} T={T} {kw}", flush=True)
     m = train(F, pref, "circ", tr, va, **kw)
-    m.update(synthetic=dict(count=count, sharp=sharp, stim=stim, n_neurons=n_neurons, T=T, noise=noise, data_seed=data_seed, amp_var=amp_var, sharp_k=sharp_k, gain=gain, gain_k=gain_k), seconds=time.time() - t0)
+    m.update(synthetic=dict(count=count, sharp=sharp, stim=stim, n_neurons=n_neurons, T=T, noise=noise, data_seed=data_seed, amp_var=amp_var, sharp_k=sharp_k, gain=gain, gain_k=gain_k, cocorr=cocorr, cocorr_k=cocorr_k), seconds=time.time() - t0)
     m.pop("preds", None); OUT.mkdir(exist_ok=True); p = OUT / "synthetic.json"
     d = json.load(open(p)) if p.exists() else {}; d[tag] = m; json.dump(d, open(p, "w"))
     print(f"  -> {tag}: err={m['err']:.2f} err_modD={m['err_modD']:.2f} within15={m['within15']:.3f} best_epoch={m.get('best_epoch')} {m['seconds']:.0f}s", flush=True)
@@ -56,5 +61,5 @@ def main(tag, count=0, sharp=0, stim=0, n_neurons=6000, T=120, noise=0.5, data_s
 if __name__ == "__main__":
     tag = sys.argv[1]; kw = {}
     for a in sys.argv[2:]:
-        k, v = a.split("="); kw[k] = v if k in ("device", "input_mode") else (bool(int(v)) if k in ("rel_bias", "row_proj", "label_rot", "ori_weight", "sel_modD") else (float(v) if k in ("lr", "early_stop", "dropout", "noise", "sharp_k", "gain_k") else int(v)))
+        k, v = a.split("="); kw[k] = v if k in ("device", "input_mode") else (bool(int(v)) if k in ("rel_bias", "row_proj", "label_rot", "ori_weight", "sel_modD") else (float(v) if k in ("lr", "early_stop", "dropout", "noise", "sharp_k", "gain_k", "cocorr_k") else int(v)))
     main(tag, **kw)
