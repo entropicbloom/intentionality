@@ -231,7 +231,7 @@ def fig_pipeline():
     # test path: predictions are only scored
     arr(13.2, YS, 13.8, YS, col=TE, lw=1.1)
     axd.add_patch(FancyBboxPatch((13.85, YS - 0.55), 1.55, 1.1, boxstyle="round,pad=0.03,rounding_size=0.18", fc="white", ec=TE, lw=1.1))
-    axd.text(14.62, YS + 0.2, "score", fontsize=7, ha="center", va="center", weight="bold", color=ORANGE_T); axd.text(14.62, YS - 0.2, "accuracy / R² vs.\nheld-out labels", fontsize=5.4, ha="center", va="center", color="#444")
+    axd.text(14.62, YS + 0.2, "score", fontsize=7, ha="center", va="center", weight="bold", color=ORANGE_T); axd.text(14.62, YS - 0.2, "angular error / R² vs.\nheld-out labels", fontsize=5.4, ha="center", va="center", color="#444")
     axd.text(16.1, YS, "no gradient;\nthe decoder never\nsees a test label", fontsize=5.6, ha="left", va="center", color="#444")
     axd.text(18.0, 0.95, "epoch chosen on a held-out slice of the training half.  One brain, samples drawn\nwithin one animal, new neurons: the `within` cell of Fig. 4", fontsize=5.8, ha="right", va="top", color="#444")
     fig.suptitle("Fig. 1  MICrONS: from one imaged cortical volume to a per-neuron decoding task whose only input is the correlation matrix", fontsize=9, y=0.985)
