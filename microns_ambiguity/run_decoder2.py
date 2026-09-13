@@ -9,7 +9,7 @@ python -m microns_ambiguity.run_decoder2 <tag> <substrate> <content> [n=128] [di
     [area_train=V1 area_test=RL]  cross-area transfer: training half restricted to one area, test half to another
     [bin_perm=1]        with input_mode=act: stimulus bins permuted per population at training and test (stimulus-agnostic activity decoder)
     [within_scan=1]     populations drawn within one scan, training and test (single-circuit relations)
-    [ablate=resid|circ] subtract the class-Gram residual (resid) or the whole class structure (circ) from every Gram, using true classes (an ablation, not a decoder)
+    [ablate=resid|circ|null] subtract the class-Gram residual (resid), the whole class structure (circ), or a random label-keyed offset of the residual's size (null: leak control) from every Gram, using true classes (an ablation, not a decoder)
     [train_scan=<scan> train_pool=N]  with within_scan=1: train on N neurons of one scan, test on the other scans (matched to one Allen animal)
     [ablate_k=24]       class resolution of the ablation
     [balance_pop=1]     populations drawn with equal numbers per orientation bin (train and test; uses labels: an ablation of label density)
@@ -64,6 +64,9 @@ def main(tag, sub, con, **kw):
         cls_all[keep] = ((ang_all[keep] + 90 / K) // (180 / K) % K).astype(int)
         Fn_tr = normalise(F[tr].astype(np.float64)); C = class_gram(Fn_tr, cls_all[tr], K)
         R = C - circulant_part(C) if ablate == "resid" else C - C.mean()
+        if ablate == "null":                                                          # control: a random label-keyed offset with the residual's size and no circulant part; measures how much any class-pair offset leaks labels
+            Rr = C - circulant_part(C); m_ = ~np.eye(K, dtype=bool); rng_ = np.random.default_rng(12345 + K); N = rng_.standard_normal((K, K)); N = (N + N.T) / 2; N = N - circulant_part(N)
+            R = N * (Rr[m_].std() / N[m_].std())
         kw["gram_adjust"] = dict(cls=cls_all, R=R, name=f"{ablate}{K}"); print(f"    ablate={ablate} K={K}: class-Gram offset range {R.min():.3f}..{R.max():.3f}", flush=True)
     if balance_pop:
         import microns_ambiguity.decoder2 as d2
