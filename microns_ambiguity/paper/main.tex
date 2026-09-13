@@ -82,7 +82,7 @@ To expose the symmetry of the relations we average the Gram into a $K\times K$ c
 On MICrONS the decoder reads orientation and receptive-field position from the Gram of 512 neurons of the test half (Fig.~\ref{fig:decoder}, Table~\ref{tab:microns}). The twin substrate is cleaner than the in-vivo one, since the twin removes trial noise, and receptive fields carry more than orientation. The predictions are in the true frame: the frame check lowers the error by less than $0.1^\circ$ in every run, so the decoder places each neuron at its absolute orientation rather than recovering the structure up to a rotation. About half of the neurons are decoded to within $15^\circ$ (0.46 in vivo, 0.54 on the twin). The error is not spread evenly over the orientation circle: the decoder resolves the cardinal axes and little else (Appendix~\ref{app:controls}, Fig.~\ref{fig:a5}). Asked only which cardinal axis a neuron is closer to, it is right for 87\% of all neurons on the twin and 79\% in vivo (chance 56\%), and for the 56\% of neurons whose preference lies within $15^\circ$ of an axis, for 94\% and 86\%. Sorted into four classes at $0^\circ$, $45^\circ$, $90^\circ$ and $135^\circ$, 66\% (twin) and 59\% (in vivo) land in the right one against a majority class of 40\%; the misses are almost all obliques. Both readouts are properties of individual neurons rather than of the scan they were recorded in: centring predictions and labels per scan leaves the receptive-field $\Rsq$ unchanged and the orientation error within $0.2^\circ$ (Appendix~\ref{app:controls}). Test Grams built from stimulus bins the decoder never trained on cost $1^\circ$ on the twin and $9^\circ$ in vivo, where a Gram over 60 movie bins is partly specific to those bins (Appendix~\ref{app:controls}). The label distribution sets a second baseline: the best constant guess scores $41.3^\circ$, and the error averaged over eight equally weighted orientation bins is $24.5^\circ$ on the twin and $27.9^\circ$ in vivo (Table~\ref{tab:microns}).
 
 \begin{table}[tbp]
-  \centering\small
+  \centering\footnotesize
   \caption{MICrONS, per-neuron decoding on the test half. Relations only: the 17M decoder on the Gram of 512-neuron populations, mean $\pm$ s.d.\ over 3 seeds. Balanced: the error averaged over eight equally weighted true-orientation bins (neuron split 2). Stimulus-known linear readout: a linear map from each neuron's own movie response vector to its content, a reference that uses the stimulus alignment the relational decoder discards, not a label-noise ceiling (Appendix~\ref{app:controls}). Chance: an uninformed decoder ($45^\circ$) and the best constant orientation given the label distribution ($41.3^\circ$).}
   \label{tab:microns}
   \begin{tabular}{llcccc}
@@ -90,9 +90,9 @@ On MICrONS the decoder reads orientation and receptive-field position from the G
     content & substrate & relations only & \begin{tabular}[c]{@{}c@{}}balanced over\\orientations\end{tabular} & \begin{tabular}[c]{@{}c@{}}stimulus-known\\linear readout\end{tabular} & \begin{tabular}[c]{@{}c@{}}chance /\\best constant\end{tabular} \\
     \midrule
     orientation (angular error) & in vivo & $25.4^\circ \pm 0.5^\circ$ & $27.9^\circ$ & $20.2^\circ$ & $45^\circ$ / $41.3^\circ$ \\
-    orientation (angular error) & digital twin & $20.2^\circ \pm 0.4^\circ$ & $24.5^\circ$ & $15.6^\circ$ & $45^\circ$ / $41.3^\circ$ \\
+    orientation (angular error) & twin & $20.2^\circ \pm 0.4^\circ$ & $24.5^\circ$ & $15.6^\circ$ & $45^\circ$ / $41.3^\circ$ \\
     receptive field ($\Rsq$) & in vivo & $0.234 \pm 0.007$ & -- & 0.34 & 0 \\
-    receptive field ($\Rsq$) & digital twin & $0.480 \pm 0.010$ & -- & 0.69 & 0 \\
+    receptive field ($\Rsq$) & twin & $0.480 \pm 0.010$ & -- & 0.69 & 0 \\
     \bottomrule
   \end{tabular}
 \end{table}
