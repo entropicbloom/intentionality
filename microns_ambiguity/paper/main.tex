@@ -87,10 +87,10 @@ On MICrONS the decoder reads orientation and receptive-field position from the G
   \label{tab:microns}
   \begin{tabular}{llcccc}
     \toprule
-    content & substrate & relations only & balanced over orientations & stimulus-known linear readout & chance / best constant \\
+    content & substrate & relations only & \begin{tabular}[c]{@{}c@{}}balanced over\\orientations\end{tabular} & \begin{tabular}[c]{@{}c@{}}stimulus-known\\linear readout\end{tabular} & \begin{tabular}[c]{@{}c@{}}chance /\\best constant\end{tabular} \\
     \midrule
-    orientation (mean angular error) & in vivo & $25.4^\circ \pm 0.5^\circ$ & $27.9^\circ$ & $20.2^\circ$ & $45^\circ$ / $41.3^\circ$ \\
-    orientation (mean angular error) & digital twin & $20.2^\circ \pm 0.4^\circ$ & $24.5^\circ$ & $15.6^\circ$ & $45^\circ$ / $41.3^\circ$ \\
+    orientation (angular error) & in vivo & $25.4^\circ \pm 0.5^\circ$ & $27.9^\circ$ & $20.2^\circ$ & $45^\circ$ / $41.3^\circ$ \\
+    orientation (angular error) & digital twin & $20.2^\circ \pm 0.4^\circ$ & $24.5^\circ$ & $15.6^\circ$ & $45^\circ$ / $41.3^\circ$ \\
     receptive field ($\Rsq$) & in vivo & $0.234 \pm 0.007$ & -- & 0.34 & 0 \\
     receptive field ($\Rsq$) & digital twin & $0.480 \pm 0.010$ & -- & 0.69 & 0 \\
     \bottomrule
@@ -201,19 +201,19 @@ Four controls on the MICrONS standard configuration (17M, 512-neuron populations
 
 \begin{table}[htbp]
   \centering\small
-  \caption{Reference decoders that see the activity, 17M unless linear, 512-neuron populations, seed 0. Orientation as mean angular error (chance $45^\circ$), receptive field as $\Rsq$.}
+  \caption{Reference decoders that see the activity (each neuron's stimulus-aligned response vector), 17M unless linear, 512-neuron populations, seed 0. Orientation as mean angular error (chance $45^\circ$), receptive field as $\Rsq$.}
   \label{tab:ref}
   \begin{tabular}{lcccc}
     \toprule
     decoder input & ori.\ in vivo & ori.\ twin & RF in vivo & RF twin \\
     \midrule
     Gram row (this paper) & $25.4^\circ$ & $20.2^\circ$ & 0.23 & 0.48 \\
-    response vector, transformer & $21.9^\circ$ & $14.9^\circ$ & 0.37 & 0.80 \\
-    response vector + Gram as attention bias & $22.2^\circ$ & $15.0^\circ$ & -- & -- \\
-    response vector, linear, no population context & $20.2^\circ$ & $15.6^\circ$ & 0.34 & 0.69 \\
-    response vector, transformer, disjoint stimulus bins & $49.5^\circ$ & $41.0^\circ$ & -- & -- \\
-    response vector with bins shuffled per population, transformer & $27.1^\circ$ & $24.5^\circ$ & 0.04 & 0.08 \\
-    response vector with bins shuffled, linear, no population context & $40.3^\circ$ & $40.2^\circ$ & -- & -- \\
+    activity, transformer & $21.9^\circ$ & $14.9^\circ$ & 0.37 & 0.80 \\
+    activity + Gram as attention bias & $22.2^\circ$ & $15.0^\circ$ & -- & -- \\
+    activity, linear, no population context & $20.2^\circ$ & $15.6^\circ$ & 0.34 & 0.69 \\
+    activity, transformer, disjoint stimulus bins & $49.5^\circ$ & $41.0^\circ$ & -- & -- \\
+    activity, bins shuffled per population, transformer & $27.1^\circ$ & $24.5^\circ$ & 0.04 & 0.08 \\
+    activity, bins shuffled, linear, no population context & $40.3^\circ$ & $40.2^\circ$ & -- & -- \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -226,7 +226,7 @@ Four controls on the MICrONS standard configuration (17M, 512-neuron populations
 
 \begin{table}[htbp]
   \centering\small
-  \caption{Controls, mean angular error on held-out neurons (chance $45^\circ$).}
+  \caption{Controls, mean angular error on held-out neurons (chance $45^\circ$). Where two numbers are given, the second is the error after the best global rotation or reflection (rows marked \emph{aligned}) or averaged over eight equally weighted true-orientation bins (rows marked \emph{balanced}).}
   \label{tab:controls}
   \begin{tabular}{llc}
     \toprule
@@ -234,22 +234,23 @@ Four controls on the MICrONS standard configuration (17M, 512-neuron populations
     \midrule
     standard decoder & twin & $20.2^\circ$ \\
     row statistics only, no relational term & twin & $37.7^\circ$ \\
-    row statistics + Gram as attention bias (equivariant) & twin & $19.6^\circ$ \\
-    disjoint stimulus bins for training and test Grams & twin & $21.2^\circ$ \\
+    row statistics + Gram as attention bias & twin & $19.6^\circ$ \\
+    disjoint stimulus bins, training vs test & twin & $21.2^\circ$ \\
     standard decoder & in vivo & $25.4^\circ$ \\
     disjoint stimulus bins (60 per side) & in vivo & $34.2^\circ$ \\
     same 60 bins on both sides & in vivo & $25.3^\circ$ \\
     neuron split 1 / 2 & in vivo & $25.4^\circ$ / $24.6^\circ$ \\
-    orientation-balanced loss, raw / balanced over 8 bins & twin & $21.4^\circ$ / $25.3^\circ$ \\
-    standard decoder, raw / balanced over 8 bins & twin & $20.3^\circ$ / $24.5^\circ$ \\
-    orientation-balanced loss, raw / balanced & in vivo & $25.8^\circ$ / $29.1^\circ$ (standard $24.6^\circ$ / $27.9^\circ$) \\
-    class-balanced populations (64 neurons per class, train and test), raw / after best rotation & twin & $22.4^\circ$ / $22.3^\circ$ \\
-    class-balanced populations, raw / after best rotation & in vivo & $26.5^\circ$ / $26.4^\circ$ \\
-    trained on V1, scored on V1 (raw / after best rotation) & twin & $22.2^\circ$ / $22.2^\circ$ \\
-    trained on V1, scored on RL & twin & $26.2^\circ$ / $24.6^\circ$ \\
-    trained on V1, scored on AL & twin & $58.2^\circ$ / $31.6^\circ$ \\
-    populations drawn within one scan (128 neurons; trained and tested within scans) & twin / in vivo & $30.7^\circ$ / $32.6^\circ$ \\
-    mixed-scan populations of 128 neurons, V1 (reference for the row above) & twin & $22.2^\circ$ \\
+    standard decoder, raw / balanced & twin & $20.3^\circ$ / $24.5^\circ$ \\
+    orientation-balanced loss, raw / balanced & twin & $21.4^\circ$ / $25.3^\circ$ \\
+    standard decoder, raw / balanced & in vivo & $24.6^\circ$ / $27.9^\circ$ \\
+    orientation-balanced loss, raw / balanced & in vivo & $25.8^\circ$ / $29.1^\circ$ \\
+    class-balanced populations (64 per class), raw / aligned & twin & $22.4^\circ$ / $22.3^\circ$ \\
+    class-balanced populations, raw / aligned & in vivo & $26.5^\circ$ / $26.4^\circ$ \\
+    trained on V1, scored on V1, raw / aligned & twin & $22.2^\circ$ / $22.2^\circ$ \\
+    trained on V1, scored on RL, raw / aligned & twin & $26.2^\circ$ / $24.6^\circ$ \\
+    trained on V1, scored on AL, raw / aligned & twin & $58.2^\circ$ / $31.6^\circ$ \\
+    within-scan populations (128 neurons) & twin / in vivo & $30.7^\circ$ / $32.6^\circ$ \\
+    mixed-scan populations (128 neurons, V1) & twin & $22.2^\circ$ \\
     \bottomrule
   \end{tabular}
 \end{table}
