@@ -298,10 +298,41 @@ Earlier runs decoded orientation as a class (8 classes on MICrONS, 6 on Allen) w
 \end{table}
 
 \section{Labelled reference models}
-TODO: ridge readouts from each neuron's correlations to labelled training neurons (MICrONS in vivo 0.41 / 0.32, twin 0.49 / 0.67; Allen leave-one-mouse-out 0.35 for orientation, 0.20 for receptive fields), with the caveat that ridge is one linear labelled model and the decoder exceeded it on Allen receptive fields.
+A second reference uses labels at test time: a ridge readout from each test neuron's correlations to the labelled training neurons, fitted on the training half, from the classification-era runs (orientation as 8 or 6 classes, accuracy; receptive fields as $\Rsq$). It is one linear labelled model, not a ceiling, and the relational decoder exceeded it on Allen receptive fields.
+
+\begin{table}[htbp]
+  \centering\small
+  \caption{Ridge readout from a neuron's correlations to labelled training neurons (classification era; orientation accuracy, receptive field $\Rsq$).}
+  \begin{tabular}{lcc}
+    \toprule
+    dataset, substrate & orientation & receptive field \\
+    \midrule
+    MICrONS, in vivo & 0.41 (8 classes) & 0.32 \\
+    MICrONS, digital twin & 0.49 (8 classes) & 0.67 \\
+    Allen, leave-one-mouse-out & 0.35 (6 classes) & 0.20 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \section{Receptive-field decomposition per split}
-TODO: per-split table of absolute $\Rsq$, mouse-level correlation and within-mouse correlation for both regimes.
+Per held-out-mouse split, for the two Allen regimes of Fig.~\ref{fig:rf}: $\Rsq$ on absolute screen coordinates, the correlation between predicted and true per-mouse mean position over the 9 test mice ($x$, $y$), and the correlation between predicted and true position relative to the mouse mean over the cells ($x$, $y$).
+
+\begin{table}[htbp]
+  \centering\small
+  \caption{Allen receptive fields per split.}
+  \begin{tabular}{llccc}
+    \toprule
+    populations & split & absolute $\Rsq$ & per-mouse mean $r$ ($x$, $y$) & within-mouse $r$ ($x$, $y$) \\
+    \midrule
+    single-animal & 0 & 0.29 & 0.47, 0.74 & 0.07, 0.11 \\
+    single-animal & 1 & $-0.02$ & 0.48, 0.40 & 0.06, 0.08 \\
+    single-animal & 2 & $-0.45$ & 0.19, 0.25 & 0.11, $-0.01$ \\
+    mixed & 0 & 0.22 & 0.70, 0.81 & 0.00, 0.20 \\
+    mixed & 1 & 0.08 & 0.23, 0.80 & 0.02, 0.08 \\
+    mixed & 2 & $-0.25$ & 0.46, 0.75 & $-0.06$, 0.04 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 
 \clearpage

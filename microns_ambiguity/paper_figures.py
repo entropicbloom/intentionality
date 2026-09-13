@@ -176,7 +176,7 @@ def fig_pipeline():
     axr.add_patch(Rectangle((-1, -1), 2, 2, fc="#f2f4f3", ec="#8a939c", lw=0.8))
     for i, n in enumerate(six): axr.scatter(ds.rf[n, 0], ds.rf[n, 1], s=28, c=NC[i], ec="white", lw=0.6, zorder=3)
     axr.set_xticks([]); axr.set_yticks([]); [sp.set_visible(False) for sp in axr.spines.values()]; axr.set_title("receptive-field centre\n(screen)", fontsize=6.8, pad=2)
-    foot(0.60, 0.98, "5,287 neurons with orientation (gOSI ≥ 0.25), 11,326 with RF")
+    foot(0.745, 0.98, "5,287 neurons with orientation, 11,326 with RF")
     # ---- d: protocol. Full matrix ordered training-first; a population Gram is a diagonal block; two paths through the
     # same decoder: training blocks meet labels in a loss, test blocks are only scored.
     axd = fig.add_axes([0.03, 0.02, 0.95, 0.46]); axd.set_xlim(0, 18.2); axd.set_ylim(0.4, 5.4); axd.set_aspect("equal"); axd.axis("off")
