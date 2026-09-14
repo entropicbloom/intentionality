@@ -19,7 +19,7 @@
 
 \title{What the correlations between neurons say about each neuron}
 \author{Francesco L\"assig\thanks{TODO: affiliation and co-authors.}}
-\date{Draft v2, \today}
+\date{Draft v3, \today}
 
 \begin{document}
 \maketitle
@@ -267,15 +267,15 @@ Four controls on the MICrONS standard configuration (17M, 512-neuron populations
     class-balanced populations (64 per class, 2 seeds), raw / aligned & twin & $22.0^\circ$ / $21.9^\circ$ \\
     class-balanced populations, raw / aligned, 2 seeds & in vivo & $26.6^\circ$ / $26.4^\circ$ \\
     trained on V1, scored on V1 (128 neurons), 3 seeds & twin & $22.4^\circ \pm 0.5^\circ$ \\
-    trained on V1, scored on RL, raw / aligned, 3 seeds & twin & 26, 43, 46 / 25, 41, 39 \\
-    trained on V1, scored on AL (128 neurons), raw / aligned, 3 seeds & twin & 58, 33, 32 / 32, 32, 32 \\
-    same, class-balanced training, V1 / RL / AL, 2 seeds, raw & twin & $31^\circ$ / $29^\circ$ / $45^\circ$ \\
+    trained on V1, scored on RL, raw / aligned (3 seeds each) & twin & 26, 43, 46 / 25, 41, 39 \\
+    trained on V1, scored on AL (128 neurons), raw / aligned & twin & 58, 33, 32 / 32, 32, 32 \\
+    same, class-balanced training (2 seeds), V1 / RL / AL, raw & twin & $31^\circ$ / $29^\circ$ / $45^\circ$ \\
     \quad aligned & twin & $31^\circ$ / $29^\circ$ / $36^\circ$ \\
     within-scan populations of 128, 3 seeds & twin / in vivo & $32.0 \pm 1.1^\circ$ / $31.1 \pm 1.2^\circ$ \\
     one training scan (140 neurons), populations of 128 & twin / in vivo & $38^\circ$--$44^\circ$ / $37^\circ$--$39^\circ$ \\
     mixed-scan populations of 128, 3 seeds & twin / in vivo & $22.3 \pm 0.4^\circ$ / $25.8 \pm 0.2^\circ$ \\
     \midrule
-    Allen, mixed populations of 128, training pool 280 / 560 / 6,706 & 2.2M & $40.5^\circ$ / $40.7^\circ$ / $36.0^\circ$ \\
+    Allen, mixed populations of 128, pool 280 / 560 / 6,706 cells & 2.2M & $40.5^\circ$ / $40.7^\circ$ / $36.0^\circ$ \\
     \bottomrule
   \end{tabular}
 \end{table}
