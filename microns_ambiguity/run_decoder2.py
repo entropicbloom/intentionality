@@ -13,6 +13,7 @@ python -m microns_ambiguity.run_decoder2 <tag> <substrate> <content> [n=128] [di
     [train_scan=<scan> train_pool=N]  with within_scan=1: train on N neurons of one scan, test on the other scans (matched to one Allen animal)
     [ablate_k=24]       class resolution of the ablation
     [balance_pop=1]     populations drawn with equal numbers per orientation bin (train and test; uses labels: an ablation of label density)
+    [balance_train=1]   as balance_pop but for training populations only (test populations unrestricted): removes the training prior
     [save_preds=1]      save averaged per-neuron predictions to outputs/preds/<tag>.npz (idx, P, y, scan, area)
 Appends to outputs/decoder2.json under key <tag>."""
 from __future__ import annotations
@@ -58,6 +59,7 @@ def main(tag, sub, con, **kw):
     ablate = kw.pop("ablate", "")                                                    # residual ablation: "resid" subtracts the class-Gram residual (K=8 classes, estimated on the labelled training half) from every Gram, train and test; "circ" subtracts the whole class-Gram structure (control)
     ablate_k = kw.pop("ablate_k", 8)                                                # class resolution of the ablation (8 or 24)
     balance_pop = kw.pop("balance_pop", 0)                                          # class-balanced populations: n/8 neurons from each 8-class orientation bin, train and test
+    balance_train = kw.pop("balance_train", 0)                                      # class-balanced TRAINING populations only (test populations unrestricted): removes the training prior, e.g. for cross-area transfer to a small area
     if ablate:
         from .residual_check import class_gram, circulant_part, normalise
         K = int(ablate_k); ang_all = np.asarray(ds.ori, float) % 180; cls_all = np.full(ds.n, -1)
@@ -68,7 +70,7 @@ def main(tag, sub, con, **kw):
             Rr = C - circulant_part(C); m_ = ~np.eye(K, dtype=bool); rng_ = np.random.default_rng(12345 + K); N = rng_.standard_normal((K, K)); N = (N + N.T) / 2; N = N - circulant_part(N)
             R = N * (Rr[m_].std() / N[m_].std())
         kw["gram_adjust"] = dict(cls=cls_all, R=R, name=f"{ablate}{K}"); print(f"    ablate={ablate} K={K}: class-Gram offset range {R.min():.3f}..{R.max():.3f}", flush=True)
-    if balance_pop:
+    if balance_pop or balance_train:
         import microns_ambiguity.decoder2 as d2
         Kb = 8; angb = np.asarray(ds.ori, float) % 180; clsb = np.full(ds.n, -1); clsb[keep] = ((angb[keep] + 90 / Kb) // (180 / Kb) % Kb).astype(int)
         class BalancedSampler(d2.Sampler):
@@ -80,7 +82,8 @@ def main(tag, sub, con, **kw):
                 idx = np.stack([np.concatenate([self.rng.choice(p, self.per, replace=len(p) < self.per) for p in self.pools]) for _ in range(B)])
                 idx = np.stack([self.rng.permutation(r) for r in idx]); it = torch.as_tensor(idx, device=self.Fn.device); X = self.Fn[it]
                 return idx, d2.adjust_gram(d2.gram_from_features(X, self.mean, self.std), it), X
-        d2.Sampler = BalancedSampler; print("    balance_pop=1: populations with equal numbers per 8-class bin", flush=True)
+        if balance_pop: d2.Sampler = BalancedSampler; print("    balance_pop=1: populations with equal numbers per 8-class bin", flush=True)
+        else: kw["train_sampler"] = BalancedSampler; print("    balance_train=1: training populations with equal numbers per 8-class bin; test populations unrestricted", flush=True)
     train_scan, train_pool = kw.pop("train_scan", ""), kw.pop("train_pool", 0)      # matched single-circuit training: one scan, N training neurons; test on the other scans
     within_scan = kw.pop("within_scan", 0)                                          # populations drawn within one scan (the MICrONS analogue of Allen's single-animal populations)
     if within_scan:
@@ -113,7 +116,7 @@ def main(tag, sub, con, **kw):
         pr = m.pop("preds"); (OUT / "preds").mkdir(parents=True, exist_ok=True)
         np.savez(OUT / "preds" / f"{tag}.npz", idx=pr["idx"], P=pr["P"], y=np.asarray(y, float)[pr["idx"]], scan=ds.scan[pr["idx"]].astype(str), area=ds.area[pr["idx"]].astype(str))
     m.pop("preds", None); m.pop("F_eval", None)
-    m.update(sub=sub, con=con, seconds=time.time() - t0, n_neurons=int(len(keep)), split_seed=int(split_seed), bins=int(bins), area_train=area_train, area_test=area_test, n_train=int(len(tr)), n_test=int(len(va)), within_scan=int(within_scan), ablate=ablate, ablate_k=int(ablate_k), balance_pop=int(balance_pop), train_scan=train_scan, train_pool=int(train_pool))
+    m.update(sub=sub, con=con, seconds=time.time() - t0, n_neurons=int(len(keep)), split_seed=int(split_seed), bins=int(bins), area_train=area_train, area_test=area_test, n_train=int(len(tr)), n_test=int(len(va)), within_scan=int(within_scan), ablate=ablate, ablate_k=int(ablate_k), balance_pop=int(balance_pop), balance_train=int(balance_train), train_scan=train_scan, train_pool=int(train_pool))
     OUT.mkdir(exist_ok=True); p = OUT / "decoder2.json"
     d = json.load(open(p)) if p.exists() else {}
     d[tag] = m; json.dump(d, open(p, "w"))

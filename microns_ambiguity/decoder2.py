@@ -141,7 +141,7 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False, bin_perm=False, sel_modD=False, gram_adjust=None):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False, bin_perm=False, sel_modD=False, gram_adjust=None, train_sampler=None):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
@@ -223,7 +223,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     steps = epochs * (pops_per_epoch // batch)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, lr, total_steps=steps, pct_start=0.1)
-    tr = Sampler(Fn, train_idx, n, rng, mean, std); va = Sampler(Fn_ev, val_idx, n, np.random.default_rng(seed + 100), mean_ev, std_ev)
+    tr = (train_sampler or Sampler)(Fn, train_idx, n, rng, mean, std); va = Sampler(Fn_ev, val_idx, n, np.random.default_rng(seed + 100), mean_ev, std_ev)   # train_sampler: class to use for training populations only (balance_train)
     # selection populations are drawn from selection + training neurons (the
     # selection slice alone can be smaller than n); only selection neurons are scored
     se = None
