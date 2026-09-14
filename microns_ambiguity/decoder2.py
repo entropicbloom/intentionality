@@ -55,12 +55,12 @@ class Block(nn.Module):
 
 
 class RelDecoder(nn.Module):
-    def __init__(self, n_tokens, out_dim, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True, dropout=0.1, input_mode="gram", act_dim=0):
+    def __init__(self, n_tokens, out_dim, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True, dropout=0.1, input_mode="gram", act_dim=0, use_stats=True):
         super().__init__()
-        self.row_proj, self.input_mode = row_proj, input_mode
+        self.row_proj, self.input_mode, self.use_stats = row_proj, input_mode, use_stats
         # token init: "gram": projected Gram row (+ 3 permutation-invariant row statistics);
         # "act": the neuron's own (row-normalised) response vector, the raw-activity reference (no Gram in the input)
-        self.inp = nn.Linear(act_dim if input_mode == "act" else (n_tokens if row_proj else 0) + 3, dim)
+        self.inp = nn.Linear(act_dim if input_mode == "act" else (n_tokens if row_proj else 0) + (3 if use_stats else 0), dim)
         self.blocks = nn.ModuleList([Block(dim, heads, rel_bias, dropout) for _ in range(layers)])
         self.head = nn.Sequential(nn.LayerNorm(dim), nn.Linear(dim, out_dim))
 
@@ -69,7 +69,7 @@ class RelDecoder(nn.Module):
             x = self.inp(X * math.sqrt(X.shape[-1]))       # unit-norm rows scaled to unit variance per feature
         else:
             stats = torch.stack([G.mean(-1), G.std(-1), (G ** 3).mean(-1)], -1)
-            x = torch.cat([G, stats], -1) if self.row_proj else stats
+            x = (torch.cat([G, stats], -1) if self.use_stats else G) if self.row_proj else stats   # use_stats=False: Gram row only (complement of the row-statistics-only control)
             x = self.inp(x)
         for b in self.blocks:
             x = b(x, G)
@@ -141,7 +141,7 @@ def normalize_features(F):
 
 def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel_bias=False, row_proj=True,
           epochs=10, pops_per_epoch=2000, batch=32, lr=1e-3, seed=0, device="cpu", verbose=True, val_pops=200,
-          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False, bin_perm=False, sel_modD=False, gram_adjust=None, train_sampler=None):
+          heads_=None, early_stop=0.0, dropout=0.1, sel_idx=None, sel_reps=1, avg_reps=(8, 32), return_preds=False, cover_groups=None, cond_frac=1.0, gram_drop=0.0, aug_prob=1.0, F_eval=None, input_mode="gram", label_rot=False, ori_weight=False, bin_perm=False, sel_modD=False, gram_adjust=None, train_sampler=None, use_stats=True):
     """F: (N, d) responses; y: labels (N,) int or (N, k) float. Dense supervision.
     early_stop: fraction of the TRAINING neurons held out as a selection set; the
     reported validation metric is taken at the epoch that is best on that set, so
@@ -218,7 +218,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
         def loss_fn(out, tgt, _idx=None):
             m = lab_t[_idx]
             return ((out[m] - tgt[m]) ** 2).mean() if m.any() else (out * 0).sum()
-    model = RelDecoder(n, out_dim, dim, heads, layers, rel_bias, row_proj, dropout=dropout, input_mode=input_mode, act_dim=Fn.shape[1]).to(device)
+    model = RelDecoder(n, out_dim, dim, heads, layers, rel_bias, row_proj, dropout=dropout, input_mode=input_mode, act_dim=Fn.shape[1], use_stats=use_stats).to(device)
     nparam = sum(p.numel() for p in model.parameters())
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     steps = epochs * (pops_per_epoch // batch)
@@ -317,7 +317,7 @@ def train(F, y, task, train_idx, val_idx, n=128, dim=128, heads=4, layers=2, rel
             final["preds"] = m["preds"]
     if verbose:
         print("    test-time averaging: " + " ".join(f"{k}={v:.3f}" for k, v in final.items() if "avg" in k), flush=True)
-    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, input_mode=input_mode, label_rot=label_rot, ori_weight=ori_weight, bin_perm=bin_perm, sel_modD=sel_modD, gram_adjust=(None if gram_adjust is None else gram_adjust.get('name', 'yes')), cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
+    final.update(history=hist, n=n, dim=dim, layers=layers, rel_bias=rel_bias, row_proj=row_proj, use_stats=use_stats, input_mode=input_mode, label_rot=label_rot, ori_weight=ori_weight, bin_perm=bin_perm, sel_modD=sel_modD, gram_adjust=(None if gram_adjust is None else gram_adjust.get('name', 'yes')), cond_frac=cond_frac, gram_drop=gram_drop, aug_prob=aug_prob,
                  heads=heads, dropout=dropout, lr=lr, seed=seed, early_stop=early_stop, sel_reps=sel_reps, n_sel=(int(len(sel_idx)) if sel_idx is not None else 0),
                                          params=nparam, pops_per_epoch=pops_per_epoch, epochs=epochs, batch=batch)
     return final

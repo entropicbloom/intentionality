@@ -39,9 +39,15 @@ def make(n=6000, T=120, count=0, sharp=0, stim=0, noise=0.5, seed=0, amp_var=0, 
     d = np.deg2rad(2 * (pref[:, None] - phi[None, :]))
     R = g[:, None] * amp[None, :] * np.exp(kappa[:, None] * (np.cos(d) - 1)) + noise * rng.normal(size=(n, T))
     if cocorr:                                                              # shared variability among like-tuned neurons, strongest near 90° (the dominant class of V1):
-        th = np.deg2rad(2 * pref); z = np.zeros((n, T))                     # a smooth random field over preferred orientation (3 Fourier modes per frame) ...
-        for k in range(1, 4): z += np.cos(k * th)[:, None] * rng.normal(size=T)[None, :] + np.sin(k * th)[:, None] * rng.normal(size=T)[None, :]
-        z /= np.sqrt(6.0); s_ = cocorr_k * np.exp(2.0 * (np.cos(np.deg2rad(2 * (pref - 90.0))) - 1))   # ... entering each neuron with a weight peaked at 90°
+        th = np.deg2rad(2 * pref); z = np.zeros((n, T))
+        if cocorr == 1:                                                     # cocorr=1: a smooth random field over preferred orientation (3 Fourier modes per frame; couples 0° and 90°)
+            for k in range(1, 4): z += np.cos(k * th)[:, None] * rng.normal(size=T)[None, :] + np.sin(k * th)[:, None] * rng.normal(size=T)[None, :]
+            z /= np.sqrt(6.0)
+        else:                                                               # cocorr=2: a local field, node noise on 36 orientations smoothed with a von Mises kernel (kappa 4, half-width ~30°), so only like-tuned neurons share it
+            nodes = np.arange(36) * 5.0; eta = rng.normal(size=(36, T))
+            w = np.exp(4.0 * (np.cos(np.deg2rad(2 * (pref[:, None] - nodes[None, :]))) - 1)); w /= w.sum(1, keepdims=True)
+            z = w @ eta; z /= z.std()
+        s_ = cocorr_k * np.exp(2.0 * (np.cos(np.deg2rad(2 * (pref - 90.0))) - 1))   # entering each neuron with a weight peaked at 90°
         R = R + s_[:, None] * z
     return R.astype(np.float32), pref.astype(np.float32)
 

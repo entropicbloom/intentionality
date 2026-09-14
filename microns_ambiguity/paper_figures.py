@@ -40,11 +40,15 @@ def save(fig, name, title, caption, section):
     plt.close(fig); FIGS.append((name, title, caption, section)); print("wrote", name)
 
 
-def chance(ax, x_text=1.42, allen=False):
+def chance(ax, x_text=1.42, allen=False, best_const=None):
     """45° chance line for angular error (errors of an uninformed decoder are uniform on 0–90°);
+    best_const: the best constant prediction given the label distribution (41.3° MICrONS, 43.9° Allen), dotted;
     on Allen also the 7.5° mean disagreement a perfect decoder shows against labels on a 30° grid."""
     ax.axhline(45, color="#888", lw=0.9, zorder=0)
     if x_text is not None: ax.text(x_text, 45.8, "chance", fontsize=6.5, color="#666", va="bottom")
+    if best_const is None: best_const = 43.9 if allen else 41.3
+    ax.axhline(best_const, color="#888", lw=0.8, ls=":", zorder=0)
+    if x_text is not None: ax.text(x_text, best_const - 0.8, "best constant", fontsize=6.5, color="#666", va="top")
     if allen:
         ax.axhline(7.5, color="#888", lw=0.8, ls="--", zorder=0)
         if x_text is not None: ax.text(x_text, 8.3, "label grid", fontsize=6.5, color="#666", va="bottom")
@@ -546,7 +550,7 @@ def figA6():
         per = [d[yb == k].mean() for k in range(K)]; frac = np.bincount(yb, minlength=K) / len(y); pf = np.bincount(tb, minlength=K) / len(y)
         x = np.arange(K) * w
         ax.bar(x, per, w * 0.8, color=col, alpha=0.85, label="error of neurons in bin")
-        ax.axhline(45, color="#888", lw=0.9, zorder=0); ax.set_ylim(0, 50); ax.set_xticks(x); ax.set_xticklabels([f"{v:.0f}" for v in x], fontsize=7); ax.set_xlabel("true preferred orientation (°)"); ax.set_ylabel("mean error (°)")
+        ax.axhline(45, color="#888", lw=0.9, zorder=0); ax.axhline(43.9 if K == 6 else 41.3, color="#888", lw=0.8, ls=":", zorder=0); ax.set_ylim(0, 50); ax.set_xticks(x); ax.set_xticklabels([f"{v:.0f}" for v in x], fontsize=7); ax.set_xlabel("true preferred orientation (°)"); ax.set_ylabel("mean error (°)")
         ax2 = ax.twinx(); ax2.plot(x, frac, "o-", color="k", ms=3, lw=0.8, label="fraction of labels"); ax2.plot(x, pf, "s--", color="#c44", ms=3, lw=0.8, label="fraction of predictions"); ax2.set_ylim(0, 0.5); ax2.set_ylabel("fraction", fontsize=7); ax2.tick_params(axis="y", labelsize=7); ax2.spines["right"].set_visible(True)
         ax.set_title(ttl, fontsize=8.5)
         if ax is np.atleast_1d(axes)[0]: h1, l1 = ax.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels()
