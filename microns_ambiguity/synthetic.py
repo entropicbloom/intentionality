@@ -25,7 +25,7 @@ def vonmises_pref(n, rng, cardinal):
     return th
 
 
-def make(n=6000, T=120, count=0, sharp=0, stim=0, noise=0.5, seed=0, amp_var=0, sharp_k=4.0, gain=0, gain_k=0.0, cocorr=0, cocorr_k=0.5):
+def make(n=6000, T=120, count=0, sharp=0, stim=0, noise=0.5, seed=0, amp_var=0, sharp_k=4.0, gain=0, gain_k=0.0, cocorr=0, cocorr_k=0.5, cocorr_flat=0):
     rng = np.random.default_rng(seed)
     pref = vonmises_pref(n, rng, count)
     kappa = np.full(n, 2.0)
@@ -48,15 +48,18 @@ def make(n=6000, T=120, count=0, sharp=0, stim=0, noise=0.5, seed=0, amp_var=0, 
             w = np.exp(4.0 * (np.cos(np.deg2rad(2 * (pref[:, None] - nodes[None, :]))) - 1)); w /= w.sum(1, keepdims=True)
             z = w @ eta; z /= z.std()
         s_ = cocorr_k * np.exp(2.0 * (np.cos(np.deg2rad(2 * (pref - 90.0))) - 1))   # entering each neuron with a weight peaked at 90°
+        if cocorr_flat: s_ = np.full(n, s_.mean())                                     # control: the same field with a uniform weight (no preferred class)
         R = R + s_[:, None] * z
     return R.astype(np.float32), pref.astype(np.float32)
 
 
-def main(tag, count=0, sharp=0, stim=0, n_neurons=6000, T=120, noise=0.5, data_seed=0, amp_var=0, sharp_k=4.0, gain=0, gain_k=0.0, cocorr=0, cocorr_k=0.5, **kw):
-    F, pref = make(n_neurons, T, count, sharp, stim, noise, data_seed, amp_var, sharp_k, gain, gain_k, cocorr, cocorr_k)
+def main(tag, count=0, sharp=0, stim=0, n_neurons=6000, T=120, noise=0.5, data_seed=0, amp_var=0, sharp_k=4.0, gain=0, gain_k=0.0, cocorr=0, cocorr_k=0.5, cocorr_flat=0, bins=0, **kw):
+    F, pref = make(n_neurons, T, count, sharp, stim, noise, data_seed, amp_var, sharp_k, gain, gain_k, cocorr, cocorr_k, cocorr_flat)
+    if bins:                                                                # bins=1: disjoint halves of the frames for training and test Grams (as bins=1 on cortex)
+        h = T // 2; F, kw["F_eval"] = F[:, :h], F[:, h:2 * h]
     rng = np.random.default_rng(data_seed); perm = rng.permutation(n_neurons); h = n_neurons // 2
     tr, va = perm[:h], perm[h:]
-    t0 = time.time(); print(f"[{tag}] synthetic count={count} sharp={sharp} stim={stim} n={n_neurons} T={T} {kw}", flush=True)
+    t0 = time.time(); print(f"[{tag}] synthetic count={count} sharp={sharp} stim={stim} n={n_neurons} T={T} bins={bins} cocorr_flat={cocorr_flat} { {k: v for k, v in kw.items() if not hasattr(v, 'shape')} }", flush=True)
     m = train(F, pref, "circ", tr, va, **kw)
     m.update(synthetic=dict(count=count, sharp=sharp, stim=stim, n_neurons=n_neurons, T=T, noise=noise, data_seed=data_seed, amp_var=amp_var, sharp_k=sharp_k, gain=gain, gain_k=gain_k, cocorr=cocorr, cocorr_k=cocorr_k), seconds=time.time() - t0)
     m.pop("preds", None); OUT.mkdir(exist_ok=True); p = OUT / "synthetic.json"
