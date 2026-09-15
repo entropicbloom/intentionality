@@ -279,7 +279,7 @@ def fig1():
             if t in M: ax.plot([gi - 0.3, gi + 0.3], [M[t][key]] * 2, "-", color="k", lw=1.2, label="stimulus-known linear readout" if gi == 0 and con == "ori" else None)
         if con == "ori": ax.legend(fontsize=6.5, loc="upper left")
         ax.set_xticks([0, 1]); ax.set_xticklabels(["in vivo", "digital twin"]); ax.set_ylabel(ylab)
-        ax.set_xlim(-0.55, 1.75); ax.set_ylim(0, {"ori": 50, "rf": 0.6}[con])
+        ax.set_xlim(-0.55, 1.75); ax.set_ylim(0, {"ori": 50, "rf": 0.75}[con])
     if sc: coarse_panel(axes[2], [("in vivo", C["iv"], [os.path.join(MPREDS, t + ".npz") for t in ("c_iv_17M_sp1", "c_iv_17M_sp2")]), ("digital twin", C["twin"], [os.path.join(MPREDS, t + ".npz") for t in ("c_is_17M_sp1", "c_is_17M_sp2")])], "coarse readouts, 17M (neuron splits 1, 2)")
     fig.suptitle("Fig. 2  MICrONS: per-neuron content decoded from the population correlation matrix alone (512 neurons, no labels, no reference)", fontsize=9)
     save(fig, "fig2_microns_decoder", "MICrONS relational per-neuron decoding",
