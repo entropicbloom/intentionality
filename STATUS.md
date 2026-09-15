@@ -4,7 +4,9 @@ Results tables: `microns_ambiguity/README.md`. Paper: `microns_ambiguity/paper/m
 
 ## In flight
 
-Nothing (2026-09-14 ~21:00 UTC). No pods. v6 compiled (`~/Desktop/relational_decoding_v6.pdf`, 20 pages) plus a self-contained mobile HTML (`~/Desktop/relational_decoding_v6.html`). Open items for the user: affiliation, repository URL.
+Nothing (2026-09-15 ~18:30 UTC). No pods. v7 compiled (`~/Desktop/relational_decoding_v7.pdf`, 20 pages) plus a self-contained mobile HTML (`~/Desktop/relational_decoding_v7.html`). Open items for the user: affiliation, repository URL.
+
+v7 revision summary (2026-09-15, citation audit by a separate agent, all eight points checked against the source and accepted): pre-norm now cites Xiong et al. 2020 (ICML) next to Vaswani (decoder2.py Block applies LayerNorm before attention and MLP, so the word stays); kawakita2024 (Sci. Rep., humans vs LLMs) replaced by kawakita2025 (iScience 28(3):112029, across individuals, which is what the sentence claims); spontaneous-activity sentence in the intro no longer says "correlation structure" (Tsodyks/Kenet correlate spontaneous frames against evoked maps); "13 two-photon scans" -> "13 of the 14" in Fig. 1 caption and Methods (Ding et al. report 14 scans; the release node table used here holds 13, verified by counting scan_session-scan_idx pairs); refs.bib author `{de Vries}` so citeproc keeps the particle in the HTML (the PDF is numeric and was unaffected); arora2025 -> NeurIPS 2025 proceedings; sucholutsky2023 -> sucholutsky2025, TMLR 2025; hyperalignment sentence now "from responses to a common stimulus" (Procrustes on a shared timeline, not on similarity structures). No prose otherwise touched. No new runs. No reviewer pass on v7.
 
 v6 revision summary (2026-09-14, after `review_2026-09-14_v5.md`, verdict minor revision): calibration sentences corrected (no threshold located; weakest model setting below cortex on residual fraction, above on factor; stale seed-sensitivity sentence removed; "down to a third" removed); 1.28 restored; single-scan range 31–32° everywhere; coincidence stated as V1 (73 % of neurons) with the volume inheriting it, not holding in RL/AL; AL in-vivo peak within noise noted; Allen criterion corrected (150 cells responsive to drifting gratings; 5,529 static-grating labels); per-split best constants (43.9/43.4/43.3) -> single-animal margin 0.3–1.8°; oblique ranges labelled (pooled both substrates vs per class twin); one-peaked description marked in vivo, excesses labelled V1; table row and paragraph head reworded (no "co-fluctuation"/"co-correlated"); 56 % sentence split; Appendix A substrates named; LM/volume caption; row-statistics result moved to the third observation; bin-shuffled conclusion dropped; per-area-errors clause; selectivity sentence as parenthesis; "relations carry the readout" sentence and Fig. 1 bin counts cut; kohn2005 removed from refs.bib; abstract 344 -> 310 words; intro paragraph 4 tightened. No new runs. No reviewer pass on v6 (user did not ask).
 
@@ -96,7 +98,7 @@ Every run writes config + per-epoch history + final metrics to `microns_ambiguit
 
 ## Related work notes (for the paper; all references verified against publisher records on 2026-09-11)
 
-ML neighbours (verified 2026-09-11, now cited in the intro): NeuPRINT (Mi, Le, He, Shlizerman, Sümbül, NeurIPS 2023): time-invariant per-neuron embedding from population dynamics, decodes cell type. NuCLR (Arora, Lachi, Knight, Azabou, Richards, Hurwitz, Siegle, Dyer, arXiv 2512.01199, Dec 2025): contrastive self-supervised neuron identity from population context, permutation-equivariant spatiotemporal transformer on binned spike trains (20 ms bins); tasks are cell type (Allen Neuropixels optotagging, Bugeon) and brain region (IBL, Steinmetz); zero-shot to unseen animals; no tuning targets, no MICrONS, no relations-only input. POYO (Azabou et al., NeurIPS 2023): one decoder across sessions/animals via spike tokens with unit embeddings. Positioning: same genre (per-neuron property from population context, transfer to unseen animals), different input (relations only, stimulus discarded), different target (stimulus content), plus the symmetry explanation. Natural reviewer request: a raw-activity decoder as reference for how much relations alone lose.
+ML neighbours (verified 2026-09-11, now cited in the intro): NeuPRINT (Mi, Le, He, Shlizerman, Sümbül, NeurIPS 2023): time-invariant per-neuron embedding from population dynamics, decodes cell type. NuCLR (Arora, Lachi, Knight, Azabou, Richards, Hurwitz, Siegle, Dyer, NeurIPS 2025; arXiv 2512.01199): contrastive self-supervised neuron identity from population context, permutation-equivariant spatiotemporal transformer on binned spike trains (20 ms bins); tasks are cell type (Allen Neuropixels optotagging, Bugeon) and brain region (IBL, Steinmetz); zero-shot to unseen animals; no tuning targets, no MICrONS, no relations-only input. POYO (Azabou et al., NeurIPS 2023): one decoder across sessions/animals via spike tokens with unit embeddings. Positioning: same genre (per-neuron property from population context, transfer to unseen animals), different input (relations only, stimulus discarded), different target (stimulus content), plus the symmetry explanation. Natural reviewer request: a raw-activity decoder as reference for how much relations alone lose.
 The intro lineage (paragraph 2 of `paper/main.tex`), one line each on what the source claims and what we take from it:
 - Shepard & Chipman 1970 (Cogn. Psychol. 1:1-17): second-order isomorphism; a representation need not resemble its
   object, the relations among representations should mirror the relations among objects.
@@ -104,9 +106,9 @@ The intro lineage (paragraph 2 of `paper/main.tex`), one line each on what the s
   similarity structure ("chorus of prototypes"). The cleanest statement of the idea we build on.
 - Kriegeskorte, Mur & Bandettini 2008 (Front. Syst. Neurosci. 2:4); Kriegeskorte & Kievit 2013 (TICS 17(8):401-412):
   RSA; similarity structure is the level at which brains, models and species are compared, independent of coordinates.
-- Haxby et al. 2011 (Neuron 72(2):404-416): hyperalignment; a shared representational space across subjects built from
-  response structure under a shared movie. Closest precedent for our across-brain regime, at subject level.
-- Sucholutsky et al. 2023 (arXiv:2310.13018); Huh et al. 2024 (ICML, PMLR 235:20617-20642, "Position: the platonic
+- Haxby et al. 2011 (Neuron 72(2):404-416): hyperalignment; a shared representational space across subjects built by
+  Procrustes alignment of response patterns on a shared movie timeline (not from similarity structures). Closest precedent for our across-brain regime, at subject level.
+- Sucholutsky et al. 2025 (TMLR, Oct 2025; arXiv:2310.13018); Huh et al. 2024 (ICML, PMLR 235:20617-20642, "Position: the platonic
   representation hypothesis"): representational alignment across systems via relations among representations.
 - Tsodyks et al. 1999 (Science 286:1943-1946); Kenet et al. 2003 (Nature 425:954-956): spontaneous activity in the dark
   reproduces evoked orientation maps; a single neuron's spike-triggered population pattern matches the map of its
@@ -124,7 +126,8 @@ The intro lineage (paragraph 2 of `paper/main.tex`), one line each on what the s
   mathematical structure of experience; cite as definition, not as the claim (fixed).
 - Oizumi, Lim & Kanai 2026 (PNAS Nexus 5(9):pgag261): equivariant encoders -> rigid group-inherited orbits ("attributes",
   universal) + plastic quotient ("signatures", individual). Our circulant part = rigid, anisotropy = what pins the frame.
-- Kawakita et al. 2024 (Sci. Rep. 14:15917): Gromov-Wasserstein unsupervised alignment of similarity structures; the
+- Kawakita, Zeleznikow-Johnston, Takeda, Tsuchiya, Oizumi 2025 (iScience 28(3):112029, "Is my 'red' your 'red'?"): Gromov-Wasserstein
+  unsupervised alignment of colour similarity structures across individuals (the 2024 Sci. Rep. 14:15917 paper aligns humans against LLMs and was cited by mistake through v6); the
   continuous relaxation of our exhaustive permutation matching.
 - Lässig 2025 (arXiv:2512.11000, q-bio.NC): our framework paper; cited after the lineage, never first.
 Decisions: no consciousness framing; the framework paper and Oizumi appear in one discussion paragraph; the
