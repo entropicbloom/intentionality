@@ -1,4 +1,4 @@
-# What the correlations between neurons say about each neuron
+# A neuron's tuning is fixed by its correlations with other neurons
 
 *Draft v8. Figures refer to `outputs/paper/` (Figs. 1–6 main text, A1–A3 appendix).*
 
