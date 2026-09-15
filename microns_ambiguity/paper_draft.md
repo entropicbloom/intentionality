@@ -129,7 +129,7 @@ Limits. MICrONS is one animal, and its training and test halves share recording 
 
 The symmetry result is an instance of a general expectation: a representation that is equivariant to a group has a group-fixed part, identical across individuals up to relabelling, and an individual remainder [oizumi2026]. The matching-over-relabellings test is the discrete form of unsupervised alignment of similarity structures across individuals by optimal transport [kawakita2025]. This paper adds the measurement in cortex, at the level of single neurons, and the finding that the absolute readout is possible and rests on a remainder that belongs to the correlations, not to the sample of neurons or stimuli.
 
-**Code and data.** TODO: repository URL. All data are public releases.
+**Code and data.** Code, run configurations and per-neuron predictions are in the directory `microns_ambiguity` (branch `microns-ambiguity`) of https://github.com/entropicbloom/intentionality. All data are public releases.
 
 ## Appendix A. Scaling and population size
 
