@@ -1,0 +1,135 @@
+\begin{thebibliography}{18}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Shepard and Chipman(1970)]{shepard1970}
+Roger~N. Shepard and Susan Chipman.
+\newblock Second-order isomorphism of internal representations: shapes of
+  states.
+\newblock \emph{Cognitive Psychology}, 1:\penalty0 1--17, 1970.
+
+\bibitem[Kriegeskorte et~al.(2008)Kriegeskorte, Mur, and
+  Bandettini]{kriegeskorte2008}
+Nikolaus Kriegeskorte, Marieke Mur, and Peter~A. Bandettini.
+\newblock Representational similarity analysis: connecting the branches of
+  systems neuroscience.
+\newblock \emph{Frontiers in Systems Neuroscience}, 2:\penalty0 4, 2008.
+
+\bibitem[Lyre(2022)]{lyre2022}
+Holger Lyre.
+\newblock Neurophenomenal structuralism. {A} philosophical agenda for a
+  structuralist neuroscience of consciousness.
+\newblock \emph{Neuroscience of Consciousness}, 2022\penalty0 (1):\penalty0
+  niac012, 2022.
+
+\bibitem[L{\"a}ssig(2025)]{framework2025}
+Francesco L{\"a}ssig.
+\newblock Unambiguous representations in neural networks: an
+  information-theoretic approach to intentionality.
+\newblock arXiv:2512.11000 [q-bio.NC], 2025.
+\newblock URL \url{https://arxiv.org/abs/2512.11000}.
+
+\bibitem[Tsodyks et~al.(1999)Tsodyks, Kenet, Grinvald, and Arieli]{tsodyks1999}
+Misha Tsodyks, Tal Kenet, Amiram Grinvald, and Amos Arieli.
+\newblock Linking spontaneous activity of single cortical neurons and the
+  underlying functional architecture.
+\newblock \emph{Science}, 286:\penalty0 1943--1946, 1999.
+
+\bibitem[Rubin et~al.(2019)Rubin, Sheintuch, Brande-Eilat, Pinchasof, Rechavi,
+  Geva, and Ziv]{rubin2019}
+Alon Rubin, Liron Sheintuch, Noa Brande-Eilat, Or~Pinchasof, Yoav Rechavi,
+  Nitzan Geva, and Yaniv Ziv.
+\newblock Revealing neural correlates of behavior without behavioral
+  measurements.
+\newblock \emph{Nature Communications}, 10:\penalty0 4745, 2019.
+
+\bibitem[Arora et~al.(2025)Arora, Lachi, Knight, Azabou, Richards, Hurwitz,
+  Siegle, and Dyer]{arora2025}
+Vinam Arora, Divyansha Lachi, Ian~J. Knight, Mehdi Azabou, Blake Richards,
+  Cole~L. Hurwitz, Joshua~H. Siegle, and Eva~L. Dyer.
+\newblock Know thyself by knowing others: learning neuron identity from
+  population context.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~38, 2025.
+
+\bibitem[Ding et~al.(2025)Ding, Fahey, Papadopoulos, et~al.]{ding2025}
+Zhuokun Ding, Paul~G. Fahey, Stelios Papadopoulos, et~al.
+\newblock Functional connectomics reveals general wiring rule in mouse visual
+  cortex.
+\newblock \emph{Nature}, 640\penalty0 (8058):\penalty0 459--469, 2025.
+
+\bibitem[{The MICrONS Consortium}(2025)]{microns2025}
+{The MICrONS Consortium}.
+\newblock Functional connectomics spanning multiple areas of mouse visual
+  cortex.
+\newblock \emph{Nature}, 640\penalty0 (8058):\penalty0 435--447, 2025.
+
+\bibitem[Wang et~al.(2025)Wang, Fahey, Ding, et~al.]{wang2025}
+Eric~Y. Wang, Paul~G. Fahey, Zhuokun Ding, et~al.
+\newblock Foundation model of neural activity predicts response to new stimulus
+  types.
+\newblock \emph{Nature}, 640\penalty0 (8058):\penalty0 470--477, 2025.
+
+\bibitem[{de Vries} et~al.(2020){de Vries}, Lecoq, Buice, et~al.]{devries2020}
+Saskia E.~J. {de Vries}, Jerome~A. Lecoq, Michael~A. Buice, et~al.
+\newblock A large-scale standardized physiological survey reveals functional
+  organization of the mouse visual cortex.
+\newblock \emph{Nature Neuroscience}, 23:\penalty0 138--151, 2020.
+
+\bibitem[Vaswani et~al.(2017)Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez,
+  Kaiser, and Polosukhin]{vaswani2017}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+  Aidan~N. Gomez, {\L}ukasz Kaiser, and Illia Polosukhin.
+\newblock Attention is all you need.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~30, 2017.
+
+\bibitem[Xiong et~al.(2020)Xiong, Yang, He, Zheng, Zheng, Xing, Zhang, Lan,
+  Wang, and Liu]{xiong2020}
+Ruibin Xiong, Yunchang Yang, Di~He, Kai Zheng, Shuxin Zheng, Chen Xing,
+  Huishuai Zhang, Yanyan Lan, Liwei Wang, and Tie-Yan Liu.
+\newblock On layer normalization in the transformer architecture.
+\newblock In \emph{International Conference on Machine Learning}, volume 119 of
+  \emph{PMLR}, pages 10524--10533, 2020.
+
+\bibitem[Roth et~al.(2012)Roth, Helmchen, and Kampa]{roth2012}
+Morgane~M. Roth, Fritjof Helmchen, and Bj{\"o}rn~M. Kampa.
+\newblock Distinct functional properties of primary and posteromedial visual
+  area of mouse neocortex.
+\newblock \emph{Journal of Neuroscience}, 32\penalty0 (28):\penalty0
+  9716--9726, 2012.
+
+\bibitem[Fahey et~al.(2019)Fahey, Muhammad, Smith, Froudarakis, Cobos, Fu,
+  Walker, Yatsenko, Sinz, Reimer, and Tolias]{fahey2019}
+Paul~G. Fahey, Taliah Muhammad, Cameron Smith, Emmanouil Froudarakis, Erick
+  Cobos, Jiakun Fu, Edgar~Y. Walker, Dimitri Yatsenko, Fabian~H. Sinz, Jacob
+  Reimer, and Andreas~S. Tolias.
+\newblock A global map of orientation tuning in mouse visual cortex, 2019.
+\newblock bioRxiv 745323.
+
+\bibitem[Ko et~al.(2011)Ko, Hofer, Pichler, Buchanan, Sj{\"o}str{\"o}m, and
+  Mrsic-Flogel]{ko2011}
+Ho~Ko, Sonja~B. Hofer, Bruno Pichler, Katherine~A. Buchanan, P.~Jesper
+  Sj{\"o}str{\"o}m, and Thomas~D. Mrsic-Flogel.
+\newblock Functional specificity of local synaptic connections in neocortical
+  networks.
+\newblock \emph{Nature}, 473:\penalty0 87--91, 2011.
+
+\bibitem[Oizumi et~al.(2026)Oizumi, Lim, and Kanai]{oizumi2026}
+Masafumi Oizumi, Chanseok Lim, and Ryota Kanai.
+\newblock Principal bundle geometry of qualia: understanding the quality of
+  consciousness from symmetry.
+\newblock \emph{PNAS Nexus}, 5\penalty0 (9):\penalty0 pgag261, 2026.
+
+\bibitem[Kawakita et~al.(2025)Kawakita, Zeleznikow-Johnston, Takeda, Tsuchiya,
+  and Oizumi]{kawakita2025}
+Genji Kawakita, Ariel Zeleznikow-Johnston, Ken Takeda, Naotsugu Tsuchiya, and
+  Masafumi Oizumi.
+\newblock Is my ``red'' your ``red''?: {E}valuating structural correspondences
+  between color similarity judgments using unsupervised alignment.
+\newblock \emph{iScience}, 28\penalty0 (3):\penalty0 112029, 2025.
+
+\end{thebibliography}
