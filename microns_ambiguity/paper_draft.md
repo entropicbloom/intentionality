@@ -38,7 +38,7 @@ Each row of a population's Gram, together with three row statistics (the mean, s
 
 ### 2.4 Protocol
 
-**Split.** MICrONS neurons are halved at random. Training populations are sampled inside the training half and test populations inside the test half, so no test neuron appears in a training population (Fig. 1d). A slice of the training half is held out to choose the epoch. The test half never influences selection.
+**Split.** MICrONS neurons are halved at random. Training populations are sampled inside the training half and test populations inside the test half, so no test neuron appears in a training population (Fig. 1d). Early stopping uses a slice of the training half: the epoch with the lowest error on that slice is kept, so the test half never influences model selection. The test half never influences selection.
 
 **Regimes (Allen).** Two independent choices define a run. The split decides where test neurons come from: the training animals, each halved into training and test neurons, or held-out animals. The population decides what a sample is: neurons drawn from one animal, so that the Gram is a within-circuit matrix, or from several animals, so that most entries are between-animal correlations. We call the four cells `within`, `pooledwithin`, `cross` and `pooledcross`. Held-out regimes select the epoch on further held-out mice. Every held-out cell is run on three mouse splits and every training-animal cell on three neuron splits.
 
