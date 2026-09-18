@@ -43,6 +43,10 @@ Question from the user: is the frame-fixing just "the 90-degree class marks a po
    Code: `synthetic.py` gained `cocorr_flat=1` (uniform weight, same mean as the peaked one) and `bins=1` (disjoint frame halves via train's F_eval, as run_decoder2 bins=1). zsh pitfall: an unquoted $VAR is one word in zsh, so option strings must be written out or expanded with ${=VAR}.
    Paper implications if confirmed (not applied): two or three sentences in Section 3.2 / Discussion turning "obliques not resolved" into a consequence of the symmetry analysis (rotation fixed, residual reflection-symmetric, outputs collapse to cardinals), and one or two rows in the synthetic table. No new section or figure.
 
+### Scan effect recomputed (2026-09-18, `microns_ambiguity/scan_effect.py`)
+
+The Methods sentence "same-scan pairs correlate about 50 % more strongly than cross-scan pairs at matched RF distance" came from the first commit with no surviving script and no substrate named. Recomputed: 6,000 random RF-labelled neurons, pairs binned by decile of RF-centre distance, same-scan / cross-scan mean correlation per decile. In vivo 1.49 1.48 1.45 1.44 1.48 1.58 over the six nearest deciles (then the correlations cross zero and the ratio is undefined); twin 1.27 1.26 1.25 1.24 1.28 1.35. So the in-vivo figure was right, and the old figure-caption note "the twin has no such effect" was wrong (the twin has a smaller one). Paper sentence now names both substrates and the method; caption note and README corrected. Pending rebuild (user is batching edits).
+
 ## Log of decisions and results (2026-09-11/12, newest last)
 
 Reporting decision for the regression results (2026-09-11): main text uses mean absolute angular error in degrees only, with a 45° chance line (uniform errors on 0–90° average 45°) and one predicted-vs-true scatter per dataset. Allen panels also mark the ~7.5° label-quantisation floor (30° label grid). Within-15° fraction goes to the appendix table only; no normalised score.

@@ -678,7 +678,8 @@ MICrONS the readout is cardinal (0°: 24.8°, 90°: 33.8°, 120°/150°: 45°).
   orientation and in-vivo covariance are not.  Orientation labels are gated
   at gOSI ≥ 0.25 (5,287 of 12,894 neurons).
 * In-vivo oracle responses are compared across 13 scans; same-scan pairs are
-  ≈ 50 % more correlated than cross-scan pairs at matched RF distance, a
+  ≈ 1.5x more correlated than cross-scan pairs at matched RF distance (≈ 1.3x on
+  the twin; `scan_effect.py`, 2026-09-18), a
   session effect that the stratified splits do not remove but that cannot
   create orientation- or RF-specific class structure.
 * The class-level protocol is the paper's; it hides class *identities* but
