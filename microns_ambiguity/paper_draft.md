@@ -1,6 +1,6 @@
 # Reading a neuron's tuning from its correlations with other neurons
 
-*Draft v8. Figures refer to `outputs/paper/` (Figs. 1–6 main text, A1–A3 appendix).*
+*Draft v9. Figures refer to `outputs/paper/` (Figs. 1–6 main text, A1–A3 appendix).*
 
 ## Abstract
 
