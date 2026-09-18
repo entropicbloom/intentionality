@@ -431,7 +431,7 @@ def fig4():
          "Predicted versus true mean receptive-field position of each held-out mouse (9 mice × 3 mouse splits = 27 points; x squares, y dots), from "
          "decoders trained on single-animal or mixed populations. The per-mouse mean is recovered (r 0.36–0.71; permutation p ≤ 0.03), the position of a neuron "
          "relative to its mouse-mates is not (r ≈ 0.1 over 1,259 cells after centring per mouse). R² on absolute coordinates is therefore not a stable summary "
-         "here: it depends on whether the between-mouse spread of a given test set is reproduced at the right scale. With 23–112 RF-labelled cells per mouse the "
+         "here: it depends on whether the between-mouse spread of a given test set is reproduced at the right scale. With 11–112 RF-labelled cells per mouse the "
          "decoder learns the population-level signal and not the fine one; MICrONS (one animal, 11k labels) shows the same decoder recovers neuron-level RF at R² 0.48.", "main")
 
 
