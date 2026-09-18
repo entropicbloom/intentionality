@@ -1,0 +1,23 @@
+[syn5_localflat1_d0] synthetic count=0 sharp=0 stim=0 n=6000 T=120 {'n': 512, 'dim': 256, 'layers': 4, 'epochs': 20, 'batch': 64, 'seed': 0, 'rel_bias': True, 'device': 'mps', 'early_stop': 0.2, 'sel_reps': 4, 'pops_per_epoch': 5000}
+    ep0 loss=0.567 err=45.344 within15=0.148 sel=-56.696 (74s)
+    ep1 loss=0.515 err=42.321 within15=0.242 sel=-45.485 (147s)
+    ep2 loss=0.506 err=46.165 within15=0.109 sel=-49.246 (221s)
+    ep3 loss=0.498 err=43.590 within15=0.173 sel=-30.918 (294s)
+    ep4 loss=0.497 err=39.496 within15=0.215 sel=-35.335 (368s)
+    ep5 loss=0.494 err=41.604 within15=0.199 sel=-22.460 (441s)
+    ep6 loss=0.491 err=41.369 within15=0.198 sel=-40.184 (515s)
+    ep7 loss=0.486 err=29.703 within15=0.316 sel=-48.450 (588s)
+    ep8 loss=0.472 err=30.165 within15=0.325 sel=-27.309 (660s)
+    ep9 loss=0.444 err=25.925 within15=0.325 sel=-24.087 (732s)
+    ep10 loss=0.395 err=24.519 within15=0.333 sel=-29.194 (804s)
+    ep11 loss=0.359 err=26.242 within15=0.335 sel=-25.996 (878s)
+    ep12 loss=0.332 err=22.209 within15=0.339 sel=-32.448 (950s)
+    ep13 loss=0.304 err=21.755 within15=0.345 sel=-26.960 (1022s)
+    ep14 loss=0.284 err=20.158 within15=0.371 sel=-25.454 (1093s)
+    ep15 loss=0.261 err=18.813 within15=0.445 sel=-24.715 (1163s)
+    ep16 loss=0.230 err=17.541 within15=0.525 sel=-25.057 (1235s)
+    ep17 loss=0.202 err=16.320 within15=0.565 sel=-27.008 (1306s)
+    ep18 loss=0.186 err=14.017 within15=0.638 sel=-25.639 (1379s)
+    ep19 loss=0.182 err=14.453 within15=0.603 sel=-25.563 (1452s)
+    test-time averaging: err_avg8=34.112 err_avg32=37.963
+  -> syn5_localflat1_d0: err=41.60 err_modD=40.41 within15=0.199 best_epoch=5 1454s
