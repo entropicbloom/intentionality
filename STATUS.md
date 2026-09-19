@@ -184,6 +184,25 @@ The intro lineage (paragraph 2 of `paper/main.tex`), one line each on what the s
 Decisions: no consciousness framing; the framework paper and Oizumi appear in one discussion paragraph; the
 spontaneous-activity papers get a sentence in the discussion as the precedent.
 
+## Next steps after the arXiv v1 (written 2026-09-19)
+
+Submission: submit/8101670, on hold for moderation (cs.NE primary, q-bio.NC cross-list, reassignment requested, CC BY). When the id arrives: add it to the website exhibit 3 (`consciousness/_includes/exhibit3.md`), the site header links (`_includes/header.md`), and this repo's README.
+
+People to contact once the id exists (one paragraph, one figure, one specific question each):
+- Masafumi Oizumi (Tokyo): symmetry/qualia-structure (PNAS Nexus 2026 with Kanai, cited in the Discussion); GW alignment is the continuous version of the relabelling test. Send the D8 diagram (`outputs/paper/fig_d8_symmetries.png`). Most likely to read carefully.
+- Ryota Kanai (Araya): co-author of the same paper, structuralist framing. D8 diagram.
+- Holger Lyre (Magdeburg): neurophenomenal structuralism (cited in the intro); hook is content fixed up to a symmetry and cortex breaking it only partly.
+- Eva Dyer (Georgia Tech): NuCLR senior author; the decoder side. Send Fig. 2.
+- Tolias / MICrONS functional group (Ding, Wang, Fahey): the 90-degree anisotropy is a finding about their volume; send the per-area table (Table 2). They can check it against their Monet measurements.
+
+Material for v2 / a follow-up (all recorded, none in the arXiv v1):
+- v12 corrections (main.tex) that were not carried into v10a: R-squared and averaging-protocol definitions, hyperparameters, Allen split/sampler facts, retinotopy bound, bootstrap CIs in the areas table, the 60/30-epoch Allen budget disclosure, the class-balance V1-vs-volume clarification, Fig. A1 budget caveat. Plus a compaction pass to bring v12 back to ~9,500 words.
+- Reflection story: the two-candidate model explains the cardinal readout (`reflection_check.py`, `reflection_figure.py`, `d8_figure.py`); residual is 93-97 % reflection-symmetric on the twin. Two figures ready. One paragraph in 3.2.
+- Allen anisotropy replicates: factor 1.29 at 0 deg pooled over 33 mice, 1.21 within mouse, peak resolved 500/500 (`allen/anisotropy_check.py`). Open: whether 0 deg (Allen) and 90 deg (MICrONS) are the same orientation under the two stimulus conventions (half an hour: check the direction/orientation conventions in both releases); whether the Allen anisotropy is tuning sharpness of cardinal cells under gratings rather than a circuit property.
+- Stimulus-bias candidate: measure the orientation-energy spectrum of the MICrONS oracle clips and the Allen movie templates (needs downloads: DataJoint release / AllenSDK); 2D FFT per frame, energy by orientation, cardinal share. Closes or confirms the second sufficient cause the abstract names.
+- Synthetic disjoint-frame controls at more seeds (uniform weight is 1 seed); budget-matched pooledcross at 30 epochs; balanced error for the split-0 seeds (needs a re-evaluation pass with return_preds).
+- Reflection-breaking test: is there any asymmetry between 45 and 135 deg in the residual (reflection-antisymmetric share in vivo is 0.22; split-half test would show whether it is noise).
+
 ## Possible next steps
 - Spontaneous-activity relations (Allen sessions have a grey-screen block): Kenet 2003 / Tsodyks 1999 show spontaneous
   correlations group neurons by orientation (the circulant part). The open question for a label-free readout is whether
