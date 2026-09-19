@@ -4,7 +4,7 @@ Results tables: `microns_ambiguity/README.md`. Paper: `microns_ambiguity/paper/m
 
 ## In flight
 
-Nothing (2026-09-19). arXiv v1 (v10a) submitted 2026-09-19; folder in `microns_ambiguity/paper/arxiv_v10a/` and `~/Desktop/paper/relational_decoding_v10a.{pdf,html}` (20 pages); v12 (all review corrections, 23 pages) in `~/Desktop/paper/` too and in main.tex.
+Nothing (2026-09-19 12:16). arXiv v1 (v10a) submitted 2026-09-19 as submit/8101670, status on hold (moderation; cs.NE primary, q-bio.NC cross-list, reassignment note in comments, CC BY); folder in `microns_ambiguity/paper/arxiv_v10a/` and `~/Desktop/paper/relational_decoding_v10a.{pdf,html}` (20 pages); v12 (all review corrections, 23 pages) in `~/Desktop/paper/` too and in main.tex.
 
 v10 (2026-09-18): trim only. 21 restating or legacy sentences removed and three clauses merged (9,450 -> 9,088 words), chosen from an Opus list of 45 candidates; kept against the list: the intro half-split sentence (parallel to the Allen one), the 56 % base rate, the first 3.3 summary sentence, the Methods scan and label-variance sentences, caption sentences that let figures stand alone, the Kawakita and structuralist sentences. Fig. A4 legend reworded. No content change. Reflection-check results recorded below but NOT in the paper (user: record only).
 
