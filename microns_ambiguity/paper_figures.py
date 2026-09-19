@@ -237,7 +237,7 @@ def fig_pipeline():
     axd.add_patch(FancyBboxPatch((13.85, YS - 0.55), 1.55, 1.1, boxstyle="round,pad=0.03,rounding_size=0.18", fc="white", ec=TE, lw=1.1))
     axd.text(14.62, YS + 0.2, "score", fontsize=7, ha="center", va="center", weight="bold", color=ORANGE_T); axd.text(14.62, YS - 0.2, "angular error / R² vs.\nheld-out labels", fontsize=5.4, ha="center", va="center", color="#444")
     axd.text(16.1, YS, "no gradient;\nthe decoder never\nsees a test label", fontsize=5.6, ha="left", va="center", color="#444")
-    axd.text(18.0, 0.95, "epoch chosen on a held-out slice of the training half.  One brain, samples drawn\nwithin one animal, new neurons: the `within` cell of Fig. 4", fontsize=5.8, ha="right", va="top", color="#444")
+    axd.text(18.0, 0.95, "epoch chosen on a held-out slice of the training half.  One brain, samples drawn\nwithin one animal, new neurons.", fontsize=5.8, ha="right", va="top", color="#444")
     fig.suptitle("Fig. 1  MICrONS: from one imaged cortical volume to a per-neuron decoding task whose only input is the correlation matrix", fontsize=9, y=0.985)
     save(fig, "fig1_microns_pipeline", "How the MICrONS task is built",
          "(a) The MICrONS functional-connectomics release (Ding, Fahey, Papadopoulos et al. 2025): one mouse, 13 two-photon scans of a cubic millimetre of visual cortex "
@@ -251,7 +251,7 @@ def fig_pipeline():
          "512 × 512 matrix is the decoder's entire input, one row per neuron, one prediction per row. Training draws thousands of samples per epoch from the "
          "training half; their predictions meet the labels of the labelled neurons in the sample in a loss that updates the decoder. Scoring draws samples from "
          "the test half and compares predictions with held-out labels; no gradient. Labels never enter the input on either path, and the halves share no neuron. "
-         "The epoch is chosen on a held-out slice of the training half. One animal, samples drawn within one animal, new neurons: the `within` cell of Fig. 4.", "main")
+         "The epoch is chosen on a held-out slice of the training half. One animal, samples drawn within one animal, new neurons.", "main")
 
 
 # ---------------------------------------------------------------- Fig 2: MICrONS label-free decoding
