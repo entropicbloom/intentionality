@@ -474,7 +474,7 @@ def figA2():
         tags = have(M, tags); xs = [M[t]["n"] for t in tags]; ys = [M[t]["err"] for t in tags]; ax.plot(xs, ys, "o-", color=col, label=lab)
     chance(ax, x_text=None); ax.set_xscale("log", base=2); ax.set_xlabel("neurons per population"); ax.set_ylabel("orientation error (°)"); ax.set_title("MICrONS orientation"); ax.legend(fontsize=6.5); ax.set_ylim(0, 50)
     ax = axes[1]
-    for tags, lab, col, src in [(["n128_rel_rf", "n256_rel_rf", "n512_rel_rf", "n1024_rel_rf"], "MICrONS in vivo, 0.3M", C["iv"], M), (["twin_n256_rf", "big_twin_n512_rf", "big_twin_n1024_rf"], "MICrONS twin, 2.2M", C["twin"], M),
+    for tags, lab, col, src in [(["n128_rel_rf", "n256_rel_rf", "n512_rel_rf", "n1024_rel_rf"], "MICrONS in vivo, 0.3M", C["iv"], M), (["big_twin_n512_rf", "big_twin_n1024_rf"], "MICrONS twin, 2.2M", C["twin"], M),
                                 (["g4_rf_n256_d256L4_cf50", "g4_rf_n512_d512L8_cf50", "g4_rf_n1024_d512L8_cf50"], "Allen mixed pop., held-out mice (split 0)", C["mix"], A)]:
         xs = [src[t]["n"] for t in tags]; ys = [src[t]["r2"] for t in tags]; ax.plot(xs, ys, "s--", color=col, mfc="white", label=lab)
     ax.axhline(0, color=C["base"], lw=1, zorder=0); ax.set_xscale("log", base=2); ax.set_xlabel("neurons per population"); ax.set_ylabel("R²"); ax.set_title("receptive field"); ax.legend(fontsize=6.5)
