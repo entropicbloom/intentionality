@@ -73,8 +73,9 @@ def main():
     ax.annotate("most self-similar\nclass", xy=(POS[4][0] + 0.2, POS[4][1] + 0.08), xytext=(0.95, -0.35), fontsize=8, color=MARK, ha="center", va="center",
                 arrowprops=dict(arrowstyle="-", color=MARK, lw=0.8), zorder=5)
     ax.plot([0, 0], [-1.25, 1.25], color=MARK, lw=1.2, ls="--", zorder=1)
-    arc_arrow(ax, 2, 6, OBL, style="--", rad=0.0); arc_arrow(ax, 6, 2, OBL, style="--", rad=0.0)
-    ax.text(0, -1.62, "the frame's rotation is fixed; the reflection through\n90° survives, so 45° and 135° stay interchangeable",
+    for a_, b_ in [(1, 7), (2, 6), (3, 5)]:
+        arc_arrow(ax, a_, b_, OBL, style="--", rad=0.0); arc_arrow(ax, b_, a_, OBL, style="--", rad=0.0)
+    ax.text(0, -1.62, "the frame's rotation is fixed; the reflection through\n90° survives and still swaps each class with its mirror",
             ha="center", va="top", fontsize=8, color="0.3")
 
     fig.suptitle("The symmetries of the orientation ring (D8: 8 rotations × 2 reflections = 16) and what the cortical anisotropy removes",
