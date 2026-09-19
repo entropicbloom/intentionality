@@ -4,7 +4,7 @@ Results tables: `microns_ambiguity/README.md`. Paper: `microns_ambiguity/paper/m
 
 ## In flight
 
-Nothing (2026-09-18 evening). arXiv candidate v10a in `microns_ambiguity/paper/arxiv_v10a/` and `~/Desktop/paper/relational_decoding_v10a.{pdf,html}` (20 pages); v12 (all review corrections, 23 pages) in `~/Desktop/paper/` too and in main.tex.
+Nothing (2026-09-19). arXiv v1 (v10a) submitted 2026-09-19; folder in `microns_ambiguity/paper/arxiv_v10a/` and `~/Desktop/paper/relational_decoding_v10a.{pdf,html}` (20 pages); v12 (all review corrections, 23 pages) in `~/Desktop/paper/` too and in main.tex.
 
 v10 (2026-09-18): trim only. 21 restating or legacy sentences removed and three clauses merged (9,450 -> 9,088 words), chosen from an Opus list of 45 candidates; kept against the list: the intro half-split sentence (parallel to the Allen one), the 56 % base rate, the first 3.3 summary sentence, the Methods scan and label-variance sentences, caption sentences that let figures stand alone, the Kawakita and structuralist sentences. Fig. A4 legend reworded. No content change. Reflection-check results recorded below but NOT in the paper (user: record only).
 
@@ -76,6 +76,10 @@ Paper 10,550 -> 11,716 words, 20 -> 23 pages. Growth is almost all Methods/appen
 ### v10a: the arXiv candidate (2026-09-18 evening, `microns_ambiguity/paper/arxiv_v10a/`)
 
 User's decision after two review rounds: v12 (11,700 words, 23 pages) is journal-grade but too long; v10 would have been an honest arXiv v1 except for two errors that touch conclusions. v10a = the v10 source (commit cbbe846) plus exactly: (1) the Allen single-animal explanation (round-1 A4 with round-2 facts: same training cells, 171-633 cells per animal, sampler skips small training halves, pool-size vs confinement decomposition, MICrONS within-scan cost 5-10 deg), in 3.3, the abstract and the Discussion; (2) the single-animal margins against each run's own best constant (five of six 0.3-1.0 below, one 0.4 above, inside bootstrap noise), in 3.3 and the abstract, with the Fig. 5 / Allen-table best constant given per test set (42.5-44.0); (3) the swapped 0.3M values; (4) 11 to 112 receptive-field labels per mouse. Nothing else from v11/v12. Self-contained folder: main.tex (graphicspath ./), refs.bib, main.bbl, the nine figure PDFs, main.pdf (20 pages, 9,343 words, compiles clean). Desktop copies: `~/Desktop/paper/relational_decoding_v10a.pdf` and `.html`. The v12 corrections remain in main.tex for a later v2 / journal version.
+
+### Anisotropy on Allen (2026-09-19, `allen/anisotropy_check.py`; for v2, not in the arXiv v1)
+
+User asked whether the per-class anisotropy was measured on Allen; it was not in the paper. Computed on the grating relations (40 DG condition means) with the 6-class static-grating labels: same-class correlation peaks at 0 deg with factor 1.29 pooled over 33 mice and 1.21 on within-mouse pairs only; 0 deg is the peak in 500/500 cell bootstraps; the 120 deg class is the least self-similar (0.77). Label mode ties 0 and 90 deg at 19 %. MICrONS twin for comparison: 1.28 at 90 deg. So the one-peaked cardinal anisotropy replicates across animals with a factor of the same size. Caveats: grating relations partly reflect tuning sharpness (cardinal cells are sharper), and 0 deg on Allen vs 90 deg on MICrONS are different stimulus conventions, not checked. arXiv v1 submitted 2026-09-19 (v10a; primary cs.NE with cross-list/reassignment to q-bio.NC requested).
 
 ## Log of decisions and results (2026-09-11/12, newest last)
 
