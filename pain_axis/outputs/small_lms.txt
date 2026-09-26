@@ -1,17 +1,65 @@
-Per layer of each small LM (final-token hidden state): r of its Gram with the
-25-LLM mean Gram, and r of its remainder (after the meaning predictors) with the
-mean LLM remainder. For reference, LLM remainders agree with each other at the
-LOO value given per variant.
+Small causal LMs read at the final ':' token. Per model and variant:
+  layer   chosen by r of the model's Gram with the 25-LLM mean Gram
+  r_gram  that r
+  r_rem   r of the model's remainder with the mean remainder of the LLMs outside its family
+  r_rem_upper  median r_rem over the upper half of layers
+Chance: 95% of |r| for the residual of a random 45-vector. Reference: each LLM vs the
+mean remainder of the other families (LOFO), median [min, max].
 
-=== raw === meaning R2 0.74; LLM remainder agreement LOO 0.78
-  Qwen25-05B  layer: r with LLM mean / remainder r
-    L1 0.47/-0.14  L2 0.48/+0.09  L3 0.56/+0.17  L4 0.52/+0.12  L5 0.62/+0.15  L6 0.61/+0.22  L7 0.62/+0.28  L8 0.59/+0.25  L9 0.57/+0.28  L10 0.60/+0.33  L11 0.64/+0.44  L12 0.66/+0.46  L13 0.61/+0.39  L14 0.61/+0.40  L15 0.73/+0.40  L16 0.74/+0.50  L17 0.74/+0.50  L18 0.73/+0.48  L19 0.74/+0.49  L20 0.74/+0.45  L21 0.74/+0.42  L22 0.76/+0.43  L23 0.77/+0.41  L24 0.74/+0.38
+=== raw ===  meaning R2 0.74;  LLM reference (LOFO) 0.76 [0.54, 0.89];  chance ±0.32
+  model                       size  layer  r_gram  r_rem r_rem_upper
+  gpt2                        0.12    L10    0.68  +0.14       +0.10
+  pythia-160m                 0.16     L8    0.70  +0.32       +0.26
+  SmolLM2-360M                0.36    L31    0.87  +0.55       +0.52
+  pythia-410m                 0.41    L21    0.86  +0.36       +0.31
+  Qwen25-05B                  0.49    L23    0.77  +0.31       +0.32
+  Qwen3-06B-Base              0.60    L27    0.82  +0.49       +0.35
+  gpt2-large                  0.77    L26    0.83  +0.27       +0.24
+  TinyLlama_v11               1.10    L20    0.64  +0.03       +0.21
+  phi-1_5                     1.40    L24    0.86  +0.46       +0.38
+  pythia-14b                  1.40    L22    0.84  +0.38       +0.33
+  OLMo-2-0425-1B              1.50    L15    0.92  +0.67       +0.57
+  Qwen25-15B                  1.50    L27    0.85  +0.50       +0.41
+  gpt2-xl                     1.60    L48    0.87  +0.38       +0.33
+  stablelm-2-1_6b             1.60    L23    0.93  +0.74       +0.67
+  SmolLM2-17B                 1.70    L23    0.89  +0.59       +0.59
+  Qwen3-17B-Base              1.70    L27    0.90  +0.61       +0.54
 
-=== alldenoise === meaning R2 0.70; LLM remainder agreement LOO 0.65
-  Qwen25-05B  layer: r with LLM mean / remainder r
-    L1 0.29/-0.25  L2 0.43/-0.21  L3 0.51/-0.19  L4 0.22/-0.11  L5 0.50/-0.07  L6 0.44/-0.13  L7 0.47/-0.04  L8 0.53/-0.02  L9 0.51/-0.04  L10 0.44/+0.08  L11 0.59/+0.03  L12 0.61/-0.06  L13 0.57/-0.08  L14 0.57/+0.02  L15 0.64/+0.21  L16 0.64/+0.41  L17 0.46/+0.36  L18 0.46/+0.34  L19 0.47/+0.36  L20 0.54/+0.52  L21 0.60/+0.52  L22 0.62/+0.55  L23 0.74/+0.49  L24 0.56/+0.47
+=== alldenoise ===  meaning R2 0.70;  LLM reference (LOFO) 0.58 [0.36, 0.79];  chance ±0.32
+  model                       size  layer  r_gram  r_rem r_rem_upper
+  gpt2                        0.12    L10    0.67  +0.04       -0.14
+  pythia-160m                 0.16     L4    0.65  -0.06       +0.12
+  SmolLM2-360M                0.36    L31    0.80  +0.62       +0.55
+  pythia-410m                 0.41    L23    0.73  +0.37       +0.30
+  Qwen25-05B                  0.49    L23    0.74  +0.42       +0.27
+  Qwen3-06B-Base              0.60    L26    0.69  +0.47       +0.22
+  gpt2-large                  0.77    L27    0.78  +0.62       +0.46
+  TinyLlama_v11               1.10    L22    0.59  -0.01       -0.10
+  phi-1_5                     1.40    L21    0.90  +0.70       +0.55
+  pythia-14b                  1.40    L20    0.79  +0.29       +0.14
+  OLMo-2-0425-1B              1.50    L15    0.80  +0.72       +0.55
+  Qwen25-15B                  1.50    L27    0.74  +0.52       +0.30
+  gpt2-xl                     1.60    L48    0.79  +0.60       +0.42
+  stablelm-2-1_6b             1.60    L21    0.93  +0.77       +0.71
+  SmolLM2-17B                 1.70    L18    0.76  +0.61       +0.51
+  Qwen3-17B-Base              1.70    L23    0.80  +0.45       +0.29
 
-=== whitened === meaning R2 0.75; LLM remainder agreement LOO 0.83
-  Qwen25-05B  layer: r with LLM mean / remainder r
-    L1 0.54/+0.08  L2 0.54/+0.04  L3 0.53/+0.27  L4 0.55/+0.27  L5 0.62/+0.19  L6 0.64/+0.17  L7 0.65/+0.27  L8 0.57/+0.29  L9 0.57/+0.27  L10 0.59/+0.30  L11 0.63/+0.38  L12 0.67/+0.38  L13 0.67/+0.37  L14 0.66/+0.43  L15 0.77/+0.46  L16 0.73/+0.42  L17 0.74/+0.42  L18 0.71/+0.48  L19 0.68/+0.49  L20 0.66/+0.46  L21 0.69/+0.42  L22 0.81/+0.39  L23 0.82/+0.45  L24 0.82/+0.46
+=== whitened ===  meaning R2 0.75;  LLM reference (LOFO) 0.80 [0.56, 0.92];  chance ±0.32
+  model                       size  layer  r_gram  r_rem r_rem_upper
+  gpt2                        0.12    L10    0.71  +0.09       +0.03
+  pythia-160m                 0.16     L8    0.68  +0.16       +0.18
+  SmolLM2-360M                0.36    L24    0.85  +0.55       +0.54
+  pythia-410m                 0.41    L19    0.85  +0.15       +0.15
+  Qwen25-05B                  0.49    L23    0.82  +0.38       +0.36
+  Qwen3-06B-Base              0.60    L27    0.85  +0.54       +0.45
+  gpt2-large                  0.77    L24    0.83  +0.20       +0.13
+  TinyLlama_v11               1.10     L7    0.66  +0.34       +0.28
+  phi-1_5                     1.40    L24    0.90  +0.54       +0.43
+  pythia-14b                  1.40    L21    0.86  +0.29       +0.27
+  OLMo-2-0425-1B              1.50    L14    0.93  +0.74       +0.60
+  Qwen25-15B                  1.50    L27    0.91  +0.64       +0.49
+  gpt2-xl                     1.60    L48    0.87  +0.40       +0.37
+  stablelm-2-1_6b             1.60    L23    0.90  +0.71       +0.69
+  SmolLM2-17B                 1.70    L23    0.93  +0.70       +0.56
+  Qwen3-17B-Base              1.70    L28    0.92  +0.64       +0.54
 
