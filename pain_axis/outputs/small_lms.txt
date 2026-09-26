@@ -1,0 +1,17 @@
+Per layer of each small LM (final-token hidden state): r of its Gram with the
+25-LLM mean Gram, and r of its remainder (after the meaning predictors) with the
+mean LLM remainder. For reference, LLM remainders agree with each other at the
+LOO value given per variant.
+
+=== raw === meaning R2 0.74; LLM remainder agreement LOO 0.78
+  Qwen25-05B  layer: r with LLM mean / remainder r
+    L1 0.47/-0.14  L2 0.48/+0.09  L3 0.56/+0.17  L4 0.52/+0.12  L5 0.62/+0.15  L6 0.61/+0.22  L7 0.62/+0.28  L8 0.59/+0.25  L9 0.57/+0.28  L10 0.60/+0.33  L11 0.64/+0.44  L12 0.66/+0.46  L13 0.61/+0.39  L14 0.61/+0.40  L15 0.73/+0.40  L16 0.74/+0.50  L17 0.74/+0.50  L18 0.73/+0.48  L19 0.74/+0.49  L20 0.74/+0.45  L21 0.74/+0.42  L22 0.76/+0.43  L23 0.77/+0.41  L24 0.74/+0.38
+
+=== alldenoise === meaning R2 0.70; LLM remainder agreement LOO 0.65
+  Qwen25-05B  layer: r with LLM mean / remainder r
+    L1 0.29/-0.25  L2 0.43/-0.21  L3 0.51/-0.19  L4 0.22/-0.11  L5 0.50/-0.07  L6 0.44/-0.13  L7 0.47/-0.04  L8 0.53/-0.02  L9 0.51/-0.04  L10 0.44/+0.08  L11 0.59/+0.03  L12 0.61/-0.06  L13 0.57/-0.08  L14 0.57/+0.02  L15 0.64/+0.21  L16 0.64/+0.41  L17 0.46/+0.36  L18 0.46/+0.34  L19 0.47/+0.36  L20 0.54/+0.52  L21 0.60/+0.52  L22 0.62/+0.55  L23 0.74/+0.49  L24 0.56/+0.47
+
+=== whitened === meaning R2 0.75; LLM remainder agreement LOO 0.83
+  Qwen25-05B  layer: r with LLM mean / remainder r
+    L1 0.54/+0.08  L2 0.54/+0.04  L3 0.53/+0.27  L4 0.55/+0.27  L5 0.62/+0.19  L6 0.64/+0.17  L7 0.65/+0.27  L8 0.57/+0.29  L9 0.57/+0.27  L10 0.59/+0.30  L11 0.63/+0.38  L12 0.67/+0.38  L13 0.67/+0.37  L14 0.66/+0.43  L15 0.77/+0.46  L16 0.73/+0.42  L17 0.74/+0.42  L18 0.71/+0.48  L19 0.68/+0.49  L20 0.66/+0.46  L21 0.69/+0.42  L22 0.81/+0.39  L23 0.82/+0.45  L24 0.82/+0.46
+

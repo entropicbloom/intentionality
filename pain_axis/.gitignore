@@ -1,1 +1,3 @@
 outputs/baseline_acts_*.npy
+outputs/*.npy
+outputs/*.npz
