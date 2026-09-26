@@ -1,0 +1,180 @@
+
+=== held out: model, variant: raw ===
+true labelling ranked first for 25/25 models (out of 3,628,800 labellings); concepts correct 250/250
+per concept: S1_pain 25, S2_pain 25, Fear 25, NegEmotion 25, NegWorld 25, BodySens 25, Arousal 25, Random 25, Numb 25, Sadness 25
+model                            r_true  rank  margin  ok  cheapest swap (drop in r)   errors
+Gemma_2_27B_base                  0.957     1  +0.051  10  NegEmotion/NegWorld (0.051)     
+Gemma_2_27B_instruct              0.872     1  +0.031  10  S1_pain/S2_pain (0.031)     
+Gemma_2_2B_base                   0.917     1  +0.037  10  Arousal/Random (0.037)     
+Gemma_2_2B_instruct               0.944     1  +0.026  10  Arousal/Numb (0.026)     
+Gemma_2_9B_base                   0.914     1  +0.007  10  Arousal/Random (0.007)     
+Gemma_2_9B_instruct               0.905     1  +0.011  10  Arousal/Random (0.011)     
+Gemma_3_27B_base                  0.930     1  +0.036  10  S1_pain/S2_pain (0.036)     
+Gemma_3_27B_instruct              0.930     1  +0.029  10  Arousal/Random (0.029)     
+Llama_3.1_70B_base                0.960     1  +0.042  10  Arousal/Numb (0.042)     
+Llama_3.1_70B_instruct            0.956     1  +0.030  10  Arousal/Numb (0.030)     
+Llama_3.1_8B_base                 0.948     1  +0.048  10  NegEmotion/NegWorld (0.048)     
+Llama_3.1_8B_instruct             0.960     1  +0.031  10  Arousal/Numb (0.031)     
+Llama_3.3_70B_instruct            0.955     1  +0.038  10  Arousal/Numb (0.038)     
+Mistral_7B_base                   0.942     1  +0.030  10  Arousal/Random (0.030)     
+Mistral_7B_instruct               0.912     1  +0.021  10  Arousal/Numb (0.021)     
+Mistral_Small_24B_base            0.972     1  +0.049  10  NegEmotion/NegWorld (0.049)     
+Phi_4                             0.773     1  +0.010  10  Arousal/Numb (0.010)     
+Qwen_2.5_32B_base                 0.869     1  +0.030  10  S1_pain/S2_pain (0.030)     
+Qwen_2.5_32B_instruct             0.940     1  +0.028  10  S1_pain/S2_pain (0.028)     
+Qwen_2.5_72B_base                 0.933     1  +0.033  10  Arousal/Random (0.033)     
+Qwen_2.5_72B_instruct             0.918     1  +0.042  10  S1_pain/S2_pain (0.042)     
+Qwen_2.5_7B_base                  0.910     1  +0.044  10  S1_pain/S2_pain (0.044)     
+Qwen_2.5_7B_instruct              0.860     1  +0.043  10  S1_pain/S2_pain (0.043)     
+Qwen_3_14B_base                   0.794     1  +0.018  10  Arousal/Numb (0.018)     
+Qwen_3_8B_base                    0.898     1  +0.039  10  Arousal/Numb (0.043)     
+
+=== held out: model, variant: alldenoise ===
+true labelling ranked first for 16/25 models (out of 3,628,800 labellings); concepts correct 216/250
+per concept: S1_pain 21, S2_pain 21, Fear 20, NegEmotion 21, NegWorld 25, BodySens 23, Arousal 20, Random 22, Numb 22, Sadness 21
+model                            r_true  rank  margin  ok  cheapest swap (drop in r)   errors
+Gemma_2_27B_base                  0.919     1  +0.011  10  Fear/NegEmotion (0.011)     
+Gemma_2_27B_instruct              0.886     2  -0.025   8  Fear/NegEmotion (-0.025)     Fear<-NegEmotion NegEmotion<-Fear
+Gemma_2_2B_base                   0.896     1  +0.003  10  S1_pain/S2_pain (0.003)     
+Gemma_2_2B_instruct               0.893     1  +0.003  10  Arousal/Numb (0.005)     
+Gemma_2_9B_base                   0.916     1  +0.017  10  S1_pain/S2_pain (0.017)     
+Gemma_2_9B_instruct               0.879     1  +0.018  10  Numb/Sadness (0.018)     
+Gemma_3_27B_base                  0.865     5  -0.020   4  Arousal/Random (-0.006)     S1_pain<-S2_pain S2_pain<-S1_pain Arousal<-Random Random<-Arousal Numb<-Sadness Sadness<-Numb
+Gemma_3_27B_instruct              0.753    10  -0.041   3  Arousal/Random (0.002)     S1_pain<-S2_pain S2_pain<-S1_pain Fear<-Random Arousal<-Fear Random<-Arousal Numb<-Sadness Sadness<-Numb
+Llama_3.1_70B_base                0.924     1  +0.012  10  Fear/NegEmotion (0.013)     
+Llama_3.1_70B_instruct            0.912     1  +0.033  10  S1_pain/S2_pain (0.033)     
+Llama_3.1_8B_base                 0.909     1  +0.006  10  Fear/NegEmotion (0.009)     
+Llama_3.1_8B_instruct             0.900     7  -0.012   8  Fear/NegEmotion (-0.012)     Fear<-NegEmotion NegEmotion<-Fear
+Llama_3.3_70B_instruct            0.885     1  +0.018  10  NegEmotion/Arousal (0.018)     
+Mistral_7B_base                   0.930     1  +0.017  10  NegEmotion/NegWorld (0.017)     
+Mistral_7B_instruct               0.855    23  -0.069   8  Arousal/Sadness (-0.069)     Arousal<-Sadness Sadness<-Arousal
+Mistral_Small_24B_base            0.900     1  +0.011  10  Fear/NegEmotion (0.011)     
+Phi_4                             0.695     4  -0.009   8  Fear/BodySens (-0.009)     Fear<-BodySens BodySens<-Fear
+Qwen_2.5_32B_base                 0.430 27631  -0.268   3  BodySens/Sadness (-0.165)     S1_pain<-S2_pain S2_pain<-S1_pain NegEmotion<-Sadness BodySens<-NegEmotion Arousal<-Numb Numb<-Arousal Sadness<-BodySens
+Qwen_2.5_32B_instruct             0.860     1  +0.023  10  Arousal/Random (0.023)     
+Qwen_2.5_72B_base                 0.778     1  +0.023  10  S1_pain/S2_pain (0.023)     
+Qwen_2.5_72B_instruct             0.875     2  -0.018   8  Fear/NegEmotion (-0.018)     Fear<-NegEmotion NegEmotion<-Fear
+Qwen_2.5_7B_base                  0.816     1  +0.009  10  Numb/Sadness (0.009)     
+Qwen_2.5_7B_instruct              0.781     1  +0.001  10  S1_pain/Sadness (0.002)     
+Qwen_3_14B_base                   0.800     1  +0.009  10  Fear/BodySens (0.009)     
+Qwen_3_8B_base                    0.763     4  -0.025   6  Arousal/Random (-0.010)     S1_pain<-S2_pain S2_pain<-S1_pain Arousal<-Random Random<-Arousal
+
+=== held out: model, variant: whitened ===
+true labelling ranked first for 25/25 models (out of 3,628,800 labellings); concepts correct 250/250
+per concept: S1_pain 25, S2_pain 25, Fear 25, NegEmotion 25, NegWorld 25, BodySens 25, Arousal 25, Random 25, Numb 25, Sadness 25
+model                            r_true  rank  margin  ok  cheapest swap (drop in r)   errors
+Gemma_2_27B_base                  0.970     1  +0.043  10  Arousal/Numb (0.043)     
+Gemma_2_27B_instruct              0.948     1  +0.015  10  Arousal/Numb (0.015)     
+Gemma_2_2B_base                   0.922     1  +0.024  10  Arousal/Random (0.024)     
+Gemma_2_2B_instruct               0.957     1  +0.007  10  Arousal/Numb (0.007)     
+Gemma_2_9B_base                   0.920     1  +0.017  10  Arousal/Random (0.017)     
+Gemma_2_9B_instruct               0.911     1  +0.016  10  Arousal/Random (0.016)     
+Gemma_3_27B_base                  0.969     1  +0.032  10  Arousal/Numb (0.032)     
+Gemma_3_27B_instruct              0.952     1  +0.024  10  S1_pain/S2_pain (0.024)     
+Llama_3.1_70B_base                0.952     1  +0.034  10  S1_pain/S2_pain (0.034)     
+Llama_3.1_70B_instruct            0.972     1  +0.028  10  Arousal/Numb (0.028)     
+Llama_3.1_8B_base                 0.945     1  +0.041  10  NegEmotion/NegWorld (0.041)     
+Llama_3.1_8B_instruct             0.966     1  +0.018  10  Arousal/Numb (0.018)     
+Llama_3.3_70B_instruct            0.968     1  +0.029  10  S1_pain/S2_pain (0.029)     
+Mistral_7B_base                   0.947     1  +0.022  10  Arousal/Numb (0.022)     
+Mistral_7B_instruct               0.934     1  +0.021  10  Arousal/Numb (0.021)     
+Mistral_Small_24B_base            0.977     1  +0.038  10  Arousal/Numb (0.038)     
+Phi_4                             0.785     1  +0.008  10  Arousal/Numb (0.013)     
+Qwen_2.5_32B_base                 0.939     1  +0.028  10  Arousal/Numb (0.028)     
+Qwen_2.5_32B_instruct             0.942     1  +0.008  10  S1_pain/S2_pain (0.008)     
+Qwen_2.5_72B_base                 0.947     1  +0.013  10  S1_pain/S2_pain (0.013)     
+Qwen_2.5_72B_instruct             0.951     1  +0.027  10  S1_pain/S2_pain (0.027)     
+Qwen_2.5_7B_base                  0.879     1  +0.033  10  S1_pain/S2_pain (0.033)     
+Qwen_2.5_7B_instruct              0.905     1  +0.034  10  S1_pain/S2_pain (0.034)     
+Qwen_3_14B_base                   0.831     1  +0.016  10  Arousal/Numb (0.016)     
+Qwen_3_8B_base                    0.943     1  +0.031  10  Arousal/Numb (0.031)     
+
+=== held out: family, variant: raw ===
+true labelling ranked first for 24/25 models (out of 3,628,800 labellings); concepts correct 248/250
+per concept: S1_pain 25, S2_pain 25, Fear 25, NegEmotion 25, NegWorld 25, BodySens 25, Arousal 24, Random 24, Numb 25, Sadness 25
+model                            r_true  rank  margin  ok  cheapest swap (drop in r)   errors
+Gemma_2_27B_base                  0.951     1  +0.049  10  Arousal/Numb (0.049)     
+Gemma_2_27B_instruct              0.859     1  +0.029  10  Random/Numb (0.029)     
+Gemma_2_2B_base                   0.907     1  +0.035  10  Arousal/Numb (0.035)     
+Gemma_2_2B_instruct               0.933     1  +0.024  10  Arousal/Numb (0.024)     
+Gemma_2_9B_base                   0.903     2  -0.006   8  Arousal/Random (-0.006)     Arousal<-Random Random<-Arousal
+Gemma_2_9B_instruct               0.887     1  +0.001  10  Arousal/Random (0.001)     
+Gemma_3_27B_base                  0.924     1  +0.036  10  S1_pain/S2_pain (0.036)     
+Gemma_3_27B_instruct              0.920     1  +0.026  10  Random/Numb (0.026)     
+Llama_3.1_70B_base                0.958     1  +0.043  10  S1_pain/S2_pain (0.043)     
+Llama_3.1_70B_instruct            0.950     1  +0.032  10  Arousal/Numb (0.032)     
+Llama_3.1_8B_base                 0.949     1  +0.049  10  NegEmotion/NegWorld (0.049)     
+Llama_3.1_8B_instruct             0.957     1  +0.032  10  Arousal/Numb (0.032)     
+Llama_3.3_70B_instruct            0.951     1  +0.041  10  Arousal/Numb (0.041)     
+Mistral_7B_base                   0.939     1  +0.029  10  Arousal/Random (0.029)     
+Mistral_7B_instruct               0.908     1  +0.021  10  Arousal/Numb (0.021)     
+Mistral_Small_24B_base            0.969     1  +0.048  10  NegEmotion/NegWorld (0.048)     
+Phi_4                             0.773     1  +0.010  10  Arousal/Numb (0.010)     
+Qwen_2.5_32B_base                 0.850     1  +0.018  10  Arousal/Random (0.018)     
+Qwen_2.5_32B_instruct             0.918     1  +0.021  10  Arousal/Random (0.021)     
+Qwen_2.5_72B_base                 0.905     1  +0.019  10  Arousal/Random (0.019)     
+Qwen_2.5_72B_instruct             0.930     1  +0.040  10  Arousal/Random (0.040)     
+Qwen_2.5_7B_base                  0.890     1  +0.041  10  S1_pain/S2_pain (0.041)     
+Qwen_2.5_7B_instruct              0.824     1  +0.042  10  S1_pain/S2_pain (0.042)     
+Qwen_3_14B_base                   0.762     1  +0.015  10  Arousal/Numb (0.015)     
+Qwen_3_8B_base                    0.886     1  +0.039  10  Arousal/Numb (0.042)     
+
+=== held out: family, variant: alldenoise ===
+true labelling ranked first for 13/25 models (out of 3,628,800 labellings); concepts correct 206/250
+per concept: S1_pain 19, S2_pain 19, Fear 20, NegEmotion 21, NegWorld 25, BodySens 23, Arousal 19, Random 22, Numb 19, Sadness 19
+model                            r_true  rank  margin  ok  cheapest swap (drop in r)   errors
+Gemma_2_27B_base                  0.903     1  +0.008  10  Fear/NegEmotion (0.008)     
+Gemma_2_27B_instruct              0.898     3  -0.029   8  Fear/NegEmotion (-0.029)     Fear<-NegEmotion NegEmotion<-Fear
+Gemma_2_2B_base                   0.883     1  +0.001  10  S1_pain/S2_pain (0.001)     
+Gemma_2_2B_instruct               0.880     2  -0.001   6  Arousal/Numb (0.001)     S1_pain<-S2_pain S2_pain<-S1_pain Arousal<-Numb Numb<-Arousal
+Gemma_2_9B_base                   0.904     1  +0.015  10  S1_pain/S2_pain (0.015)     
+Gemma_2_9B_instruct               0.874     1  +0.013  10  Numb/Sadness (0.013)     
+Gemma_3_27B_base                  0.853     7  -0.029   4  Arousal/Random (-0.012)     S1_pain<-S2_pain S2_pain<-S1_pain Arousal<-Random Random<-Arousal Numb<-Sadness Sadness<-Numb
+Gemma_3_27B_instruct              0.753    10  -0.035   3  Arousal/Random (0.005)     S1_pain<-S2_pain S2_pain<-S1_pain Fear<-Random Arousal<-Fear Random<-Arousal Numb<-Sadness Sadness<-Numb
+Llama_3.1_70B_base                0.913     1  +0.012  10  Fear/NegEmotion (0.012)     
+Llama_3.1_70B_instruct            0.899     1  +0.032  10  S1_pain/S2_pain (0.032)     
+Llama_3.1_8B_base                 0.896     1  +0.005  10  NegEmotion/NegWorld (0.009)     
+Llama_3.1_8B_instruct             0.892     6  -0.014   8  Fear/NegEmotion (-0.014)     Fear<-NegEmotion NegEmotion<-Fear
+Llama_3.3_70B_instruct            0.879     1  +0.015  10  NegEmotion/Arousal (0.015)     
+Mistral_7B_base                   0.922     1  +0.016  10  NegEmotion/NegWorld (0.016)     
+Mistral_7B_instruct               0.847    23  -0.071   8  Arousal/Sadness (-0.071)     Arousal<-Sadness Sadness<-Arousal
+Mistral_Small_24B_base            0.892     1  +0.009  10  Fear/NegEmotion (0.009)     
+Phi_4                             0.695     4  -0.009   8  Fear/BodySens (-0.009)     Fear<-BodySens BodySens<-Fear
+Qwen_2.5_32B_base                 0.400 53379  -0.274   3  BodySens/Sadness (-0.172)     S1_pain<-S2_pain S2_pain<-S1_pain NegEmotion<-Sadness BodySens<-NegEmotion Arousal<-Numb Numb<-Arousal Sadness<-BodySens
+Qwen_2.5_32B_instruct             0.813     1  +0.012  10  Numb/Sadness (0.014)     
+Qwen_2.5_72B_base                 0.715     1  +0.019  10  S1_pain/S2_pain (0.019)     
+Qwen_2.5_72B_instruct             0.894     2  -0.014   8  Fear/NegEmotion (-0.014)     Fear<-NegEmotion NegEmotion<-Fear
+Qwen_2.5_7B_base                  0.766     3  -0.001   8  Numb/Sadness (-0.001)     Numb<-Sadness Sadness<-Numb
+Qwen_2.5_7B_instruct              0.717     5  -0.018   6  S1_pain/Sadness (-0.016)     S1_pain<-Sadness S2_pain<-Numb Numb<-S2_pain Sadness<-S1_pain
+Qwen_3_14B_base                   0.762     1  +0.006  10  Fear/BodySens (0.006)     
+Qwen_3_8B_base                    0.728     3  -0.029   6  Arousal/Random (-0.008)     S1_pain<-S2_pain S2_pain<-S1_pain Arousal<-Random Random<-Arousal
+
+=== held out: family, variant: whitened ===
+true labelling ranked first for 25/25 models (out of 3,628,800 labellings); concepts correct 250/250
+per concept: S1_pain 25, S2_pain 25, Fear 25, NegEmotion 25, NegWorld 25, BodySens 25, Arousal 25, Random 25, Numb 25, Sadness 25
+model                            r_true  rank  margin  ok  cheapest swap (drop in r)   errors
+Gemma_2_27B_base                  0.970     1  +0.047  10  Arousal/Numb (0.047)     
+Gemma_2_27B_instruct              0.941     1  +0.015  10  Arousal/Numb (0.015)     
+Gemma_2_2B_base                   0.916     1  +0.024  10  Arousal/Random (0.024)     
+Gemma_2_2B_instruct               0.947     1  +0.006  10  Arousal/Numb (0.006)     
+Gemma_2_9B_base                   0.913     1  +0.010  10  Arousal/Random (0.010)     
+Gemma_2_9B_instruct               0.900     1  +0.010  10  Arousal/Random (0.010)     
+Gemma_3_27B_base                  0.961     1  +0.032  10  S1_pain/S2_pain (0.032)     
+Gemma_3_27B_instruct              0.949     1  +0.023  10  S1_pain/S2_pain (0.023)     
+Llama_3.1_70B_base                0.952     1  +0.033  10  S1_pain/S2_pain (0.033)     
+Llama_3.1_70B_instruct            0.971     1  +0.029  10  Arousal/Numb (0.029)     
+Llama_3.1_8B_base                 0.944     1  +0.041  10  NegEmotion/NegWorld (0.041)     
+Llama_3.1_8B_instruct             0.966     1  +0.018  10  Arousal/Numb (0.018)     
+Llama_3.3_70B_instruct            0.969     1  +0.028  10  S1_pain/S2_pain (0.028)     
+Mistral_7B_base                   0.943     1  +0.021  10  Arousal/Numb (0.021)     
+Mistral_7B_instruct               0.931     1  +0.021  10  Arousal/Numb (0.021)     
+Mistral_Small_24B_base            0.974     1  +0.038  10  Arousal/Numb (0.038)     
+Phi_4                             0.785     1  +0.008  10  Arousal/Numb (0.013)     
+Qwen_2.5_32B_base                 0.927     1  +0.025  10  Arousal/Numb (0.025)     
+Qwen_2.5_32B_instruct             0.927     1  +0.003  10  S1_pain/S2_pain (0.003)     
+Qwen_2.5_72B_base                 0.934     1  +0.007  10  S1_pain/S2_pain (0.007)     
+Qwen_2.5_72B_instruct             0.948     1  +0.026  10  S1_pain/S2_pain (0.026)     
+Qwen_2.5_7B_base                  0.867     1  +0.035  10  S1_pain/S2_pain (0.035)     
+Qwen_2.5_7B_instruct              0.880     1  +0.031  10  S1_pain/S2_pain (0.031)     
+Qwen_3_14B_base                   0.812     1  +0.013  10  Arousal/Numb (0.013)     
+Qwen_3_8B_base                    0.937     1  +0.031  10  Arousal/Numb (0.031)     
