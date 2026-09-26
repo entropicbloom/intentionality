@@ -1,0 +1,14 @@
+r = Pearson r of the 45 off-diagonal entries with the mean over the 25 LLMs;
+rank = rank of the true labelling among 10! when matching to that mean (1 = identified).
+LLM reference: each LLM vs the mean of the other 24, min / median r:
+  raw        0.773 / 0.930
+  alldenoise 0.430 / 0.879
+  whitened   0.785 / 0.947
+
+representation           raw r    rank   alldenoise r    rank     whitened r    rank
+tfidf                    0.274  261705          0.452   12593          0.439   17385
+minilm                   0.644       9          0.800      15          0.679      12
+gpt2_L6                  0.547    1112          0.490    1569          0.604     629
+pythia160m_L6            0.663      69          0.359   61000          0.603     237
+gpt2rand_L6              0.386   36434          0.396   39129          0.479    6346
+gpt2rand_mean            0.368   50744          0.256  329734          0.397   24699
