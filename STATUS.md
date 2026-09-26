@@ -188,6 +188,8 @@ spontaneous-activity papers get a sentence in the discussion as the precedent.
 
 Submission: submit/8101670, on hold for moderation (cs.NE primary, q-bio.NC cross-list, reassignment requested, CC BY). When the id arrives: add it to the website exhibit 3 (`consciousness/_includes/exhibit3.md`), the site header links (`_includes/header.md`), and this repo's README.
 
+Zenodo (2026-09-26): v10a published as doi:10.5281/zenodo.22973260 (https://zenodo.org/records/22973260), Preprint, CC BY, v1; identical PDF (md5 405ef565...). Website header and exhibit 3 already link it (consciousness commit a0266b5). When the arXiv id arrives: add it on Zenodo under Alternate identifiers (scheme arXiv); add a plain publication entry to the portfolio (`../francesco/content/publication/`, not linked to the consciousness pages), with arXiv and DOI links. User chose to wait for arXiv before the portfolio entry.
+
 People to contact once the id exists (one paragraph, one figure, one specific question each):
 - Masafumi Oizumi (Tokyo): symmetry/qualia-structure (PNAS Nexus 2026 with Kanai, cited in the Discussion); GW alignment is the continuous version of the relabelling test. Send the D8 diagram (`outputs/paper/fig_d8_symmetries.png`). Most likely to read carefully.
 - Ryota Kanai (Araya): co-author of the same paper, structuralist framing. D8 diagram.
