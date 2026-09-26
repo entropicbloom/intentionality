@@ -1,0 +1,25 @@
+Per variant: R^2 of the meaning model(s) for each LLM (median), and agreement
+(Pearson r) of each LLM with the mean of the others, median [min, max],
+leaving out one model (LOO) or its whole family (LOFO).
+
+=== raw ===
+no removal               R2   -    LOO 0.93 [0.77, 0.97]   LOFO 0.92 [0.76, 0.97]
+minus minilm             R2 0.35  LOO 0.90 [0.61, 0.95]   LOFO 0.88 [0.61, 0.95]
+minus gpt2medium         R2 0.50  LOO 0.86 [0.52, 0.93]   LOFO 0.83 [0.52, 0.93]
+minus minilm+gpt2medium  R2 0.59  LOO 0.84 [0.42, 0.93]   LOFO 0.83 [0.42, 0.93]
+  largest shared residuals (LLMs vs meaning; mean, t): Fear-NegEmotion +0.16 (+26.3), NegEmotion-NegWorld +0.18 (+23.1), Fear-NegWorld +0.20 (+14.1), S1_pain-S2_pain +0.21 (+13.3), S2_pain-Sadness +0.11 (+12.5), BodySens-Numb -0.18 (-12.2)
+
+=== alldenoise ===
+no removal               R2   -    LOO 0.88 [0.43, 0.93]   LOFO 0.88 [0.40, 0.92]
+minus minilm             R2 0.51  LOO 0.75 [0.24, 0.84]   LOFO 0.70 [0.18, 0.82]
+minus gpt2medium         R2 0.31  LOO 0.84 [0.16, 0.93]   LOFO 0.83 [0.13, 0.92]
+minus minilm+gpt2medium  R2 0.54  LOO 0.71 [0.10, 0.87]   LOFO 0.69 [0.06, 0.85]
+  largest shared residuals (LLMs vs meaning; mean, t): S1_pain-S2_pain +0.26 (+15.7), S1_pain-Numb +0.19 (+13.5), BodySens-Sadness -0.19 (-11.3), Random-Numb -0.14 (-10.8), S1_pain-Sadness +0.17 (+9.8), S2_pain-Numb +0.14 (+9.7)
+
+=== whitened ===
+no removal               R2   -    LOO 0.95 [0.78, 0.98]   LOFO 0.94 [0.78, 0.97]
+minus minilm             R2 0.41  LOO 0.91 [0.61, 0.96]   LOFO 0.90 [0.61, 0.95]
+minus gpt2medium         R2 0.51  LOO 0.89 [0.61, 0.95]   LOFO 0.88 [0.61, 0.95]
+minus minilm+gpt2medium  R2 0.62  LOO 0.86 [0.46, 0.93]   LOFO 0.85 [0.46, 0.93]
+  largest shared residuals (LLMs vs meaning; mean, t): Fear-NegEmotion +0.15 (+24.1), NegEmotion-NegWorld +0.16 (+21.8), NegWorld-Random -0.19 (-17.4), S2_pain-Sadness +0.12 (+15.1), S1_pain-S2_pain +0.16 (+14.4), Fear-NegWorld +0.17 (+13.4)
+

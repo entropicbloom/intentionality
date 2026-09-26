@@ -1,0 +1,26 @@
+=== raw ===
+  minilm                   r with LLM mean 0.64
+  gpt2medium               r with LLM mean 0.77
+  all-mpnet-base-v2        r with LLM mean 0.84
+  bge-large-en-v1.5        r with LLM mean 0.76
+  minus all 4 linear       (4 predictors) R2 0.71  LOO 0.79  LOFO 0.77
+  minus all 4 + squares    (8 predictors) R2 0.74  LOO 0.77  LOFO 0.76
+  minus 8 random predictors: LOO median 0.93
+=== alldenoise ===
+  minilm                   r with LLM mean 0.80
+  gpt2medium               r with LLM mean 0.63
+  all-mpnet-base-v2        r with LLM mean 0.86
+  bge-large-en-v1.5        r with LLM mean 0.86
+  minus all 4 linear       (4 predictors) R2 0.65  LOO 0.65  LOFO 0.59
+  minus all 4 + squares    (8 predictors) R2 0.70  LOO 0.65  LOFO 0.58
+  minus 8 random predictors: LOO median 0.88
+=== whitened ===
+  minilm                   r with LLM mean 0.68
+  gpt2medium               r with LLM mean 0.75
+  all-mpnet-base-v2        r with LLM mean 0.85
+  bge-large-en-v1.5        r with LLM mean 0.81
+  minus all 4 linear       (4 predictors) R2 0.72  LOO 0.83  LOFO 0.81
+  minus all 4 + squares    (8 predictors) R2 0.75  LOO 0.83  LOFO 0.80
+  minus 8 random predictors: LOO median 0.95
+
+[exited with code 0]
